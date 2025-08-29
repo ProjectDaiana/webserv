@@ -6,71 +6,94 @@
 /*   By: ltreser <ltreser@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/23 17:26:54 by ltreser           #+#    #+#             */
-/*   Updated: 2025/08/24 19:22:38 by ltreser          ###   ########.fr       */
+/*   Updated: 2025/08/29 16:06:10 by ltreser          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef WEBSERV_HPP
 # define WEBSERV_HPP
 
-#define PERM_MEM_SIZE 100
-#define push_struct(type, arena) (type *)arena_alloc(arena, sizeof(type));
+# define PERM_MEM_SIZE 584  //TODO always update
+# define push_struct(type, arena) (type *)arena_alloc(arena, sizeof(type));
 
-#include <stdlib.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <stdio.h>
+# include <stddef.h>
+# include <stdint.h>
+# include <stdio.h>
+# include <stdlib.h>
 
-typedef struct s_arena t_arena;
-typedef struct s_data t_data;
-typedef struct s_listen_binding t_listen_binding;
-typedef struct s_server t_server;
+typedef struct s_arena			t_arena;
+typedef struct s_data			t_data;
+typedef struct s_listen_binding	t_listen_binding;
+typedef struct s_server			t_server;
+typedef struct s_location		t_location;
 
-struct s_server
+struct							s_location
 {
-	const char			*name; //server name
-	t_listen_binding	*lb; //pointer to array of listen bindings
-	int					lb_count; //length of that array
-	const char			*error_pages; //array of file paths for error codes
-	int					*error codes; //array of status codes (eg 404)
-	size_t				max_bdy_size; //maximum allowed body size of the requests
-	t_location			**locations; //pointer to locations array
-	int					location_count; //length of that array
+	const char *path;              // URL path prefix (e.g. "/images")
+	const char **accepted_methods; // e.g. "GET", "POST"
+	int method_count;              // number of methods in the array
+	const char *redirect;          // URL to redirect to (NULL if not)
+	const char *root;              // filesystem root for this location
+	int autoindex;                 // automatic directory listing enable flag
+	const char *default_file;     
+		// if client requests directory instead of a specific file path,
+		//this file is shown per default
+	int upload_enabled;            // flag - 1 enabled, 0 disabled
+	const char *upload_store;      // directory where uploads are stored
+	const char **cgi_extensions;   // array of extensions that trigger cgi,
+	//	can be .php and .phtml bc they handled by the sam einterpreter,
+	//	we only need to handle one file extension (e.g. only .py or only .php) so we can also just have a const string here in theory
+	int cgi_count;                 // number of extensions in the array
+	const char *cgi_path;         
+		// the binary (interpreter) of the .php/.phtml files/whatever file extension we will choose
 }
 
-struct s_listen_binding
+struct							s_server
 {
-	char	*host;
-	int		port;
+	const char *name;        // server name
+	t_listen_binding **lb;    // pointer to array of listen bindings
+	int lb_count;            // length of that array
+	const char **error_pages; // array of file paths for error codes
+	int			error_page_count; //amount of error pages
+	int *error codes;        // array of status codes (eg 404)
+	int			error_code_count; //amount of error codes
+	size_t max_bdy_size;     // maximum allowed body size of the requests
+	t_location **locations;  // pointer to locations array
+	int location_count;      // length of that array
+}
+
+struct							s_listen_binding
+{
+	char						*host;
+	int							port;
 };
 
-struct s_arena
+struct							s_arena
 {
-	uint8_t *start;
-	size_t size;
-	size_t used;
+	uint8_t						*start;
+	size_t						size;
+	size_t						used;
 };
 
-
-struct s_data
+struct							s_data
 {
-	t_arena *perm_memory;	
-	//put more here
+	t_arena						*perm_memory;
+	t_server					*s;
+	t_location					*l;
+
+	// put more here
 };
 
+// memory
+void							free_arena(t_arena *mem);
+t_arena							*alloc_perm_memory(void);
+void							*arena_alloc(t_arena *mem, size_t size);
 
-//memory
-void    free_arena(t_arena *mem);
-t_arena *alloc_perm_memory(void);
-void *arena_alloc(t_arena *mem, size_t size);
+// init
+t_data							*init_data(void);
 
-//init
-t_data 	*init_data(void);
-
-//parser
+// parser
 
 //..
-
-
 
 #endif
