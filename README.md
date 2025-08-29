@@ -1,21 +1,23 @@
-#TO DO
+# TO DO
 
-## Connection
+### Connection
+0. Parse Config file
 1. create a socket(). this will return an fd
 2. bind assigns an address
 3. SOCK_STREAM will receive the connections
-The sockaddr structure is defined as something like:
-
-           struct sockaddr {
-               sa_family_t sa_family;
-               char        sa_data[14];
-           }
-
-		   
-4. Listen for requests. Here we need to use poll or similar and be able to handle all of them. Using arena, circular buffer or ? 
+4. Listen for connections. Here we need to use poll or similar and be able to handle all of them.
 5. Accept or reject. 
-6. Send Response. This is NGINX Response:
-`	HTTP/1.1 200 OK
+
+### Reading and parse request
+6. Read the request. 
+7. Parse the request
+8. Route to content_static or content_cgi. Pipes or other solution
+
+### Response
+9. Send response back(write) or start a for for cgi
+This is NGINX Response:
+```json
+	HTTP/1.1 200 OK
 	Server: nginx/1.18.0
 	Date: Thu, 21 Aug 2025 16:56:33 GMT
 	Content-Type: text/html
@@ -24,7 +26,47 @@ The sockaddr structure is defined as something like:
 	Connection: keep-alive
 	ETag: "68a74fb5-264"
 	Accept-Ranges: bytes
-`
+```
+### Handle signals
+10. Listen for signals? close connection on exit.
+
+
+
+## Structs
+
+The sockaddr structure is defined as something like:
+```c
+struct sockaddr {
+	sa_family_t sa_family;
+	char        sa_data[14];
+};
+```
+
+```c
+in_addr struct:
+struct in_addr {
+    uint32_t s_addr;  // 32-bit IPv4 address in network byte order
+};
+```
+```c
+int poll(struct pollfd fds[], nfds_t nfds, int timeout);
+struct pollfd {
+    int fd;         // the socket descriptor
+    short events;   // bitmap of events we're interested in
+    short revents;  // on return, bitmap of events that occurred
+};
+```
+
+
+## Parser Config
+## Parser Requests
+Arena implementation.
+- header
+- location
+
+## Test commands
+- ` siege -c 20 -r 5 http://localhost:8080 ` (-c = concurrent users, -r = repetitions per user)
+- `curl http://localhost:8080`
 
 ## NGINX commands
 - `sudo systemctl start nginx`
@@ -41,7 +83,8 @@ The sockaddr structure is defined as something like:
 
 
 
-## Reading
+
+# TO READ
 - https://beej.us/guide/bgnet/html/split/index.html
 - NGINX Configuration File’s Structure https://nginx.org/en/docs/beginners_guide.html
 - Worker processes https://nginx.org/en/docs/ngx_core_module.html#worker_processes
