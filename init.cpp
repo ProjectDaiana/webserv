@@ -6,7 +6,7 @@
 /*   By: ltreser <ltreser@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/24 16:34:29 by ltreser           #+#    #+#             */
-/*   Updated: 2025/08/30 19:57:41 by ltreser          ###   ########.fr       */
+/*   Updated: 2025/08/30 20:53:23 by ltreser          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,12 +28,12 @@ t_data *init_data(void)
 
 //allocating and hardcoding config for listen_binding, server, location
 //OJO only string literals, cant be changed later, but dont have to be
-//TODO create index and cgi files
+//chunky monkey, make smaller once hardcoding is deleted
 void	init_config(t_data *d, t_arena *mem)
 {
 	d->s = (t_server *)arena_alloc(mem, sizeof(t_server));
 	d->l = (t_location *)arena_alloc(mem, sizeof(t_location));
-	d->s->name = "miniserver";
+	d->s->name = "PumpkinServer";
 	d->s->lb_count = 1;
 	d->s->lb = (t_listen_binding **)arena_alloc(mem, d->s->lb_count * sizeof(t_listen_binding));
 	d->s->lb[0] = (t_listen_binding *)arena_alloc(mem, sizeof(t_listen_binding));
@@ -56,11 +56,11 @@ void	init_config(t_data *d, t_arena *mem)
 	d->s->locations[0]->redirect = "https://cataas.com/cat";
 	d->s->locations[0]->root = "/var/www/html";
 	d->s->locations[0]->autoindex = 1; //OJO enabled
-	d->s->locations[0]->default_file = "index.html"; //TODO put index file
+	d->s->locations[0]->default_file = "index.html";
 	d->s->locations[0]->upload_enabled = 0; //OJO disabled
 	d->s->locations[0]->upload_store = "/var/www/html/uploads";
 	d->s->locations[0]->cgi_count = 1;
 	d->s->locations[0]->cgi_extensions = (const char **)arena_alloc(mem, d->s->locations[0]->cgi_count * sizeof (const char *));
-	d->s->locations[0]->cgi_extensions[0] = ".php";
-	d->s->locations[0]->cgi_path = "/usr/bin/php-cgi"; //TODO create later
+	d->s->locations[0]->cgi_extensions[0] = ".py";
+	d->s->locations[0]->cgi_path = "/usr/bin/python3";
 }
