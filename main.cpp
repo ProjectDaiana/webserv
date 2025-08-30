@@ -1,4 +1,5 @@
 #include "server.hpp"
+#include "client.hpp"
 
 // sprintf(sendline, "GET / HTTP/1.1\r\n\r\n");
 // sendbytes = strlen(sendline);
@@ -17,6 +18,7 @@ int main (){
 	poll_fds.push_back({server._sock_fd, POLLIN, 0}); 
 	while (1)
 	{
+		char buffer[256];
 		// int poll(struct pollfd fds[], nfds_t nfds, int timeout);
 		int poll_count = poll(poll_fds.data(), poll_fds.size(), -1);
 		if (poll_count < 0){
@@ -28,13 +30,18 @@ int main (){
 			if (poll_fds[i].fd == server._sock_fd && poll_fds[i].revents & POLLIN)
 			{
 				printf("File descriptor %d is ready to read\n", poll_fds[i].fd);
-				client_fd = accept(server._sock_fd, nullptr, nullptr);
+				client_fd= accept(server._sock_fd, nullptr, nullptr);
 				if (client_fd < 0)
 					return (perror("accept failed\n"), 1);
+				
+				poll_fds.push_back({client_fd, POLLIN, 0});
+				Client client(client_fd);
+				int bytes_read = read(client_fd, buffer, 256);
+				client.add_to_request(buffer, bytes_read);
 
-				poll_fds.push_back({client_fd, POLLIN | POLLOUT, 0});
-				//Now we need to read from poll_fds 
+				client.print_raw_request();
 				// We need to route to static or cgi
+				//Now we need to read from poll_fds 
 				// when all read we set POLLOUT to the fd or initialice a process
 			}
 			else if (poll_fds[i].revents & POLLOUT)
