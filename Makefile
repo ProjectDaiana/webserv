@@ -2,7 +2,7 @@ NAME = webserv
 CXX = c++
 # CXXFLAGS = -Wall -Wextra -Werror -std=c++98
 CFLAGS = g++ -Wall -Wextra -Werror
-SRC = main.cpp server.cpp
+SRC = main.cpp server.cpp client.cpp
 
 OBJ = $(SRC:.cpp=.o)
 

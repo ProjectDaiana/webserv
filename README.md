@@ -11,7 +11,18 @@
 ### Reading and parse request
 6. Read the request. 
 7. Parse the request
+```json
+	=== Raw HTTP Request from client 4 ===
+	GET / HTTP/1.1
+	Host: localhost:8080
+	User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0
+	Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+	Accept-Language: en-US,en;q=0.5
+	Accept-Encoding: gzip, defla
+	=== End Request ===
+```
 8. Route to content_static or content_cgi. Pipes or other solution
+
 
 ### Response
 9. Send response back(write) or start a for for cgi
