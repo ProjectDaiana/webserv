@@ -6,7 +6,7 @@
 /*   By: ltreser <ltreser@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/23 17:26:54 by ltreser           #+#    #+#             */
-/*   Updated: 2025/08/29 16:06:10 by ltreser          ###   ########.fr       */
+/*   Updated: 2025/08/30 19:54:52 by ltreser          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ struct							s_location
 	int cgi_count;                 // number of extensions in the array
 	const char *cgi_path;         
 		// the binary (interpreter) of the .php/.phtml files/whatever file extension we will choose
-}
+};
 
 struct							s_server
 {
@@ -55,16 +55,16 @@ struct							s_server
 	int lb_count;            // length of that array
 	const char **error_pages; // array of file paths for error codes
 	int			error_page_count; //amount of error pages
-	int *error codes;        // array of status codes (eg 404)
+	int *error_codes;        // array of status codes (eg 404)
 	int			error_code_count; //amount of error codes
 	size_t max_bdy_size;     // maximum allowed body size of the requests
 	t_location **locations;  // pointer to locations array
 	int location_count;      // length of that array
-}
+};
 
 struct							s_listen_binding
 {
-	char						*host;
+	const char						*host;
 	int							port;
 };
 
@@ -91,6 +91,7 @@ void							*arena_alloc(t_arena *mem, size_t size);
 
 // init
 t_data							*init_data(void);
+void							init_config(t_data *d, t_arena *mem);
 
 // parser
 
