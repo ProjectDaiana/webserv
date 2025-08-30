@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # **************************************************************************** #
 #                                                                              #
 #                                                         :::      ::::::::    #
@@ -18,7 +19,7 @@ NAME        := webserv
 CXX         := c++
 CXXFLAGS    := -Wall -Wextra -Werror -std=c++98
 
-SRC         := main.cpp memory.cpp init.cpp
+SRC         := main.cpp memory.cpp init.cpp server.cpp client.cpp
 OBJ         := $(SRC:.cpp=.o)
 
 # Colors
