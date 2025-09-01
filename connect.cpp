@@ -6,7 +6,7 @@
 /*   By: ltreser <ltreser@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/21 18:49:11 by ltreser           #+#    #+#             */
-/*   Updated: 2025/08/21 20:51:55 by ltreser          ###   ########.fr       */
+/*   Updated: 2025/09/01 19:17:22 by ltreser          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ struct in_addr {
 };
 */
 
-
+//TLDR create quick-reusable socket, fill socket addr struct w variables, bind that address struct to the  socket fd, start listening to incoming connections on that socket and queue max amount, accept the first client on that queue and send a response back
 int	main(void)
 {
 	const char *response = 
@@ -61,14 +61,14 @@ int	main(void)
 	addr.sin_addr.s_addr = htonl(INADDR_ANY); //again, convert to network byte order but this time for a long instead of short. INADDR_ANY is 0.0.0.0. so any network interfaces are listened to
 	if (bind(sock, (struct sockaddr*)&addr, sizeof(addr)) < 0)
 		return (perror("bind fail\n"), close(sock), 1);
-	if (listen(sock, SOMAXCONN) < 0) //start queueing incoming connections, SOMAXXCONN tells it to accept the maximum safe amount of clients
+	if (listen(sock, SOMAXCONN) < 0) //tells kernel to accept connections on this socket -> start queueing incoming connections, SOMAXXCONN tells it to accept the maximum safe amount of clients
 		return (perror("listen failed\n"), close(sock), 1);
 	while (1)
 	{
-		client = accept(sock, nullptr, nullptr);
+		client = accept(sock, nullptr, nullptr); //accept first client in queue
 		if (client < 0)
 			return (perror("accept failed\n"), 1);
-		write(client, response, strlen(response));
+		write(client, response, strlen(response)); //write the response to it
 		close(client);
 	}
 	close(sock);
