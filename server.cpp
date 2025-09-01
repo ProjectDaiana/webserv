@@ -7,7 +7,7 @@ Server::Server(std::string ip_address, int port)
     if (_sock_fd < 0)
         throw std::runtime_error("Socket creation failed");
 
-    memset(&_sock_addr, 0, sizeof(_sock_addr));
+    memset(&_sock_addr, 0, sizeof(_sock_addr)); //TODO can we use memset/libft?
     _sock_addr.sin_family = AF_INET;
     _sock_addr.sin_port = htons(_port);
     // _sock_addr.sin_addr.s_addr = inet_addr(_ip_address.c_str());
