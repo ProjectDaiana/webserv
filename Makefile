@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # **************************************************************************** #
 #                                                                              #
 #                                                         :::      ::::::::    #
@@ -7,7 +6,7 @@
 #    By: ltreser <ltreser@student.42berlin.de>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/08/24 16:25:15 by ltreser           #+#    #+#              #
-#    Updated: 2025/08/24 16:40:38 by ltreser          ###   ########.fr        #
+#    Updated: 2025/09/01 18:54:06 by ltreser          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,7 +16,7 @@
 
 NAME        := webserv
 CXX         := c++
-CXXFLAGS    := -Wall -Wextra -Werror -std=c++98
+CXXFLAGS    := -Wall -Wextra -Werror -std=c++11
 
 SRC         := main.cpp memory.cpp init.cpp server.cpp client.cpp
 OBJ         := $(SRC:.cpp=.o)
