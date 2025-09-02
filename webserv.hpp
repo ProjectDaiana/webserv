@@ -6,14 +6,14 @@
 /*   By: ltreser <ltreser@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/23 17:26:54 by ltreser           #+#    #+#             */
-/*   Updated: 2025/08/30 19:54:52 by ltreser          ###   ########.fr       */
+/*   Updated: 2025/09/02 18:45:35 by ltreser          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef WEBSERV_HPP
 # define WEBSERV_HPP
 
-# define PERM_MEM_SIZE 584  //TODO always update
+# define PERM_MEM_SIZE 584 // TODO always update
 # define push_struct(type, arena) (type *)arena_alloc(arena, sizeof(type));
 
 # include <stddef.h>
@@ -35,36 +35,35 @@ struct							s_location
 	const char *redirect;          // URL to redirect to (NULL if not)
 	const char *root;              // filesystem root for this location
 	int autoindex;                 // automatic directory listing enable flag
-	const char *default_file;     
-		// if client requests directory instead of a specific file path,
-		//this file is shown per default
-	int upload_enabled;            // flag - 1 enabled, 0 disabled
-	const char *upload_store;      // directory where uploads are stored
-	const char **cgi_extensions;   // array of extensions that trigger cgi,
+	const char					*default_file;
+	// if client requests directory instead of a specific file path,
+	// this file is shown per default
+	int upload_enabled;          // flag - 1 enabled, 0 disabled
+	const char *upload_store;    // directory where uploads are stored
+	const char **cgi_extensions; // array of extensions that trigger cgi,
 	//	can be .php and .phtml bc they handled by the sam einterpreter,
 	//	we only need to handle one file extension (e.g. only .py or only .php) so we can also just have a const string here in theory
-	int cgi_count;                 // number of extensions in the array
-	const char *cgi_path;         
-		// the binary (interpreter) of the .php/.phtml files/whatever file extension we will choose
+	int cgi_count; // number of extensions in the array
+	const char					*cgi_path;
+	// the binary (interpreter) of the .php/.phtml files/whatever file extension we will choose
 };
 
 struct							s_server
 {
-	const char *name;        // server name
-	t_listen_binding **lb;    // pointer to array of listen bindings
-	int lb_count;            // length of that array
+	const char *name;         // server name
+	t_listen_binding *lb;     // pointer to array of listen bindings NOTE keeping it modular even if theres only one lb per server, bc this way there can be a compare listen binding ft and not too much stuff has to be passed
 	const char **error_pages; // array of file paths for error codes
-	int			error_page_count; //amount of error pages
-	int *error_codes;        // array of status codes (eg 404)
-	int			error_code_count; //amount of error codes
-	size_t max_bdy_size;     // maximum allowed body size of the requests
-	t_location **locations;  // pointer to locations array
-	int location_count;      // length of that array
+	int error_page_count;     // amount of error pages
+	int *error_codes;         // array of status codes (eg 404)
+	int error_code_count;     // amount of error codes
+	size_t max_bdy_size;      // maximum allowed body size of the requests
+	t_location **locations;   // pointer to locations array
+	int location_count;       // length of that array
 };
 
 struct							s_listen_binding
 {
-	const char						*host;
+	const char					*host;
 	int							port;
 };
 
@@ -75,13 +74,11 @@ struct							s_arena
 	size_t						used;
 };
 
-struct							s_data
+struct s_data // NOTE mb rename as config
 {
-	t_arena						*perm_memory;
-	t_server					*s;
-	t_location					*l;
-
-	// put more here
+	t_arena *perm_memory;
+	t_server **s;
+	int server_count;
 };
 
 // memory
