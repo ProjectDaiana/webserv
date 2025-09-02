@@ -94,5 +94,6 @@ void							init_config(t_data *d, t_arena *mem);
 
 //helper
 int							ft_atoi(const char *nptr);
+uint32_t						iptoi(const char *ip_str);
 
 #endif
