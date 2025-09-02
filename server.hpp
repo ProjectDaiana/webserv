@@ -14,19 +14,18 @@
 #include <unistd.h>
 #include <vector>
 
+//NOTE this server only contains runtime data, any static data is stored by the config data
+
 class Server {
 
 	public:
-	Server(std::string ip_address, int port);
+	Server(t_server *config);
 	~Server();
 	
-	int startServer();
 	int closeServer();
-	
-	int _sock_fd;
-	int _port;
-	std::string _ip_address;
-	struct sockaddr_in _sock_addr;
+//TODO move to private, have getters and setters
+	int fd;
+	sockaddr_in address;
 
 };
 
