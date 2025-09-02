@@ -92,6 +92,7 @@ void							init_config(t_data *d, t_arena *mem);
 
 // parser
 
-//..
+//helper
+int							ft_atoi(const char *nptr);
 
 #endif
