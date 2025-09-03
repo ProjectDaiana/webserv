@@ -13,6 +13,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <vector>
+#include "webserv.hpp"
 
 //NOTE this server only contains runtime data, any static data is stored by the config data
 
