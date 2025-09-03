@@ -1,10 +1,4 @@
 #include "pollHandler.hpp"
-#include "server.hpp"
-#include "client.hpp"
-
-//TODO
-// include "pollHandler.hpp" in Makefile
-// rename classes to use Titlecase so we distinguish between classes and regular functions.
 
 void handle_new_connection(Server &server, std::vector<struct pollfd> &pfds, std::map<int, Client> &clients) {
 	int new_client_fd= accept(server.fd, NULL, NULL);

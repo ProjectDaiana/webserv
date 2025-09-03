@@ -3,17 +3,30 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ltreser <ltreser@student.42berlin.de>      +#+  +:+       +#+        */
+/*   By: darotche <darotche@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/24 16:26:00 by ltreser           #+#    #+#             */
-/*   Updated: 2025/09/01 18:52:05 by ltreser          ###   ########.fr       */
+/*   Updated: 2025/09/03 16:26:25 by darotche         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserv.hpp"
 #include "pollHandler.hpp"
-#include "server.hpp"
-#include "client.hpp"
+#include "Server.hpp"
+#include "Client.hpp"
+
+
+// main parser
+// int	main(void)
+// {
+// 	t_data *data = init_data();
+// 	printf("data allocated\n");
+// 	init_data();
+// 	free_arena(data->perm_memory);
+// 	printf("data freed\n");
+// 	return (0);
+// }
+
 
 int	main(void)
 {

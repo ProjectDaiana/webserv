@@ -8,8 +8,8 @@ CXXFLAGS    := -Wall -Wextra -Werror -std=c++98
 
 # Source files
 SRC         := atoi.cpp main.cpp pollHandler.cpp \
-               client.cpp init.cpp main_parser.cpp \
-               memory.cpp server.cpp server_utils.cpp
+               Client.cpp init.cpp \
+               memory.cpp Server.cpp server_utils.cpp
 
 # Object files
 OBJ         := $(SRC:.cpp=.o)
