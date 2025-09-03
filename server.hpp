@@ -27,7 +27,7 @@ class Server {
 //TODO move to private, have getters and setters
 	int fd;
 	sockaddr_in address;
-
+	static struct pollfd create_pollfd(int fd, short events, short revents);
 };
 
 #endif

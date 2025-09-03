@@ -35,3 +35,11 @@ int Server::closeServer(){
 	}
 	return 0;
 }
+
+struct pollfd Server::create_pollfd(int fd, short events, short revents) {
+    struct pollfd pfd;
+    pfd.fd = fd;
+    pfd.events = events;
+    pfd.revents = revents;
+    return pfd;
+}
