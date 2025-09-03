@@ -1,25 +1,21 @@
 # **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    Makefile                                           :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: ltreser <ltreser@student.42berlin.de>      +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2025/08/24 16:25:15 by ltreser           #+#    #+#              #
-#    Updated: 2025/09/01 18:54:06 by ltreser          ###   ########.fr        #
-#                                                                              #
-# **************************************************************************** #
-
-# **************************************************************************** #
 #                                    CONFIG                                    #
 # **************************************************************************** #
 
 NAME        := webserv
 CXX         := c++
-CXXFLAGS    := -Wall -Wextra -Werror -std=c++11
+CXXFLAGS    := -Wall -Wextra -Werror -std=c++98
 
-SRC         := main.cpp memory.cpp init.cpp server.cpp client.cpp atoi.cpp server_utils.cpp
+# Source files
+SRC         := atoi.cpp main.cpp pollHandler.cpp \
+               client.cpp init.cpp main_parser.cpp \
+               memory.cpp server.cpp server_utils.cpp
+
+# Object files
 OBJ         := $(SRC:.cpp=.o)
+
+# Headers (tracked for dependencies)
+HEADERS     := webserv.hpp server.hpp pollHandler.hpp
 
 # Colors
 GREEN       := \033[1;32m
@@ -37,7 +33,8 @@ $(NAME): $(OBJ)
 	@$(CXX) $(CXXFLAGS) $(OBJ) -o $(NAME)
 	@echo "$(GREEN)✅ Build complete: $(NAME)$(RESET)"
 
-%.o: %.cpp
+# Compile each .cpp to .o, considering headers as dependencies
+%.o: %.cpp $(HEADERS)
 	@echo "$(BLUE)🔧 Building $< ...$(RESET)"
 	@$(CXX) $(CXXFLAGS) -c $< -o $@
 
