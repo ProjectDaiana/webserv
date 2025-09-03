@@ -1,12 +1,19 @@
 #include "client.hpp"
 
+Client::Client(int fd) : _fd(-1), _request_complete(false) {}
+
 Client::Client(int fd) : _fd(fd), _request_complete(false) {}
 
 Client::~Client() {};
 
 void Client::add_to_request(char *data, int len) {
-	_request.append(data, len);
-	_request_complete = true; /////// change this
+	_request.append(data, len); //TODO check the request syntax, is \r\n\r\n the end of request? do not append what comes after end of request
+	if (_request.find("\r\n\r\n") != std::string::npos) {
+		std::cout << "--- Request completed" << std::endl;
+		_request_complete = true;
+	}
+	else
+		std::cout << "Reading request" << std::endl;
 };
 
 std::string Client::get_request() {

@@ -9,7 +9,9 @@ class Client {
 		int _fd;
 		std::string _request;
 		bool _request_complete;
+
 	public:
+		Client();
 		Client(int fd);
 		~Client();
 
