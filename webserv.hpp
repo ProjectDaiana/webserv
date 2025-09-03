@@ -13,7 +13,7 @@
 #ifndef WEBSERV_HPP
 # define WEBSERV_HPP
 
-# define PERM_MEM_SIZE 584 // TODO always update
+# define PERM_MEM_SIZE 2000 // TODO always update
 # define push_struct(type, arena) (type *)arena_alloc(arena, sizeof(type));
 
 # include <stddef.h>
@@ -134,6 +134,8 @@ void							init_config(t_data *d, t_arena *mem);
 
 // parser
 
-//..
+//helper
+int							ft_atoi(const char *nptr);
+uint32_t						iptoi(const char *ip_str);
 
 #endif
