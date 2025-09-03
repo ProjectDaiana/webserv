@@ -1,7 +1,7 @@
 #include "pollHandler.hpp"
 
 void handle_new_connection(Server &server, std::vector<struct pollfd> &pfds, std::map<int, Client> &clients) {
-	int new_client_fd= accept(server.fd, NULL, NULL);
+	int new_client_fd= accept(server.get_fd(), NULL, NULL);
 	if (new_client_fd < 0)
 		perror("accept failed\n"); //OJO perror not allowed after reading or write
 	printf("File descriptor %d is ready to read\n", new_client_fd);
@@ -40,7 +40,7 @@ void run_server(Server server) {
 	std::vector<struct pollfd> pfds;
 	std::map<int, Client> clients;
 
-	pfds.push_back(Server::create_pollfd(server.fd, POLLIN, 0));
+	pfds.push_back(Server::create_pollfd(server.get_fd(), POLLIN, 0));
 	while (1)
 	{
 		int poll_count = poll(pfds.data(), pfds.size(), -1);
@@ -49,9 +49,9 @@ void run_server(Server server) {
 			break;
 		}
 		for (size_t i = 0; i < pfds.size(); ++i) {
-			if (pfds[i].fd == server.fd && pfds[i].revents & POLLIN)
+			if (pfds[i].fd == server.get_fd() && pfds[i].revents & POLLIN)
 				handle_new_connection(server, pfds, clients);
-			if (pfds[i].fd != server.fd && pfds[i].revents & POLLIN) {
+			if (pfds[i].fd != server.get_fd() && pfds[i].revents & POLLIN) {
 				if (!handle_client_read(pfds[i].fd, pfds, clients, i)) {
 					close(pfds[i].fd );
 					clients.erase(pfds[i].fd);
@@ -69,5 +69,5 @@ void run_server(Server server) {
 			}
 		}
 	}
-	close(server.fd);
+	close(server.get_fd());
 }
