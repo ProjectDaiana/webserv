@@ -4,12 +4,12 @@
 
 NAME        := webserv
 CXX         := c++
-CXXFLAGS    := -Wall -Wextra -Werror -std=c++98
+CXXFLAGS    := -Wall -Wextra -Werror -std=c++98 -I. -Ihelper
 
 # Source files
-SRC         := atoi.cpp main.cpp pollHandler.cpp \
+SRC         := helper/atoi.cpp main.cpp pollHandler.cpp \
                Client.cpp init.cpp \
-               memory.cpp Server.cpp server_utils.cpp
+               helper/memory.cpp Server.cpp helper/server_utils.cpp
 
 # Object files
 OBJ         := $(SRC:.cpp=.o)
