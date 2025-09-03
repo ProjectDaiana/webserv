@@ -6,7 +6,7 @@
 /*   By: ltreser <ltreser@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/23 17:26:54 by ltreser           #+#    #+#             */
-/*   Updated: 2025/09/02 18:45:35 by ltreser          ###   ########.fr       */
+/*   Updated: 2025/09/04 00:10:18 by ltreser          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,40 @@ typedef struct s_data			t_data;
 typedef struct s_listen_binding	t_listen_binding;
 typedef struct s_server			t_server;
 typedef struct s_location		t_location;
+typedef enum e_error			t_error;
+
+typedef enum e_error
+{
+	/* No error */
+	ERR_NONE = 0, /* No error */
+
+	/* File / path errors */
+	ERR_NOENT = 434,  /* File not found */
+	ERR_PERM = 435,   /* Permission denied */
+	ERR_ISDIR = 436,  /* Expected a file but found a directory */
+	ERR_NOTDIR = 437, /* Expected a directory but found a file */
+
+	/* Memory / resource errors */
+	ERR_NOMEM = 438,  /* Out of memory */
+	ERR_MALLOC = 439, /* malloc failed */
+
+	/* Socket / network errors */
+	ERR_BIND = 440,    /* Bind failed: address already in use */
+	ERR_LISTEN = 441,  /* Listen failed */
+	ERR_ACCEPT = 442,  /* Accept failed */
+	ERR_CONNECT = 443, /* Connect failed */
+	ERR_SEND = 444,    /* send() failed */
+	ERR_RECV = 445,    /* recv() failed */
+	ERR_AGAIN = 450,   /* Resource temporarily unavailable (non-blocking I/O) */
+
+	/* HTTP / request errors */
+	ERR_BADREQ = 446,      /* Malformed HTTP request */
+	ERR_URI_TOOLONG = 447, /* Request URI too long */
+	ERR_METHOD = 448,      /* Unsupported HTTP method */
+
+	/* Internal / general errors */
+	ERR_UNKNOWN = 499 /* Unknown error */
+};
 
 struct							s_location
 {
@@ -50,15 +84,23 @@ struct							s_location
 
 struct							s_server
 {
-	const char *name;         // server name
-	t_listen_binding *lb;     // pointer to array of listen bindings NOTE keeping it modular even if theres only one lb per server, bc this way there can be a compare listen binding ft and not too much stuff has to be passed
-	const char **error_pages; // array of file paths for error codes
-	int error_page_count;     // amount of error pages
-	int *error_codes;         // array of status codes (eg 404)
-	int error_code_count;     // amount of error codes
-	size_t max_bdy_size;      // maximum allowed body size of the requests
-	t_location **locations;   // pointer to locations array
-	int location_count;       // length of that array
+	const char *name; // server name
+	t_listen_binding			*lb;
+	// pointer to array of listen bindings NOTE keeping it modular even if theres only one lb per server,
+	bc this way there can be a compare listen binding ft and not too much stuff has to be passed const char
+		* *error_pages; // array of file paths for error codes
+	int error_page_count;                                                                                                  
+		// amount of error pages
+	int *error_codes;                                                                                                      
+		// array of status codes (eg 404)
+	int error_code_count;                                                                                                  
+		// amount of error codes
+	size_t max_bdy_size;                                                                                                   
+		// maximum allowed body size of the requests
+	t_location **locations;                                                                                                
+		// pointer to locations array
+	int location_count;                                                                                                    
+		// length of that array
 };
 
 struct							s_listen_binding
