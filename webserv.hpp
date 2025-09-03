@@ -13,7 +13,7 @@
 #ifndef WEBSERV_HPP
 # define WEBSERV_HPP
 
-# define PERM_MEM_SIZE 584 // TODO always update
+# define PERM_MEM_SIZE 2000 // TODO always update
 # define push_struct(type, arena) (type *)arena_alloc(arena, sizeof(type));
 
 # include <stddef.h>
