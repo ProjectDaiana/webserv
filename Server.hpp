@@ -20,7 +20,7 @@
 class Server {
 	private:
 		int _fd;
-		sockaddr_in _address;
+		// sockaddr_in _address;
 		
 	public:
 		Server(t_server *config);
