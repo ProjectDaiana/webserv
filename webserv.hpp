@@ -6,7 +6,7 @@
 /*   By: ltreser <ltreser@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/23 17:26:54 by ltreser           #+#    #+#             */
-/*   Updated: 2025/09/04 00:10:18 by ltreser          ###   ########.fr       */
+/*   Updated: 2025/09/04 18:13:33 by ltreser          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,12 +20,15 @@
 # include <stdint.h>
 # include <stdio.h>
 # include <stdlib.h>
+# include <string>
 
 typedef struct s_arena			t_arena;
 typedef struct s_data			t_data;
 typedef struct s_listen_binding	t_listen_binding;
 typedef struct s_server			t_server;
 typedef struct s_location		t_location;
+typedef struct s_request		t_request;
+typedef struct s_response		t_response;
 typedef enum e_error			t_error;
 
 typedef enum e_error
@@ -87,7 +90,7 @@ struct							s_server
 	const char *name; // server name
 	t_listen_binding			*lb;
 	// pointer to array of listen bindings NOTE keeping it modular even if theres only one lb per server,
-	bc this way there can be a compare listen binding ft and not too much stuff has to be passed const char
+	//bc this way there can be a compare listen binding ft and not too much stuff has to be passed const char
 		* *error_pages; // array of file paths for error codes
 	int error_page_count;                                                                                                  
 		// amount of error pages
@@ -116,11 +119,28 @@ struct							s_arena
 	size_t						used;
 };
 
-struct s_data // NOTE mb rename as config
+struct s_data 
 {
 	t_arena *perm_memory;
-	t_server **s;
+	t_server **s; //NOTE mb rename as config
 	int server_count;
+};
+
+//NOTE cut off uri before "?" in parser, ignore query str
+struct	s_request
+{
+	std::string method; //can only be one ofc, for example GET
+	std::string uri; //will be eg: "/cgi-bin/test.py", since we dont handle query str (at least for now)
+	std::string http_version; // eg: "HTTP/1.1", which version did the client use, impacts how we respond
+	//TODO for which headers to implement -> check what each do and what we think makes sense to implement and what to leave out, also check subject if any headers are specifically required
+	std::map<std::string, std::string> headers; //we should use a map here bc its easy to implement and use
+	std::string body; //data the user is posting/putting into the website, for method post, so the body can be empty, depending on the request type
+};
+
+struct s_response
+{
+
+
 };
 
 // memory
