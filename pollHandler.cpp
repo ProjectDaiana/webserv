@@ -1,4 +1,12 @@
 #include "pollHandler.hpp"
+#include "runCGI.hpp"
+
+#include <cstdlib>
+#include <ctime>
+
+bool is_cgi_request(const Client & /*client*/) {
+	return std::rand() % 2 == 0;
+}
 
 void handle_new_connection(Server &server, std::vector<struct pollfd> &pfds, std::map<int, Client> &clients) {
 	int new_client_fd= accept(server.get_fd(), NULL, NULL);
@@ -48,7 +56,7 @@ void run_server(Server server) {
 			perror("poll failed or no request\n");
 			break;
 		}
-		for (size_t i = 0; i < pfds.size(); ++i) {
+		for (size_t i = 0; i < pfds.size(); ++i) { //OJO something is wrong here. If we do not close after writing the number of fds will keep increasing infinitely
 			if (pfds[i].fd == server.get_fd() && pfds[i].revents & POLLIN)
 				handle_new_connection(server, pfds, clients);
 			if (pfds[i].fd != server.get_fd() && pfds[i].revents & POLLIN) {
@@ -59,11 +67,19 @@ void run_server(Server server) {
 					--i;
 					continue;
 				}
+				if (clients[pfds[i].fd].get_is_completed()) {
+                    if (is_cgi_request(clients[pfds[i].fd])) {
+                        run_cgi("./www/test.py", pfds[i].fd);
+                    }
+                    // If not CGI, we've already set POLLOUT in handle_client_read
+                }
 			}
 			else if (pfds[i].revents & POLLOUT) {	
 				handle_client_write(pfds[i].fd);
+				// This whould only happen after client closes connection or timeout
 				//The following will allow us to reuse the fds 
 				close(pfds[i].fd); //OJO we do not want to close the connection if still writting or cgi is running
+				clients.erase(pfds[i].fd); //wrong
 				pfds.erase(pfds.begin() + i);
 				--i;
 			}
