@@ -7,7 +7,7 @@ print("Content-Type: text/html\n")
 print("<html>")
 print("<head><title>Cat CGI</title></head>")
 print("<body style='font-family: sans-serif; text-align: center;'>")
-print("<h1>Here’s a random cat for you 🐾</h1>")
+print("<h1>Here's a random cat for you :)")
 
 # Use thecatapi (free random cat images)
 try:
