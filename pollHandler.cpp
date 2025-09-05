@@ -5,8 +5,8 @@
 #include <ctime>
 
 bool is_cgi_request(const Client & /*client*/) {
-	//return std::rand() % 2 == 0;
-	return true;
+	return std::rand() % 2 == 0;
+	// return false;
 }
 
 void handle_new_connection(Server &server, std::vector<struct pollfd> &pfds, std::map<int, Client> &clients) {
@@ -68,20 +68,15 @@ void run_server(Server server) {
 					--i;
 					continue;
 				}
-				if (clients[pfds[i].fd].get_is_completed()) {
-                    if (is_cgi_request(clients[pfds[i].fd])) {
-                        run_cgi("./www/cgi-bin/test.py", pfds[i].fd);
-                    }
-                    // If not CGI, we've already set POLLOUT in handle_client_read
-                }
 			}
-			if (!is_cgi_request(clients[pfds[i].fd]))
-				handle_client_write(pfds[i].fd);
 			else if (pfds[i].revents & POLLOUT) {
-				if (!is_cgi_request(clients[pfds[i].fd]))
+				if (clients[pfds[i].fd].get_is_completed() && is_cgi_request(clients[pfds[i].fd])) {
+                    run_cgi("./www/cgi-bin/test.py", pfds[i].fd);
+                }
+				else // If not CGI, we've already set POLLOUT in handle_client_read
 					handle_client_write(pfds[i].fd);
 	
-				// This whould only happen after client closes connection or timeout
+				// This should only happen after client closes connection or timeout
 				//The following will allow us to reuse the fds 
 				close(pfds[i].fd); //OJO we do not want to close the connection if still writting or cgi is running
 				clients.erase(pfds[i].fd); //wrong
