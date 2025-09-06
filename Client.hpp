@@ -3,12 +3,15 @@
 
 #include <string>
 #include <iostream>
+//#include "Response.hpp"
 
 class Client {
 	private:
 		int _fd;
-		std::string _request;
-		bool _request_complete;
+		std::string _raw_request;
+		// s_request parsed_request;
+		bool _headers_complete;
+//		Response _response;
 
 	public:
 		Client();
