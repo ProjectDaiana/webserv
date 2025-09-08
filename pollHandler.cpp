@@ -19,15 +19,17 @@ void handle_new_connection(Server &server, std::vector<struct pollfd> &pfds, std
 }
 
 bool handle_client_read(int fd, std::vector<struct pollfd> &pfds, std::map<int, Client> &clients, size_t &index) {
+	Client &client = clients[fd];
 	char buffer[256];
+
 	int bytes_read = read(fd, buffer, sizeof(buffer));
 	if (bytes_read <= 0) {
 		printf("Client %d disconnected\n", fd);
 		return false;
 	}
-	clients[fd].add_to_request(buffer, bytes_read);
-	if (clients[fd].get_is_completed()) {
-		clients[fd].print_raw_request();
+	client.add_to_request(buffer, bytes_read);
+	if (client.get_read_complete()) {
+		client.print_raw_request();
 		pfds[index].events = POLLOUT;
 	}
 	return true;
@@ -70,7 +72,7 @@ void run_server(Server server) {
 				}
 			}
 			else if (pfds[i].revents & POLLOUT) {
-				if (clients[pfds[i].fd].get_is_completed() && is_cgi_request(clients[pfds[i].fd])) {
+				if (clients[pfds[i].fd].get_read_complete() && is_cgi_request(clients[pfds[i].fd])) {
                     run_cgi("./www/cgi-bin/test.py", pfds[i].fd);
                 }
 				else // If not CGI, we've already set POLLOUT in handle_client_read
