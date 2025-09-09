@@ -20,11 +20,9 @@
 class Server {
 	private:
 		int _fd;
-		// sockaddr_in _address;
-		// response?;
-		
+		t_server _config;
 	public:
-		Server(t_server *config);
+		Server(t_server config);
 		~Server();
 		// handle_finish_and_exit to avoid closing an fd before finishing writting
 		int closeServer();
@@ -34,6 +32,7 @@ class Server {
 		
 		//TODO see if this function goes here or outside of the class
 		static struct pollfd create_pollfd(int fd, short events, short revents);
+		const t_server& get_config() const {return config};
 };
 
 #endif
