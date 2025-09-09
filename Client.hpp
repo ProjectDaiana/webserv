@@ -14,6 +14,7 @@ class Client {
 		size_t _content_len;
 		size_t _headers_end_pos;
 		int _error_code;
+		t_request request; //NOTE better to store by value, later let getter return references
 
 	public:
 		Client();
@@ -27,6 +28,8 @@ class Client {
 		void print_raw_request() const;
 		int	get_error_code() const;
 		void	set_error_code(int code);
+		const t_request& get_request() const;
+		void set_request(const t_request& new_request);
 };
 
 #endif

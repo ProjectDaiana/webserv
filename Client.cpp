@@ -61,3 +61,12 @@ void Client::set_error_code(int code)
         _error_code = code;
 }
 
+const t_request& Client::get_request() const 
+{
+    return request;
+}
+
+void Client::set_request(const t_request& new_request) 
+{
+    request = new_request;
+}
