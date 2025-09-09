@@ -15,6 +15,7 @@ class Client {
 		bool _is_parsed;
 		size_t _content_len;
 		size_t _headers_end_pos;
+		int _error_code;
 
 		Request _request;
 
@@ -42,6 +43,8 @@ class Client {
 
 		// Debug
 		void print_raw_request() const;
+		int	get_error_code() const;
+		void	set_error_code(int code);
 		void print_request_struct() const;
 };
 
