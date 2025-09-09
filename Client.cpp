@@ -1,6 +1,6 @@
 #include "Client.hpp"
 
-Client::Client(int fd) : _fd(fd), _headers_complete(0), _read_complete(0), _content_len(0), _headers_end_pos(0) {}
+Client::Client(int fd) : _fd(fd), _headers_complete(0), _read_complete(0), _content_len(0), _headers_end_pos(0), error_code(200) {}
 
 Client::Client() : _fd(-1) {}
 
@@ -49,3 +49,15 @@ void Client::print_raw_request() const {
 		std::cout << "=== End Request ===\n\n";
 	}
 }
+
+int Client::get_error_code() const 
+{
+    return _error_code;
+}
+
+void Client::set_error_code(int code) 
+{
+    if (_error_code == 200)
+        _error_code = code;
+}
+

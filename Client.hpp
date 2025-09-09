@@ -13,6 +13,7 @@ class Client {
 		bool _read_complete;
 		size_t _content_len;
 		size_t _headers_end_pos;
+		int _error_code;
 
 	public:
 		Client();
@@ -24,6 +25,8 @@ class Client {
 		bool get_read_complete() const;
 
 		void print_raw_request() const;
+		int	get_error_code() const;
+		void	set_error_code(int code);
 };
 
 #endif
