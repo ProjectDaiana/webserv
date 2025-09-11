@@ -36,7 +36,7 @@ class Client {
 		const std::map<std::string, std::string>& get_headers() const;
 		const std::string& get_header(const std::string& key) const;
 		const std::string& get_body() const;
-		const std::string& get_parse_error() const;
+		const s_error& get_parse_error() const;
 
 		// Debug
 		void print_raw_request() const;

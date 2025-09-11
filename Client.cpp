@@ -104,7 +104,7 @@ const std::string& Client::get_body() const {
 	return _request.get_parsed_request().body;
 }
 
-const std::string& Client::get_parse_error() const {
+const s_error& Client::get_parse_error() const {
 	return _request.get_parse_error();
 }
 

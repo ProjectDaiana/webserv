@@ -24,9 +24,9 @@ void debug_request(Client& client) {
     }    
     client.print_raw_request();
 
-    // Debug - check Host header
-
 	std::cout << "DEBUG Host: " << client.get_header("Host") << std::endl;
+	std::cout << "DEBUG Error: " << client.get_parse_error().code ;
+	std::cout << " " << client.get_parse_error().msg << std::endl;
 
     client.print_request_struct();
 }

@@ -26,7 +26,7 @@ bool Request::parse(const std::string& raw_request) {
 
 	size_t headers_end = raw_request.find("\r\n\r\n");
     if (headers_end == std::string::npos) {
-        _parse_error = "No CRLF CRLF found - malformed request";
+        s_parse_error.msg = "No CRLF CRLF found - malformed request";
         return false;
     }
 	
@@ -50,7 +50,7 @@ bool Request::parse_start_line(const std::string &headers) {
     std::string line;
 
     if (!std::getline(stream, line)) {
-        _parse_error = "Missing start line";
+        s_parse_error.msg = "Missing request line";
         return false;
     }
 	if (!line.empty() && line[line.size() - 1] == '\r')
@@ -61,14 +61,14 @@ bool Request::parse_start_line(const std::string &headers) {
     if (!(line_stream >> _parsed_request.method 
                       >> _parsed_request.uri 
                       >> _parsed_request.http_version)) {
-        _parse_error = "Malformed start line: " + line;
+        s_parse_error.msg = "Malformed start line: " + line;
         return false;
     }
 	// Check for emtpy values 
     if (_parsed_request.method.empty() || 
         _parsed_request.uri.empty() || 
         _parsed_request.http_version.empty()) {
-        _parse_error = "Incomplete start line";
+        s_parse_error.msg = "Incomplete start line";
         return false;
     }
 
@@ -95,7 +95,7 @@ bool Request::parse_headers(const std::string &headers) {
         // Find the first colon
         std::string::size_type pos = line.find(':');
         if (pos == std::string::npos) {
-            _parse_error = "Malformed header line: " + line;
+            s_parse_error.msg = "Malformed header line: " + line;
             return false;
         }
 
@@ -133,7 +133,7 @@ bool Request::parse_body(const std::string &body_section) {
             // C++98 doesn't have std::to_string, so use stringstream
             std::ostringstream oss;
             oss << "Body truncated (expected " << length << " bytes, got " << body_section.size() << ")";
-            _parse_error = oss.str();
+            s_parse_error.msg = oss.str();
             return false;
         }
         
@@ -170,6 +170,6 @@ void Request::print_struct() const {
 	std::cout << "===== End of request struct ==========" << std::endl;
 }
 
-const std::string& Request::get_parse_error() const {
-    return _parse_error;
+const s_error& Request::get_parse_error() const {
+    return s_parse_error;
 }

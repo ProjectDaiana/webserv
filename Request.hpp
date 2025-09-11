@@ -6,10 +6,18 @@
 #ifndef REQUEST_HPP
 #define REQUEST_HPP
 
+struct s_error {
+    int code;
+    std::string msg;
+
+	s_error() : code(400), msg("Bad Request") {}
+};
+
 class Request {
 	private:
 		s_request _parsed_request;
-    	std::string _parse_error;
+    	s_error s_parse_error;
+		std::map<std::string, std::string> _parse_error;
 		bool parse_start_line(const std::string &headers);
 		bool parse_headers(const std::string &headers);
 		bool parse_body(const std::string &body);
@@ -24,7 +32,7 @@ class Request {
 
 		// Getters
 		const s_request& get_parsed_request() const;
-		const std::string& get_parse_error() const;
+		const s_error& get_parse_error() const;
 
 		// Debug
 		void print_struct() const;
