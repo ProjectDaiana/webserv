@@ -91,6 +91,15 @@ const std::map<std::string, std::string>& Client::get_headers() const {
 	return _request.get_parsed_request().headers;
 }
 
+const std::string& Client::get_header(const std::string& key) const {
+    static const std::string empty = ""; // safe return if not found
+    const std::map<std::string, std::string>& headers = get_headers();
+    std::map<std::string, std::string>::const_iterator it = headers.find(key);
+    if (it != headers.end())
+        return it->second;
+    return empty;
+}
+
 const std::string& Client::get_body() const {
 	return _request.get_parsed_request().body;
 }

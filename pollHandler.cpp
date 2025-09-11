@@ -25,10 +25,8 @@ void debug_request(Client& client) {
     client.print_raw_request();
 
     // Debug - check Host header
-    const std::map<std::string, std::string>& headers = client.get_headers();
-    if (headers.count("Host") > 0) {
-        std::cout << "DEBUG This is Host: " << headers.at("Host") << std::endl;
-    }
+
+	std::cout << "DEBUG Host: " << client.get_header("Host") << std::endl;
 
     client.print_request_struct();
 }

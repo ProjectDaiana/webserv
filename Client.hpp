@@ -34,6 +34,7 @@ class Client {
 		const std::string& get_method() const;
 		const std::string& get_uri() const;
 		const std::map<std::string, std::string>& get_headers() const;
+		const std::string& get_header(const std::string& key) const;
 		const std::string& get_body() const;
 		const std::string& get_parse_error() const;
 
