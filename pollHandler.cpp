@@ -20,7 +20,8 @@ void handle_new_connection(Server &server, std::vector<struct pollfd> &pfds, std
 
 void debug_request(Client& client) {
 	if (!client.parse_request()) {
-        std::cout << "Parse error: " << std::endl; //<< client.get_parse_error() << std::endl;
+		std::cout << "Parse error: " << client.get_parse_error().code << std::endl;
+		std::cout << "Parse error: " << client.get_parse_error().msg << std::endl;
     }    
     client.print_raw_request();
 
@@ -43,7 +44,8 @@ bool handle_client_read(int fd, std::vector<struct pollfd> &pfds, std::map<int, 
 	client.add_to_request(buffer, bytes_read);
 	if (client.is_read_complete()) {
 		if (!client.parse_request()) { // Calling parser
-			std::cout << "Parse error: " << std::endl; //<< client.get_parse_error() << std::endl;
+			std::cout << "Parse error: " << client.get_parse_error().code << std::endl;
+			std::cout << "Parse error: " << client.get_parse_error().msg << std::endl;
 			return false;
 		}
 		debug_request(client);
