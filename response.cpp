@@ -30,7 +30,7 @@ t_response	build_response(Client &client, const t_server &config)
 	res.version = client.get_request().http_version;
 	res.body = handle_method(client, config);
 	res.content_type = get_content_type(client.get_request().uri);
-	//res.connection = get_connection_type(client); TODO write ft, figure out key
+	res.connection = get_connection_type(client); //TODO figure out correct key
 	res.content_length = res.body.size();
 	res.status_code = client.get_request().error_code;
 	res.reason_phrase = get_reason_phrase(res.status_code);
