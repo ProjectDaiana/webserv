@@ -16,7 +16,7 @@ struct s_error {
 
 class Request {
 	private:
-		s_request _parsed_request;
+		t_request _parsed_request;
     	s_error s_parse_error;
 		std::map<std::string, std::string> _parse_error;
 		bool parse_start_line(const std::string &headers);
@@ -37,7 +37,7 @@ class Request {
 		bool is_cgi();
 
 		// Getters
-		const s_request& get_parsed_request() const;
+		const t_request& get_parsed_request() const;
 		const s_error& get_parse_error() const;
 
 		// Debug

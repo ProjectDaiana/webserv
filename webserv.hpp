@@ -6,7 +6,7 @@
 /*   By: darotche <darotche@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/23 17:26:54 by ltreser           #+#    #+#             */
-/*   Updated: 2025/09/13 17:26:28 by darotche         ###   ########.fr       */
+/*   Updated: 2025/09/13 21:55:09 by darotche         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ typedef enum e_error
 // 	ERR_BIND = 440,    /* Bind failed: address already in use */
 // 	ERR_LISTEN = 441,  /* Listen failed */
 // 	ERR_ACCEPT = 442,  /* Accept failed */
-// 	ERR_CONNECT = 443, /* Connect failed */
+// 	ERR_CONNECT = 443, /* Connect failetypedef struct s_request		t_request;d */
 // 	ERR_SEND = 444,    /* send() failed */
 // 	ERR_RECV = 445,    /* recv() failed */
 // 	ERR_AGAIN = 450,   /* Resource temporarily unavailable (non-blocking I/O) */
