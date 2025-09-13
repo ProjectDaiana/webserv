@@ -74,16 +74,19 @@ bool Request::parse_start_line(const std::string &headers) {
     }
 
 	if (!is_method_uppercase(_parsed_request.method)) {
-		s_parse_error.code = 400;
 		s_parse_error.msg = "Method must be uppercase: " + _parsed_request.method;
 		return false;
 	}
 
 	if (!is_method_allowed(_parsed_request.method)) {
-        s_parse_error.code = 405; 
+        s_parse_error.code = 405; //error code is 400 by default
         s_parse_error.msg = "Method not allowed: " + _parsed_request.method;
         return false;
     }
+
+	if (!is_uri_valid(_parsed_request.uri) || !parse_uri(_parsed_request.uri)) {
+		return false;
+	} //OJO if uri is invalid headers and body might still be parsed
 
     return true;
 }
@@ -109,6 +112,37 @@ bool Request::is_method_allowed(const std::string &method) const {
 	return valid_methods.find(method) != valid_methods.end();
 }
 
+bool Request::is_uri_valid(const std::string &uri) {
+	if (uri[0] != '/' || (uri.find('#') != std::string::npos)) {
+		return false;
+	}
+
+	if (uri.length() > 8000) {
+        s_parse_error.code = 414;
+        s_parse_error.msg = "URI too long (> 8000 characters)";
+        return false;
+    }
+
+	std::string::size_type first = uri.find('?');
+    if (first != std::string::npos &&
+        uri.find('?', first + 1) != std::string::npos) {
+        return false;
+    }
+	return true;
+}
+
+bool Request::parse_uri(const std::string &uri) {
+    std::string::size_type pos = uri.find('?');
+    if (pos == std::string::npos) {
+        _parsed_request.path = uri;
+        _parsed_request.query = "";
+    } else {
+        _parsed_request.path = uri.substr(0, pos);
+        _parsed_request.query = uri.substr(pos + 1);
+    }
+
+    return true;
+}
 
 // Parse Headers
 bool Request::parse_headers(const std::string &headers) {
@@ -196,6 +230,8 @@ void Request::print_struct() const {
 	std::cout << _parsed_request.method << " "
 			  << _parsed_request.uri << " "
 			  << _parsed_request.http_version << "\n";
+	std::cout << "Path: " << _parsed_request.path << "\n";
+	std::cout << "Query: " << _parsed_request.query << "\n";
 
 	for (std::map<std::string, std::string>::const_iterator it = _parsed_request.headers.begin();
 			it != _parsed_request.headers.end(); ++it) {

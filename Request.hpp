@@ -20,11 +20,14 @@ class Request {
     	s_error s_parse_error;
 		std::map<std::string, std::string> _parse_error;
 		bool parse_start_line(const std::string &headers);
+		bool parse_uri(const std::string &uri);
 		bool parse_headers(const std::string &headers);
 		bool parse_body(const std::string &body);
 
 		bool is_method_uppercase(const std::string &method) const;
 		bool is_method_allowed(const std::string &method) const;
+		bool is_uri_valid(const std::string &uri);
+	
 	public:
 		Request();
 		Request(const std::string &raw);
@@ -40,7 +43,6 @@ class Request {
 		// Debug
 		void print_struct() const;
 		
-		// bool is_allowed_method(std::string method);
 		// bool is_supported_http();
     	// bool has_header(const std::string& key) const;
 	    // bool has_body() const;
