@@ -3,6 +3,17 @@
 #include <cstddef>
 
 
+std::string	get_connection_type(Client &client)
+{
+	const std::string connection = client.get_request().headers["Connection"];
+	if (!connection.empty())
+		return connection ;
+	if (client.get_request().http_version == "HTTP/1.1")
+		return "keep-alive";
+	else
+		return "close";
+}
+
 //check whats the suffix after the dot and map content type/ "MIME" type to that
 std::string get_content_type(const std::string &path)
 {
