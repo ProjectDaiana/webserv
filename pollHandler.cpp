@@ -35,7 +35,9 @@ bool handle_client_read(int fd, std::vector<struct pollfd> &pfds, std::map<int, 
 	return true;
 }
 
-void handle_client_write(int fd) {
+void handle_client_write(Client &client, const t_server &config) 
+{
+	(void)config;
 	const char *response = 	/// For now we return this string as response
 		"HTTP/1.1 200 OK\r\n"
 		"Content-Length: 12\r\n"
@@ -43,8 +45,8 @@ void handle_client_write(int fd) {
 		"\r\n"
 		"Hello world!";
 
-	printf("=== Sending response to fd %d\n\n", fd);
-	write(fd, response, strlen(response)); //TODO we need to write in chunks later
+	printf("=== Sending response to fd %d\n\n", client.get_fd());
+	write(client.get_fd(), response, strlen(response)); //TODO we need to write in chunks later
 }
 
 void run_server(Server server) {
@@ -76,7 +78,7 @@ void run_server(Server server) {
                     run_cgi("./www/cgi-bin/test.py", pfds[i].fd);
                 }
 				else // If not CGI, we've already set POLLOUT in handle_client_read
-					handle_client_write(pfds[i].fd);
+					handle_client_write(clients[pfds[i].fd], server.get_config());
 	
 				// This should only happen after client closes connection or timeout
 				//The following will allow us to reuse the fds 
