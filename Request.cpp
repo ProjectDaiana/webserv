@@ -45,6 +45,7 @@ bool Request::parse(const std::string& raw_request) {
     return true;
 }
 
+// Parse Start Line
 bool Request::parse_start_line(const std::string &headers) {
  	std::istringstream stream(headers);
     std::string line;
@@ -58,13 +59,13 @@ bool Request::parse_start_line(const std::string &headers) {
 
 	// Split and store it in struct  (check iss >> method)
     std::istringstream line_stream(line);
-    if (!(line_stream >> _parsed_request.method 
+    if (!(line_stream >> _parsed_request.method //check if method is not uppercase 
                       >> _parsed_request.uri 
                       >> _parsed_request.http_version)) {
         s_parse_error.msg = "Malformed start line: " + line;
         return false;
     }
-	// Check for emtpy values 
+
     if (_parsed_request.method.empty() || 
         _parsed_request.uri.empty() || 
         _parsed_request.http_version.empty()) {
@@ -72,9 +73,44 @@ bool Request::parse_start_line(const std::string &headers) {
         return false;
     }
 
+	if (!is_method_uppercase(_parsed_request.method)) {
+		s_parse_error.code = 400;
+		s_parse_error.msg = "Method must be uppercase: " + _parsed_request.method;
+		return false;
+	}
+
+	if (!is_method_allowed(_parsed_request.method)) {
+        s_parse_error.code = 405; 
+        s_parse_error.msg = "Method not allowed: " + _parsed_request.method;
+        return false;
+    }
+
     return true;
 }
 
+
+bool Request::is_method_uppercase(const std::string &method) const {
+    for (size_t i = 0; i < method.length(); ++i) {
+        if (method[i] < 'A' || method[i] > 'Z') {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool Request::is_method_allowed(const std::string &method) const {
+	std::set<std::string> valid_methods;
+	    if (valid_methods.empty()) {
+        valid_methods.insert("GET");
+        valid_methods.insert("POST");
+        valid_methods.insert("DELETE");
+        // TODO: Load valid methods from config file later
+    }
+	return valid_methods.find(method) != valid_methods.end();
+}
+
+
+// Parse Headers
 bool Request::parse_headers(const std::string &headers) {
     std::istringstream stream(headers);
     std::string line;
@@ -113,6 +149,8 @@ bool Request::parse_headers(const std::string &headers) {
     return true;
 }
 
+
+// Parse Body
 bool Request::parse_body(const std::string &body_section) {
     // // Check for Transfer-Encoding first
     // std::map<std::string, std::string>::iterator te_it = _parsed_request.headers.find("Transfer-Encoding");

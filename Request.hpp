@@ -2,6 +2,7 @@
 #include <cstring>
 #include <iostream>
 #include <sstream>  
+#include <set>
 
 #ifndef REQUEST_HPP
 #define REQUEST_HPP
@@ -22,6 +23,8 @@ class Request {
 		bool parse_headers(const std::string &headers);
 		bool parse_body(const std::string &body);
 
+		bool is_method_uppercase(const std::string &method) const;
+		bool is_method_allowed(const std::string &method) const;
 	public:
 		Request();
 		Request(const std::string &raw);
@@ -36,7 +39,6 @@ class Request {
 
 		// Debug
 		void print_struct() const;
-		
 		
 		// bool is_allowed_method(std::string method);
 		// bool is_supported_http();
