@@ -7,6 +7,21 @@
 #ifndef REQUEST_HPP
 #define REQUEST_HPP
 
+typedef struct s_request t_request;
+
+//NOTE cut off uri before "?" in parser, ignore query str
+struct  s_request
+{
+    std::string method; //can only be one ofc, for example GET
+    std::string uri; //will be eg: "/cgi-bin/test.py", since we dont handle query str (at least for now)
+    std::string path;
+    std::string query;
+    std::string http_version; // eg: "HTTP/1.1", which version did the client use, impacts how we respond
+    //TODO for which headers to implement -> check what each do and what we think makes sense to implement and what to leave out, also check subject if any headers are specifically required
+    std::map<std::string, std::string> headers; //we should use a map here bc its easy to implement and use
+    std::string body; //data the user is posting/putting into the website, for method post, so the body can be empty, depending on the request type
+};
+
 struct s_error {
     int code;
     std::string msg;
@@ -16,7 +31,7 @@ struct s_error {
 
 class Request {
 	private:
-		s_request _parsed_request;
+		t_request _parsed_request;
     	s_error s_parse_error;
 		std::map<std::string, std::string> _parse_error;
 		bool parse_start_line(const std::string &headers);
@@ -37,7 +52,7 @@ class Request {
 		bool is_cgi();
 
 		// Getters
-		const s_request& get_parsed_request() const;
+		const t_request& get_parsed_request() const;
 		const s_error& get_parse_error() const;
 
 		// Debug

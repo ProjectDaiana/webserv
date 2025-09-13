@@ -3,6 +3,9 @@
 #include <dirent.h>
 #include <cstdio>
 #include <cstdlib>
+#include <sstream>
+#include <unistd.h>
+#include <fcntl.h>
 
 
 int extract_number(const char *name) 
@@ -55,7 +58,6 @@ int init_counter_from_dir(const std::string &upload_dir)
         i = extract_number(entry->d_name); //find the number of the note in its filename
             if (i >= 0 && i > max_i) //in case of better match and no error in extract number, update
                 max_i = i;
-        }
     }
     closedir(dir);
     return max_i + 1; // set it to the next available slot
@@ -66,7 +68,9 @@ std::string	gen_filename(t_location *l)
 {
 	if (!l->upload_count) //in case upload count is set to 0, check if theres any uploads from running server previously
 		l->upload_count = init_counter_from_dir(l->upload_store);
-	std::string filename = std::string("note_") + std::to_string(l->upload_count) + ".txt";
+	std::stringstream sstr;
+	sstr << "note_" << l->upload_count << ".txt";
+	std::string filename(sstr.str());
 	l->upload_count++;
 	return filename;
 		

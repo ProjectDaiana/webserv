@@ -1,6 +1,6 @@
 #include "Client.hpp"
 
-Client::Client(int fd) : _fd(fd), _headers_complete(0), _read_complete(0), _content_len(0), _headers_end_pos(0), error_code(200) {}
+Client::Client(int fd) : _fd(fd), _headers_complete(0), _read_complete(0), _content_len(0), _headers_end_pos(0), _error_code(200) {}
 
 Client::Client() : _fd(-1) {};
 
@@ -117,15 +117,21 @@ const s_error& Client::get_parse_error() const {
 	return _request.get_parse_error();
 }
 
+int Client::get_fd() const
+{
+	return _fd;
+}
+
+
 // Debug
-void Client::print_raw_request() const {
-	{
+void Client::print_raw_request() const 
+{
 		std::cout << "\n=== Raw HTTP Request from client " << _fd << " ===\n";
 		std::cout << _raw_request << std::endl;
   		// std::cout << "Length: " << _raw_request.length() << " chars\n";
 		std::cout << "=== End Request ===\n\n";
-	}
 }
+
 
 int Client::get_error_code() const 
 {
@@ -143,9 +149,7 @@ const t_request& Client::get_request() const
     return request;
 }
 
-void Client::set_request(const t_request& new_request) 
-{
-    request = new_request;
+
 void Client::print_request_struct() const {
 	std::cout << "DEBUG: _read_complete = " << _read_complete << std::endl;
     _request.print_struct();

@@ -37,7 +37,7 @@ std::string handle_get(Client &client, const t_server &config, t_location *l)
 {
 	struct stat st; //struct that stat fills with information about a file path
 	std::string path = std::string(l->root) + client.get_request().uri;
-	if (stat(path.c_str(), &st) < 0) //if stat returns 0, the file doesnt exist, path not found
+	if (stat(path.c_str(), &st) == -1) //if stat returns -1, the file doesnt exist, path not found
 	{
 		client.set_error_code(404);
 		return std::string();

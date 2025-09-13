@@ -219,7 +219,7 @@ bool Request::parse_body(const std::string &body_section) {
 }
 
 //Getters
-const s_request& Request::get_parsed_request() const {
+const t_request& Request::get_parsed_request() const {
     return _parsed_request;
 }
 

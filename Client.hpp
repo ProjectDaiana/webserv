@@ -5,6 +5,7 @@
 #include <iostream>
 #include <cstdlib>
 #include "Request.hpp"
+#include "webserv.hpp"
 
 class Client {
 	private:
@@ -41,6 +42,7 @@ class Client {
 		const std::string& get_header(const std::string& key) const;
 		const std::string& get_body() const;
 		const s_error& get_parse_error() const;
+		int get_fd() const;
 
 		// Debug
 		void print_raw_request() const;

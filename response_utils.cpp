@@ -5,10 +5,16 @@
 
 std::string	get_connection_type(Client &client)
 {
-	const std::string connection = client.get_request().headers["Connection"];
-	if (!connection.empty())
-		return connection ;
-	if (client.get_request().http_version == "HTTP/1.1")
+	const std::map<std::string, std::string>& headers = client.get_request().headers;
+	std::string connection;
+
+	std::map<std::string, std::string>::const_iterator i = headers.find("Connection");
+	if (i != headers.end()) //in case the iterator hasnt reached the end, it has found "Connection"
+	{
+		connection = i->second; //second stands for the value associated with the key at i position
+		return connection;
+	}
+	else if (client.get_request().http_version == "HTTP/1.1")
 		return "keep-alive";
 	else
 		return "close";
@@ -18,7 +24,7 @@ std::string	get_connection_type(Client &client)
 std::string get_content_type(const std::string &path)
 {
     int dot_pos = path.rfind('.');
-    if (dot_pos == std::string::npos)
+    if (dot_pos == (int)std::string::npos)
         return "application/octet-stream"; // generic MIME type for unknown binary data
     std::string suffix = path.substr(dot_pos + 1);
     if (suffix == "html" || suffix == "htm")
@@ -59,7 +65,7 @@ t_location *find_location(std::string uri, const t_server &config)
 			std::string path(l->path);
 			if (uri.rfind(path, 0) == 0)
 			{
-				if (path.length() > best_len)
+				if ((int)path.length() > best_len)
 				{
 					best_len = path.length();
 					best_match = l;
