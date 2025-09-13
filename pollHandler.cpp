@@ -28,6 +28,7 @@ void debug_request(Client& client) {
 	std::cout << "DEBUG Host: " << client.get_header("Host") << std::endl;
 	std::cout << "DEBUG Error: " << client.get_parse_error().code ;
 	std::cout << " " << client.get_parse_error().msg << std::endl;
+	std::cout << "DEBUG Path: " << client.get_path() << std::endl;
 
     client.print_request_struct();
 }

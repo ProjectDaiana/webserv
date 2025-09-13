@@ -87,6 +87,15 @@ const std::string& Client::get_uri() const {
 	return _request.get_parsed_request().uri;
 }
 
+const std::string& Client::get_path() const {
+	return _request.get_parsed_request().path;
+}
+
+const std::string& Client::get_query() const {
+	return _request.get_parsed_request().query;
+}
+
+
 const std::map<std::string, std::string>& Client::get_headers() const {
 	return _request.get_parsed_request().headers;
 }
