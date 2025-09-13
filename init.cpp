@@ -57,6 +57,7 @@ void	init_config(t_data *d, t_arena *mem)
 	d->s[0]->locations[0]->default_file = "index.html";
 	d->s[0]->locations[0]->upload_enabled = 0; //OJO disabled
 	d->s[0]->locations[0]->upload_store = "/var/www/html/uploads";
+	d->s[0]->locations[0]->upload_count = 0;
 	d->s[0]->locations[0]->cgi_count = 1;
 	d->s[0]->locations[0]->cgi_extensions = (const char **)arena_alloc(mem, d->s[0]->locations[0]->cgi_count * sizeof (const char *));
 	d->s[0]->locations[0]->cgi_extensions[0] = ".py";
