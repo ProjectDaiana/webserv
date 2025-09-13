@@ -77,6 +77,7 @@ struct							s_location
 	// this file is shown per default
 	int upload_enabled;          // flag - 1 enabled, 0 disabled
 	const char *upload_store;    // directory where uploads are stored
+	int	upload_count;		//how many uploads were made
 	const char **cgi_extensions; // array of extensions that trigger cgi,
 	//	can be .php and .phtml bc they handled by the sam einterpreter,
 	//	we only need to handle one file extension (e.g. only .py or only .php) so we can also just have a const string here in theory
@@ -139,8 +140,19 @@ struct	s_request
 
 struct s_response
 {
-
-
+	//status line
+	std::string version; //we might only implement 1 version, but its not rly much more work fyi
+	int status_code; //from client, for example 200 (OK), 404 (not found)
+	std::string reason_phrase; //e.g. "OK" or "Not found", from helper ft
+	
+	//headers
+	std::string content_type; //MIME type = label that tells the client which type of content the body is
+	size_t content_length; //length of the body
+	std::string connection; //keep-alive or close. can be passed by the request, if not, dependant on http version if the default with no information is to keep-alive or close
+	std::string location //only for redirection, location of where to redirect to, by sending back the location of the redirection, the browser will automatically go to this location, for example for a moved page this can be true, or we could do a redirect to a nice song on youtube. the uri for"music" will then have the link "youtube.com/fesfbibesfcbslcsc"
+	
+	//body
+	std::string body; //content of the http response
 };
 
 // memory
@@ -157,5 +169,24 @@ void							init_config(t_data *d, t_arena *mem);
 //helper
 int							ft_atoi(const char *nptr);
 uint32_t						iptoi(const char *ip_str);
+
+//response
+std::string     handle_delete(Client &client, const t_server &configm t_location *l)
+int     ft_delete(std::string path)
+std::string handle_get(Client &client, const t_server &config, t_location *l)
+std::string     file_to_str(Client &client, const std::string &path)
+std::string autoindex_directory(Client &client, const std::string path)
+std::string handle_post(Client &client, t_server &config, t_location *l)
+std::string     gen_filename(t_location *l)
+int init_counter_from_dir(const std::string &upload_dir)
+int extract_number(const char *name)
+bool    method_allowed(const std::string& method, const t_location *location)
+t_location *find_location(std::string uri, const t_server &config)
+std::string get_content_type(const std::string &path)
+std::string get_reason_phrase(int code)
+void    handle_client_write(Client &client, const t_server &config)
+t_response      build_response(Client &client, const t_server &config)
+std::string     handle_method(Client &client, const t_server &config)
+
 
 #endif
