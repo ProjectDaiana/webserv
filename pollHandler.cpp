@@ -7,7 +7,7 @@
 bool is_cgi_request(const Client & /*client*/) {
 	return std::rand() % 2 == 0;
 	// return false;
-}
+} //TODO keep until request is parsed, thenthis will be moved to Request
 
 void handle_new_connection(Server &server, std::vector<struct pollfd> &pfds, std::map<int, Client> &clients) {
 	int new_client_fd= accept(server.get_fd(), NULL, NULL);
@@ -16,6 +16,21 @@ void handle_new_connection(Server &server, std::vector<struct pollfd> &pfds, std
 	printf("File descriptor %d is ready to read\n", new_client_fd);
 	clients.insert(std::make_pair(new_client_fd, Client(new_client_fd))); /// Not sure about this
 	pfds.push_back(Server::create_pollfd(new_client_fd, POLLIN, 0));
+}
+
+void debug_request(Client& client) {
+	if (!client.parse_request()) {
+		std::cout << "Parse error: " << client.get_parse_error().code << std::endl;
+		std::cout << "Parse error: " << client.get_parse_error().msg << std::endl;
+    }    
+    client.print_raw_request();
+
+	std::cout << "DEBUG Host: " << client.get_header("Host") << std::endl;
+	std::cout << "DEBUG Error: " << client.get_parse_error().code ;
+	std::cout << " " << client.get_parse_error().msg << std::endl;
+	std::cout << "DEBUG Path: " << client.get_path() << std::endl;
+
+    client.print_request_struct();
 }
 
 bool handle_client_read(int fd, std::vector<struct pollfd> &pfds, std::map<int, Client> &clients, size_t &index) {
@@ -28,8 +43,13 @@ bool handle_client_read(int fd, std::vector<struct pollfd> &pfds, std::map<int, 
 		return false;
 	}
 	client.add_to_request(buffer, bytes_read);
-	if (client.get_read_complete()) {
-		client.print_raw_request();
+	if (client.is_read_complete()) {
+		if (!client.parse_request()) { // Calling parser
+			std::cout << "Parse error: " << client.get_parse_error().code << std::endl;
+			std::cout << "Parse error: " << client.get_parse_error().msg << std::endl;
+			return false;
+		}
+		debug_request(client);
 		pfds[index].events = POLLOUT;
 	}
 	return true;
@@ -65,7 +85,7 @@ void run_server(Server server) {
 			if (pfds[i].fd == server.get_fd() && pfds[i].revents & POLLIN)
 				handle_new_connection(server, pfds, clients);
 			if (pfds[i].fd != server.get_fd() && pfds[i].revents & POLLIN) {
-				if (!handle_client_read(pfds[i].fd, pfds, clients, i)) {
+				if (!handle_client_read(pfds[i].fd, pfds, clients, i)) { //OJO parser will be called here
 					close(pfds[i].fd );
 					clients.erase(pfds[i].fd);
 					pfds.erase(pfds.begin() + i);
@@ -74,7 +94,7 @@ void run_server(Server server) {
 				}
 			}
 			else if (pfds[i].revents & POLLOUT) {
-				if (clients[pfds[i].fd].get_read_complete() && is_cgi_request(clients[pfds[i].fd])) {
+				if (clients[pfds[i].fd].is_read_complete() && is_cgi_request(clients[pfds[i].fd])) {
                     run_cgi("./www/cgi-bin/test.py", pfds[i].fd);
                 }
 				else // If not CGI, we've already set POLLOUT in handle_client_read

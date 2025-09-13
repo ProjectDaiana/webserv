@@ -4,6 +4,7 @@
 #include <vector>
 #include "Server.hpp"
 #include "Client.hpp"
+#include "Request.hpp"
 
 void	run_server(Server server);
 void	handle_new_connection(Server &server, std::vector<struct pollfd> &poll_fds, std::map<int, Client> &clients);

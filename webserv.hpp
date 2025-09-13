@@ -6,7 +6,7 @@
 /*   By: darotche <darotche@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/23 17:26:54 by ltreser           #+#    #+#             */
-/*   Updated: 2025/09/08 20:40:19 by darotche         ###   ########.fr       */
+/*   Updated: 2025/09/13 17:26:28 by darotche         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,6 +132,8 @@ struct	s_request
 {
 	std::string method; //can only be one ofc, for example GET
 	std::string uri; //will be eg: "/cgi-bin/test.py", since we dont handle query str (at least for now)
+	std::string path; 
+    std::string query;
 	std::string http_version; // eg: "HTTP/1.1", which version did the client use, impacts how we respond
 	//TODO for which headers to implement -> check what each do and what we think makes sense to implement and what to leave out, also check subject if any headers are specifically required
 	std::map<std::string, std::string> headers; //we should use a map here bc its easy to implement and use
