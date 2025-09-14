@@ -1,7 +1,7 @@
 #include "webserv.hpp"
 #include "Client.hpp"
 #include <unistd.h>
-
+#include <stdio.h>
 
 std::string	handle_method(Client &client, const t_server &config)
 {
@@ -27,9 +27,12 @@ t_response	build_response(Client &client, const t_server &config)
 {
 	t_response res;
 
+	printf("\n\n\n\n\ntesting response: \n\n");
 	res.version = client.get_request().http_version;
+	printf("this is version: '%s'\n", client.get_request().http_version.c_str());
 	res.body = handle_method(client, config);
-	res.content_type = get_content_type(client.get_request().uri);
+	res.content_type = get_content_type(client.get_path());
+	printf("this is uti: '%s'\n", client.get_path().c_str());
 	res.connection = get_connection_type(client); //TODO figure out correct key
 	res.content_length = res.body.size();
 	res.status_code = client.get_error_code();
@@ -54,6 +57,7 @@ void	handle_client_write(Client &client, const t_server &config)
 		<< "\r\n" 
 		<< response.body;
 	std::string str_response(sstr.str());
+        write(1, str_response.c_str(), str_response.size()); //TODO we need to write in chunks later
         write(client.get_fd(), str_response.c_str(), str_response.size()); //TODO we need to write in chunks later
 }
 

@@ -1,9 +1,16 @@
 #include "webserv.hpp"
-#include <std::string>
+#include <string>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+
 //TODO include more headers
 
 std::string autoindex_directory(Client &client, const std::string path)
 {
+	(void)client;
+	(void)path;
+	return std::string();
 	//open the directory q opendir()
 	//loop through entries w readdir()
 	//generate a html line in an html string for each entry
@@ -35,6 +42,7 @@ std::string	file_to_str(Client &client, const std::string &path)
 
 std::string handle_get(Client &client, const t_server &config, t_location *l)
 {
+	(void)config; //TODO remove from ft if not needed
 	struct stat st; //struct that stat fills with information about a file path
 	std::string path = std::string(l->root) + client.get_request().uri;
 	if (stat(path.c_str(), &st) == -1) //if stat returns -1, the file doesnt exist, path not found
@@ -47,12 +55,13 @@ std::string handle_get(Client &client, const t_server &config, t_location *l)
 	else if (S_ISDIR(st.st_mode)) //handle directories
 	{
 		if (l->autoindex) //if autoindexing is turned on, list files in directory
-			return autoindex_directory(path); //TODO write this
+			return autoindex_directory(client, path); //TODO write this
 		else if (l->default_file) //if its not on and theres a default file, serve it
 		{
 			std::string index_path = std::string(l->root) + "/" + std::string(l->default_file);
 			if (stat(index_path.c_str(), &st) == 0 && S_ISREG(st.st_mode))
 				return file_to_str(client, index_path);
+		}
 	}
 	client.set_error_code(403); //autoindex off && no default fine || path is neither file nor dir
 	return std::string();
