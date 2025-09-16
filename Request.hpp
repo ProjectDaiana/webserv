@@ -3,15 +3,17 @@
 #include <iostream>
 #include <sstream>  
 #include <set>
+#include "Client.hpp"
 
 #ifndef REQUEST_HPP
 #define REQUEST_HPP
+class Client;
 
 struct s_error {
     int code;
     std::string msg;
 
-	s_error() : code(400), msg("Bad Request") {}
+	s_error() : code(0) {}
 };
 
 class Request {
@@ -27,6 +29,7 @@ class Request {
 		bool is_method_uppercase(const std::string &method) const;
 		bool is_method_allowed(const std::string &method) const;
 		bool is_uri_valid(const std::string &uri);
+		void normalize_path(std::string& path);
 	
 	public:
 		Request();

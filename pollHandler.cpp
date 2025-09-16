@@ -13,7 +13,7 @@ void handle_new_connection(Server &server, std::vector<struct pollfd> &pfds, std
 	int new_client_fd= accept(server.get_fd(), NULL, NULL);
 	if (new_client_fd < 0)
 		perror("accept failed\n"); //OJO perror not allowed after reading or write
-	printf("File descriptor %d is ready to read\n", new_client_fd);
+	//printf("File descriptor %d is ready to read\n", new_client_fd);
 	clients.insert(std::make_pair(new_client_fd, Client(new_client_fd))); /// Not sure about this
 	pfds.push_back(Server::create_pollfd(new_client_fd, POLLIN, 0));
 }
@@ -25,7 +25,7 @@ void debug_request(Client& client) {
     }    
     client.print_raw_request();
 
-	std::cout << "DEBUG Host: " << client.get_header("Host") << std::endl;
+	std::cout << "DEBUG Host: " << client.get_header("Hot") << std::endl;
 	std::cout << "DEBUG Error: " << client.get_parse_error().code ;
 	std::cout << " " << client.get_parse_error().msg << std::endl;
 	std::cout << "DEBUG Path: " << client.get_path() << std::endl;
@@ -40,13 +40,23 @@ bool handle_client_read(int fd, std::vector<struct pollfd> &pfds, std::map<int, 
 	int bytes_read = read(fd, buffer, sizeof(buffer));
 	if (bytes_read <= 0) {
 		printf("Client %d disconnected\n", fd);
+		if (!client.get_raw_request().empty()) {
+            std::cout << "Attempting to parse incomplete request..." << std::endl;
+            if (!client.parse_request()) {
+                std::cout << "Parse error on disconnect: " << client.get_parse_error().code 
+                          << " - " << client.get_parse_error().msg
+						  << "Parse error passed to client: " << client.get_error_code() << std::endl;
+                // Could send error response here if connection still writable
+            }
+        }
 		return false;
 	}
 	client.add_to_request(buffer, bytes_read);
 	if (client.is_read_complete()) {
-		if (!client.parse_request()) { // Calling parser
+		if (!client.parse_request()) { // Calling parser, will also set_error
 			std::cout << "Parse error: " << client.get_parse_error().code << std::endl;
 			std::cout << "Parse error: " << client.get_parse_error().msg << std::endl;
+			std::cout << "Parse error passed to client: " << client.get_error_code() << std::endl;
 			return false;
 		}
 		debug_request(client);
