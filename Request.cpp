@@ -284,4 +284,3 @@ void Request::print_struct() const {
 const s_error& Request::get_parse_error() const {
     return s_parse_error;
 }
-

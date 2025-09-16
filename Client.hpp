@@ -43,7 +43,7 @@ class Client {
 		const std::string& get_body() const;
 		const s_error& get_parse_error() const;
 		int get_fd() const;
-	
+
 		// Debug
 		void print_raw_request() const;
 		int	get_error_code() const;
