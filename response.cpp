@@ -31,7 +31,8 @@ t_response	build_response(Client &client, const t_server &config)
 	printf("\n\n\n\n\ntesting response: \n\n");
 	res.version = client.get_request().http_version;
 	printf("this is version: '%s'\n", client.get_request().http_version.c_str());
-	res.body = handle_method(client, config); //TODO fix segif
+	(void) config;
+	// res.body = handle_method(client, config); //TODO fix segif
 	res.content_type = get_content_type(client.get_path());
 	printf("this is uti: '%s'\n", client.get_path().c_str());
 	res.connection = connection_type(client); //TODO change function name

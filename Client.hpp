@@ -43,31 +43,14 @@ class Client {
 		const std::string& get_body() const;
 		const s_error& get_parse_error() const;
 		int get_fd() const;
-
-		// Debug
-		bool parse_request();
 	
-		// Getters
-		bool is_read_complete() const;
-		bool is_headers_complete() const;
-		std::string& get_raw_request();
-		size_t get_headers_end_pos() { return _headers_end_pos; };
-		const std::string& get_method() const;
-		const std::string& get_uri() const;
-		const std::string& get_path() const;
-		const std::string& get_query() const;
-		const std::map<std::string, std::string>& get_headers() const;
-		const std::string& get_header(const std::string& key) const;
-		const std::string& get_body() const;
-		const s_error& get_parse_error() const;
-
 		// Debug
 		void print_raw_request() const;
 		int	get_error_code() const;
 		void set_error_code(int code);
 		const t_request& get_request() const;
 		void set_request(const t_request& new_request);
-		// void print_request_struct() const;
+		void print_request_struct() const;
 };
 
 #endif
