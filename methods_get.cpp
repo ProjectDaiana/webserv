@@ -44,7 +44,7 @@ std::string handle_get(Client &client, const t_server &config, t_location *l)
 {
 	(void)config; //TODO remove from ft if not needed
 	struct stat st; //struct that stat fills with information about a file path
-	std::string path = std::string(l->root) + client.get_request().uri;
+	std::string path = std::string(l->root) + client.get_path();
 	if (stat(path.c_str(), &st) == -1) //if stat returns -1, the file doesnt exist, path not found
 	{
 		client.set_error_code(404);

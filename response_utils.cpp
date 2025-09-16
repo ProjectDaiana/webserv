@@ -3,17 +3,11 @@
 #include <cstddef>
 
 
-std::string	get_connection_type(Client &client)
+std::string	connection_type(Client &client)
 {
-	const std::map<std::string, std::string>& headers = client.get_request().headers;
-	std::string connection;
-
-	std::map<std::string, std::string>::const_iterator i = headers.find("Connection");
-	if (i != headers.end()) //in case the iterator hasnt reached the end, it has found "Connection"
-	{
-		connection = i->second; //second stands for the value associated with the key at i position
+	std::string connection = client.get_header("Connection");
+	if (!connection.empty())
 		return connection;
-	}
 	else if (client.get_request().http_version == "HTTP/1.1")
 		return "keep-alive";
 	else
