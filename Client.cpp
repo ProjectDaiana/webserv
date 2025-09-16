@@ -13,13 +13,11 @@ void Client::add_to_request(char *data, int len) {
 		size_t pos = _raw_request.find("\r\n\r\n");
 		if (pos != std::string::npos) {
 			// std::cout << "DEBUG: Headers found at position " << pos << std::endl;
-			// std::cout << "DEBUG: Headers found at position " << pos << std::endl;
 			_headers_complete = true;
 			_headers_end_pos = pos + 4; 
 			
 			size_t cl = _raw_request.find("Content-Length:");
 			if (cl != std::string::npos) {
-				cl += 15; // skip string "Content-Length:"
 				cl += 15; // skip string "Content-Length:"
 				while (cl < _raw_request.size() && isspace(_raw_request[cl]))
 					cl++;
