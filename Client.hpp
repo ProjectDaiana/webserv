@@ -5,6 +5,7 @@
 #include <iostream>
 #include <cstdlib>
 #include "Request.hpp"
+#include "webserv.hpp"
 
 class Client {
 	private:
@@ -12,7 +13,6 @@ class Client {
 		std::string _raw_request;
 		bool _headers_complete;
 		bool _read_complete;
-		bool _is_parsed;
 		bool _is_parsed;
 		size_t _content_len;
 		size_t _headers_end_pos;
@@ -42,6 +42,7 @@ class Client {
 		const std::string& get_header(const std::string& key) const;
 		const std::string& get_body() const;
 		const s_error& get_parse_error() const;
+		int get_fd() const;
 
 		// Debug
 		bool parse_request();
@@ -62,11 +63,11 @@ class Client {
 
 		// Debug
 		void print_raw_request() const;
+		int	get_error_code() const;
+		void set_error_code(int code);
 		const t_request& get_request() const;
 		void set_request(const t_request& new_request);
-		int	get_error_code() const;
-		void	set_error_code(int code);
-		void print_request_struct() const;
+		// void print_request_struct() const;
 };
 
 #endif
