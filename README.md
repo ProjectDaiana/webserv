@@ -77,6 +77,7 @@ Arena implementation.
 
 ## Test commands
 - ` siege -c 20 -r 5 http://localhost:8080 ` (-c = concurrent users, -r = repetitions per user)
+- ` siege -c 3 -r 1 -f urls.txt ` to run differents conections with differents urls
 - `curl http://localhost:8080`
 
 ## NGINX commands
