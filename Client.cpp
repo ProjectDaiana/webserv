@@ -12,7 +12,7 @@ void Client::add_to_request(char *data, int len) {
 	if (!_headers_complete ) {
 		size_t pos = _raw_request.find("\r\n\r\n");
 		if (pos != std::string::npos) {
-			std::cout << "DEBUG: Headers found at position " << pos << std::endl;
+			// std::cout << "DEBUG: Headers found at position " << pos << std::endl;
 			_headers_complete = true;
 			_headers_end_pos = pos + 4; 
 			
@@ -22,47 +22,49 @@ void Client::add_to_request(char *data, int len) {
 				while (cl < _raw_request.size() && isspace(_raw_request[cl]))
 					cl++;
 				_content_len = std::atoi(_raw_request.c_str() + cl);
-				std::cout << "DEBUG: Content-Length found: " << _content_len << std::endl;
+				// std::cout << "DEBUG: Content-Length found: " << _content_len << std::endl;
 			}
 			else {
 				_content_len = 0;
-				std::cout << "DEBUG: No Content-Length found, setting to 0" << std::endl;
+				// std::cout << "DEBUG: No Content-Length found, setting to 0" << std::endl;
 			}
 
 			size_t body_size = _raw_request.size() - _headers_end_pos;
-			std::cout << "DEBUG: Total request size: " << _raw_request.size() << std::endl;
-			std::cout << "DEBUG: Headers end at: " << _headers_end_pos << std::endl;
-			std::cout << "DEBUG: Body size so far: " << body_size << std::endl;
-			std::cout << "DEBUG: Expected content length: " << _content_len << std::endl;
+			// std::cout << "DEBUG: Total request size: " << _raw_request.size() << std::endl;
+			// std::cout << "DEBUG: Headers end at: " << _headers_end_pos << std::endl;
+			// std::cout << "DEBUG: Body size so far: " << body_size << std::endl;
+			// std::cout << "DEBUG: Expected content length: " << _content_len << std::endl;
 
 			if (body_size >= _content_len) {
 				_read_complete = true;
-				std::cout << "DEBUG: READ_COMPLETE set to true immediately" << std::endl;
+				// std::cout << "DEBUG: READ_COMPLETE set to true immediately" << std::endl;
+				// std::cout << "DEBUG: Content-Length found: " << _content_len << std::endl;
 			}
 		}	
 		std::cout << "Reading request" << std::endl;
 	}
 	else {
 		size_t body_size = _raw_request.size() - _headers_end_pos;
-		std::cout << "DEBUG: Adding more body data. Current body size: " << body_size 
-				  << ", expected: " << _content_len << std::endl;
+		// std::cout << "DEBUG: Adding more body data. Current body size: " << body_size 
+			//   << ", expected: " << _content_len << std::endl;
 		if (body_size >= _content_len) {
 		_read_complete = true;
-			std::cout << "DEBUG: READ_COMPLETE set to true after additional data" << std::endl;
+			// std::cout << "DEBUG: READ_COMPLETE set to true after additional data" << std::endl;
 		}
 	}
 };
 
 bool Client::parse_request() {
-	std::cout << "DEBUG: Client::parse_request called" << std::endl;
-    std::cout << "DEBUG: _is_parsed = " << _is_parsed << std::endl;
-    std::cout << "DEBUG: _headers_complete = " << _headers_complete << std::endl;
-    std::cout << "DEBUG: _read_complete = " << _read_complete << std::endl;
-    std::cout << "DEBUG: Raw request length = " << _raw_request.length() << std::endl;
+	// std::cout << "DEBUG: Client::parse_request called" << std::endl;
+    // std::cout << "DEBUG: _is_parsed = " << _is_parsed << std::endl;
+    // std::cout << "DEBUG: _headers_complete = " << _headers_complete << std::endl;
+    // std::cout << "DEBUG: _read_complete = " << _read_complete << std::endl;
+    // std::cout << "DEBUG: Raw request length = " << _raw_request.length() << std::endl;
 
 	if (!_is_parsed) {
 		_is_parsed = _request.parse(_raw_request);
 	}
+	set_error_code(_request.get_parse_error().code);
 	return _is_parsed;
 }
 
@@ -122,16 +124,21 @@ int Client::get_fd() const
 	return _fd;
 }
 
-
 // Debug
 void Client::print_raw_request() const 
 {
-		std::cout << "\n=== Raw HTTP Request from client " << _fd << " ===\n";
-		std::cout << _raw_request << std::endl;
-  		// std::cout << "Length: " << _raw_request.length() << " chars\n";
-		std::cout << "=== End Request ===\n\n";
+	std::cout << "\n=== Raw HTTP Request from client " << _fd << " ===\n";
+	std::cout << _raw_request << std::endl;
+	// std::cout << "Length: " << _raw_request.length() << " chars\n";
+	// std::cout << "Length: " << _raw_request.length() << " chars\n";
+	std::cout << "=== End Request ===\n\n";
+
 }
 
+void Client::print_request_struct() const {
+	std::cout << "DEBUG: _read_complete = " << _read_complete << std::endl;
+    _request.print_struct();
+}
 
 int Client::get_error_code() const 
 {
@@ -147,10 +154,10 @@ void Client::set_error_code(int code)
 
 const t_request& Client::get_request() const 
 {
- return _request.get_parsed_request();
+	return _request.get_parsed_request();
 }
 
-void Client::print_request_struct() const {
-	std::cout << "DEBUG: _read_complete = " << _read_complete << std::endl;
-    _request.print_struct();
+void Client::set_request(const t_request& new_request) 
+{
+    request = new_request;
 }

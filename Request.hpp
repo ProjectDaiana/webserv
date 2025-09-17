@@ -3,9 +3,11 @@
 #include <iostream>
 #include <sstream>  
 #include <set>
+#include "Client.hpp"
 
 #ifndef REQUEST_HPP
 #define REQUEST_HPP
+class Client;
 
 typedef struct s_request t_request;
 
@@ -42,6 +44,7 @@ class Request {
 		bool is_method_uppercase(const std::string &method) const;
 		bool is_method_allowed(const std::string &method) const;
 		bool is_uri_valid(const std::string &uri);
+		void normalize_path(std::string& path);
 	
 	public:
 		Request();

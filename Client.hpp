@@ -47,7 +47,7 @@ class Client {
 		// Debug
 		void print_raw_request() const;
 		int	get_error_code() const;
-		void	set_error_code(int code);
+		void set_error_code(int code);
 		const t_request& get_request() const;
 		void set_request(const t_request& new_request);
 		void print_request_struct() const;
