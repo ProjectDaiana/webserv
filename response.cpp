@@ -7,7 +7,7 @@ std::string	handle_method(Client &client, const t_server &config)
 {
 	t_location *location;
 	
-	location = find_location(client.get_request().uri, config);
+	location = find_location(client.get_request().uri, config); //TODO is this working correctly?
 	if (!location)
 	{
 		client.set_error_code(404);

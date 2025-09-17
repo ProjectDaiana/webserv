@@ -6,7 +6,7 @@
 /*   By: ltreser <ltreser@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/24 16:34:29 by ltreser           #+#    #+#             */
-/*   Updated: 2025/09/02 18:46:04 by ltreser          ###   ########.fr       */
+/*   Updated: 2025/09/17 13:49:17 by ltreser          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ void	init_config(t_data *d, t_arena *mem)
 	d->s[0]->location_count = 1;
 	d->s[0]->locations = (t_location **)arena_alloc(mem, d->s[0]->location_count * sizeof(t_location *));
 	d->s[0]->locations[0] = (t_location *)arena_alloc(mem, sizeof(t_location));
-	d->s[0]->locations[0]->path = "/images";
+	d->s[0]->locations[0]->path = "/";
 	d->s[0]->locations[0]->method_count = 1;
 	d->s[0]->locations[0]->accepted_methods = (const char **)arena_alloc(mem, d->s[0]->locations[0]->method_count * sizeof(const char *));
 	d->s[0]->locations[0]->accepted_methods[0] = "GET";
