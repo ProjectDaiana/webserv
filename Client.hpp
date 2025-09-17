@@ -16,7 +16,7 @@ class Client {
 		bool _is_parsed;
 		size_t _content_len;
 		size_t _headers_end_pos;
-		int _error_code;
+		int _error_code; //TODO change back to 200 when reset
 		t_request request; //NOTE better to store by value, later let getter return references
 
 		Request _request;

@@ -25,6 +25,7 @@ std::string	file_to_str(Client &client, const std::string &path)
 	if (-1 == fd)
 	{
 		client.set_error_code(404);
+		printf("404 set at third instance\n");
 		return content_bytes;
 	}
 	char buffer[4096]; //4kb
@@ -44,10 +45,14 @@ std::string handle_get(Client &client, const t_server &config, t_location *l)
 {
 	(void)config; //TODO remove from ft if not needed
 	struct stat st; //struct that stat fills with information about a file path
+	printf("root is: '%s'\n", l->root);
+	printf("uri is: '%s'\n", client.get_path().c_str());
 	std::string path = std::string(l->root) + client.get_path();
+	printf("index is being searched at this location : '%s'\n", path.c_str());
 	if (stat(path.c_str(), &st) == -1) //if stat returns -1, the file doesnt exist, path not found
 	{
 		client.set_error_code(404);
+		printf("404 set at second instance\n");
 		return std::string();
 	}
 	if (S_ISREG(st.st_mode)) //S_ISREG is the flag for a regular file, not a direcory

@@ -147,6 +147,7 @@ int Client::get_error_code() const
 
 void Client::set_error_code(int code) 
 {
+	printf("ERROR CODE '%d' HAS BEEN SET!\n", code);
     if (_error_code == 200)
         _error_code = code;
 }
