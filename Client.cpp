@@ -81,6 +81,10 @@ bool Client::is_headers_complete() const {
 	return (_headers_complete);
 }
 
+bool Client::is_cgi() const {
+	return _request.is_cgi();
+}
+
 const std::string& Client::get_method() const {
 	return _request.get_parsed_request().method;
 }

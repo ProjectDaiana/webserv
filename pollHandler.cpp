@@ -90,7 +90,8 @@ void run_server(Server server) {
 				}
 			}
 			else if (pfds[i].revents & POLLOUT) {
-				if (clients[pfds[i].fd].is_read_complete() && is_cgi_request(clients[pfds[i].fd])) {
+				// if (clients[pfds[i].fd].is_read_complete() && is_cgi_request(clients[pfds[i].fd])) {
+				if (clients[pfds[i].fd].is_read_complete() && clients[pfds[i].fd].is_cgi()) {
                     run_cgi("./www/cgi-bin/test.py", pfds[i].fd);
                 }
 				else // If not CGI, we've already set POLLOUT in handle_client_read

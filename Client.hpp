@@ -32,6 +32,7 @@ class Client {
 		// Getters
 		bool is_read_complete() const;
 		bool is_headers_complete() const;
+		bool is_cgi() const;
 		std::string& get_raw_request();
 		size_t get_headers_end_pos() { return _headers_end_pos; };
 		const std::string& get_method() const;

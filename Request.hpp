@@ -52,7 +52,7 @@ class Request {
 		~Request();
 	
 		bool parse(const std::string& raw_request);
-		bool is_cgi();
+		bool is_cgi() const;
 
 		// Getters
 		const t_request& get_parsed_request() const;
