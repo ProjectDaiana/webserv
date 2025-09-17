@@ -1,8 +1,10 @@
 #include "webserv.hpp"
 #include <string>
+#include <sys/stat.h>
 
 int	ft_delete(std::string path)
 {
+	(void)path;
 	return 0;
 	//TODO figure out how were supposed to delete
 	//return -1 when error
@@ -10,8 +12,9 @@ int	ft_delete(std::string path)
 }
 
 
-std::string	handle_delete(Client &client, const t_server &configm t_location *l)
+std::string	handle_delete(Client &client, const t_server &config, t_location *l)
 {
+	(void)config; //TODO remove it from ft if not needed
 	std::string path = std::string(l->root) + client.get_request().uri;
 	struct stat st;
 	if (stat(path.c_str(), &st) < 0)
@@ -24,7 +27,7 @@ std::string	handle_delete(Client &client, const t_server &configm t_location *l)
 		client.set_error_code(403); //not allowed
 		return std::string();
 	}
-	if (ft_delete(path.c_str() == -1)
+	if (ft_delete(path.c_str()) == -1)
 		client.set_error_code(500); //server error
 	return std::string(); //empty body anyways
 }

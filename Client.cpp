@@ -146,9 +146,8 @@ void Client::set_error_code(int code)
 
 const t_request& Client::get_request() const 
 {
-    return request;
+ return _request.get_parsed_request();
 }
-
 
 void Client::print_request_struct() const {
 	std::cout << "DEBUG: _read_complete = " << _read_complete << std::endl;

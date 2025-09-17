@@ -5,8 +5,8 @@
 #include <ctime>
 
 bool is_cgi_request(const Client & /*client*/) {
-	return std::rand() % 2 == 0;
-	// return false;
+	//return std::rand() % 2 == 0;
+	 return false;
 } //TODO keep until request is parsed, thenthis will be moved to Request
 
 void handle_new_connection(Server &server, std::vector<struct pollfd> &pfds, std::map<int, Client> &clients) {

@@ -76,7 +76,7 @@ std::string	gen_filename(t_location *l)
 		
 }
 
-std::string handle_post(Client &client, t_server &config, t_location *l)
+std::string handle_post(Client &client, const t_server &config, t_location *l)
 {
 	int fd;
 	ssize_t write_count;
