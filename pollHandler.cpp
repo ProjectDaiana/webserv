@@ -90,8 +90,11 @@ void run_server(Server server) {
 			break;
 		}
 		for (size_t i = 0; i < pfds.size(); ++i) { //OJO something is wrong here. If we do not close after writing the number of fds will keep increasing infinitely
+			
+			Client &client = clients[pfds[i].fd];
+			
 			if (pfds[i].fd == server.get_fd() && pfds[i].revents & POLLIN)
-				handle_new_connection(server, pfds, clients);
+			handle_new_connection(server, pfds, clients);
 			if (pfds[i].fd != server.get_fd() && pfds[i].revents & POLLIN) {
 				if (!handle_client_read(pfds[i].fd, pfds, clients, i)) { //OJO parser will be called here
 					close(pfds[i].fd );
@@ -101,19 +104,19 @@ void run_server(Server server) {
 					continue;
 				}
 			}
-			else if (pfds[i].revents & POLLOUT) {
-				if (clients[pfds[i].fd].is_read_complete() && is_cgi_request(clients[pfds[i].fd])) {
+			else if (pfds[i].revents & POLLOUT && client.is_read_complete()) {
+				if (is_cgi_request(client)) {
                     run_cgi("./www/cgi-bin/test.py", pfds[i].fd);
                 }
 				else // If not CGI, we've already set POLLOUT in handle_client_read
-					handle_client_write(clients[pfds[i].fd], server.get_config());
+					handle_client_write(client, server.get_config());
 	
 				// This should only happen after client closes connection or timeout
 				//The following will allow us to reuse the fds 
-				close(pfds[i].fd); //OJO we do not want to close the connection if still writting or cgi is running
-				clients.erase(pfds[i].fd); //wrong
-				pfds.erase(pfds.begin() + i);
-				--i;
+				// close(pfds[i].fd); //OJO we do not want to close the connection if still writting or cgi is running
+				// clients.erase(pfds[i].fd); //wrong
+				// pfds.erase(pfds.begin() + i);
+				// --i;
 			}
 		}
 	}
