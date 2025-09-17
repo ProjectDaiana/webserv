@@ -66,18 +66,6 @@ bool handle_client_read(int fd, std::vector<struct pollfd> &pfds, std::map<int, 
 	return true;
 }
 
-// void handle_client_write(int fd) {
-// 	const char *response = 	/// For now we return this string as response
-// 		"HTTP/1.1 200 OK\r\n"
-// 		"Content-Length: 12\r\n"
-// 		"Content-Type: text/plain\r\n"
-// 		"\r\n"
-// 		"Hello world!";
-
-// 	printf("=== Sending response to fd %d\n\n", fd);
-// 	write(fd, response, strlen(response)); //TODO we need to write in chunks later
-// }
-
 void run_server(Server server) {
 	std::vector<struct pollfd> pfds;
 	std::map<int, Client> clients;
@@ -105,8 +93,9 @@ void run_server(Server server) {
 					continue;
 				}
 			}
-			else if (pfds[i].revents & POLLOUT && client.is_read_complete()) {
-				if (is_cgi_request(client)) {
+			else if (pfds[i].revents & POLLOUT && clients[pfds[i].fd].is_read_complete()){
+				// if (is_cgi_request(clients[pfds[i].fd])) {
+				if ( clients[pfds[i].fd].is_cgi()) {
                     run_cgi("./www/cgi-bin/test.py", pfds[i].fd);
                 }
 				else // If not CGI, we've already set POLLOUT in handle_client_read

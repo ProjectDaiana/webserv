@@ -21,6 +21,7 @@ Server::Server(t_server *config)
 		exit(0);
 	if (listen(_fd, SOMAXCONN) < 0 && (perror("Listen failed\n"), 1))
 		exit(0);
+	_config = *config;
 }
 
 Server::~Server() {

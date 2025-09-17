@@ -28,7 +28,7 @@ struct s_error {
     int code;
     std::string msg;
 
-	s_error() : code(0) {}
+	s_error() : code(200), msg("OK") {}
 };
 
 class Request {
@@ -52,7 +52,7 @@ class Request {
 		~Request();
 	
 		bool parse(const std::string& raw_request);
-		bool is_cgi();
+		bool is_cgi() const;
 		void reset_struct();
 
 		// Getters

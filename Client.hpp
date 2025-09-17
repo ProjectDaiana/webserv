@@ -16,7 +16,7 @@ class Client {
 		bool _is_parsed;
 		size_t _content_len;
 		size_t _headers_end_pos;
-		int _error_code;
+		int _error_code; //TODO change back to 200 when reset
 		t_request request; //NOTE better to store by value, later let getter return references
 
 		Request _request;
@@ -33,6 +33,7 @@ class Client {
 		// Getters
 		bool is_read_complete() const;
 		bool is_headers_complete() const;
+		bool is_cgi() const;
 		std::string& get_raw_request();
 		size_t get_headers_end_pos() { return _headers_end_pos; };
 		const std::string& get_method() const;

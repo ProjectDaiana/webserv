@@ -94,6 +94,10 @@ bool Client::is_headers_complete() const {
 	return (_headers_complete);
 }
 
+bool Client::is_cgi() const {
+	return _request.is_cgi();
+}
+
 const std::string& Client::get_method() const {
 	return _request.get_parsed_request().method;
 }
@@ -160,6 +164,7 @@ int Client::get_error_code() const
 
 void Client::set_error_code(int code) 
 {
+	printf("ERROR CODE '%d' HAS BEEN SET!\n", code);
     if (_error_code == 200)
         _error_code = code;
 }
