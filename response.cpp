@@ -2,15 +2,22 @@
 #include "Client.hpp"
 #include <unistd.h>
 #include <stdio.h>
+#include "Request.hpp"
 
 std::string	handle_method(Client &client, const t_server &config)
 {
+	printf("\n__handling method__\n");
+	if (!client.get_path().c_str())
+		printf("ERROR: empty uri.\n");
 	t_location *location;
 	
 	location = find_location(client.get_request().uri, config); //TODO is this working correctly?
+	if (location)
+		printf("location passed!\n");
 	if (!location)
 	{
 		client.set_error_code(404);
+		printf("404 set at first instance");
 		return std::string();
 	}
 	else if (client.get_request().method == "GET" && method_allowed("GET", location))
@@ -28,12 +35,13 @@ t_response	build_response(Client &client, const t_server &config)
 	(void)config;
 	t_response res;
 
-	printf("\n\n\n\n\ntesting response: \n\n");
+	printf("\n\n\n\n\n__TESTING RESPONSE__\n");
+	printf("client fd: '%d'\n", client.get_fd());
+	printf("is config accessible: server name is: '%s'\n", config.name);
 	res.version = client.get_request().http_version;
-	printf("this is version: '%s'\n", client.get_request().http_version.c_str());
-	res.body = handle_method(client, config); //TODO fix segif
+	res.body = handle_method(client, config); //TODO fix segf
 	res.content_type = get_content_type(client.get_path());
-	printf("this is uti: '%s'\n", client.get_path().c_str());
+	printf("_______________________\nthis is uri: '%s'\n", client.get_path().c_str());
 	res.connection = connection_type(client); //TODO change function name
 	res.content_length = res.body.size();
 	res.status_code = client.get_error_code();
@@ -57,6 +65,8 @@ void	handle_client_write(Client &client, const t_server &config)
 		<< "\r\n" 
 		<< response.body;
 	std::string str_response(sstr.str());
+		printf("\n_______________________________\n");
+		printf("finished response:\n");
         write(1, str_response.c_str(), str_response.size());
         write(client.get_fd(), str_response.c_str(), str_response.size());
 }

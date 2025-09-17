@@ -55,7 +55,7 @@ bool handle_client_read(int fd, std::vector<struct pollfd> &pfds, std::map<int, 
 	return true;
 }
 
-void handle_client_write(int fd) {
+/*void handle_client_write(int fd) {
 	const char *response = 	/// For now we return this string as response
 		"HTTP/1.1 200 OK\r\n"
 		"Content-Length: 12\r\n"
@@ -65,7 +65,7 @@ void handle_client_write(int fd) {
 
 	printf("=== Sending response to fd %d\n\n", fd);
 	write(fd, response, strlen(response)); //TODO we need to write in chunks later
-}
+}*/
 
 void run_server(Server server) {
 	std::vector<struct pollfd> pfds;
@@ -100,10 +100,10 @@ void run_server(Server server) {
 	
 				// This should only happen after client closes connection or timeout
 				//The following will allow us to reuse the fds 
-				close(pfds[i].fd); //OJO we do not want to close the connection if still writting or cgi is running
-				clients.erase(pfds[i].fd); //wrong
-				pfds.erase(pfds.begin() + i);
-				--i;
+				//close(pfds[i].fd); //OJO we do not want to close the connection if still writting or cgi is running
+				//clients.erase(pfds[i].fd); //wrong
+				//pfds.erase(pfds.begin() + i);
+				//--i;
 			}
 		}
 	}

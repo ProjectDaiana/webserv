@@ -26,7 +26,7 @@ struct s_error {
     int code;
     std::string msg;
 
-	s_error() : code(400), msg("Bad Request") {}
+	s_error() : code(200), msg("OK") {}
 };
 
 class Request {
