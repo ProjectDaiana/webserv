@@ -61,6 +61,7 @@ bool handle_client_read(int fd, std::vector<struct pollfd> &pfds, std::map<int, 
 		}
 		debug_request(client);
 		pfds[index].events = POLLOUT;
+		client.reset();
 	}
 	return true;
 }
@@ -117,6 +118,7 @@ void run_server(Server server) {
 				// clients.erase(pfds[i].fd); //wrong
 				// pfds.erase(pfds.begin() + i);
 				// --i;
+				pfds[i].events = POLLIN;
 			}
 		}
 	}

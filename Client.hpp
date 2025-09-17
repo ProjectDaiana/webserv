@@ -28,6 +28,7 @@ class Client {
 
 		void add_to_request(char* data, int len);
 		bool parse_request();
+		void reset();
 	
 		// Getters
 		bool is_read_complete() const;

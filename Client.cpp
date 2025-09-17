@@ -55,11 +55,12 @@ void Client::add_to_request(char *data, int len) {
 };
 
 bool Client::parse_request() {
-	// std::cout << "DEBUG: Client::parse_request called" << std::endl;
-    // std::cout << "DEBUG: _is_parsed = " << _is_parsed << std::endl;
-    // std::cout << "DEBUG: _headers_complete = " << _headers_complete << std::endl;
-    // std::cout << "DEBUG: _read_complete = " << _read_complete << std::endl;
-    // std::cout << "DEBUG: Raw request length = " << _raw_request.length() << std::endl;
+	std::cout << "DEBUG: Client::parse_request called" << std::endl;
+    std::cout << "DEBUG: _is_parsed = " << _is_parsed << std::endl;
+    std::cout << "DEBUG: _headers_complete = " << _headers_complete << std::endl;
+    std::cout << "DEBUG: _read_complete = " << _read_complete << std::endl;
+    std::cout << "DEBUG: Raw request length = " << _raw_request.length() << std::endl;
+	std::cout << "DEBUG: Raw request = " << _raw_request << std::endl;
 
 	if (!_is_parsed) {
 		_is_parsed = _request.parse(_raw_request);
@@ -67,6 +68,18 @@ bool Client::parse_request() {
 	set_error_code(_request.get_parse_error().code);
 	return _is_parsed;
 }
+
+void Client::reset() {
+	_raw_request.clear();
+	_request.reset_struct();
+	_headers_complete = false;
+	_read_complete = false;
+	_is_parsed = false;
+	_content_len = 0;
+	_headers_end_pos = 0;
+	_error_code = 0;
+}
+
 
 // Getters
 std::string& Client::get_raw_request() {

@@ -53,6 +53,7 @@ class Request {
 	
 		bool parse(const std::string& raw_request);
 		bool is_cgi();
+		void reset_struct();
 
 		// Getters
 		const t_request& get_parsed_request() const;
