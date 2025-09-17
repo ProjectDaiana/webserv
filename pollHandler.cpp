@@ -90,19 +90,22 @@ void run_server(Server server) {
 				}
 			}
 			else if (pfds[i].revents & POLLOUT) {
-				// if (clients[pfds[i].fd].is_read_complete() && is_cgi_request(clients[pfds[i].fd])) {
-				if (clients[pfds[i].fd].is_read_complete() && clients[pfds[i].fd].is_cgi()) {
+				if (clients[pfds[i].fd].is_read_complete() && is_cgi_request(clients[pfds[i].fd])) {
+				//if (clients[pfds[i].fd].is_read_complete() && clients[pfds[i].fd].is_cgi()) {
                     run_cgi("./www/cgi-bin/test.py", pfds[i].fd);
                 }
 				else // If not CGI, we've already set POLLOUT in handle_client_read
 					handle_client_write(clients[pfds[i].fd], server.get_config());
 	
 				// This should only happen after client closes connection or timeout
+				if (clients[pfds[i].fd].is_write_complete())
+				{
 				//The following will allow us to reuse the fds 
-				//close(pfds[i].fd); //OJO we do not want to close the connection if still writting or cgi is running
-				//clients.erase(pfds[i].fd); //wrong
-				//pfds.erase(pfds.begin() + i);
-				//--i;
+					close(pfds[i].fd); //OJO we do not want to close the connection if still writting or cgi is running
+					clients.erase(pfds[i].fd); //wrong
+					pfds.erase(pfds.begin() + i);
+					--i;
+				}
 			}
 		}
 	}

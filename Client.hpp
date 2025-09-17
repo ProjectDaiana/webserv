@@ -13,7 +13,7 @@ class Client {
 		std::string _raw_request;
 		bool _headers_complete;
 		bool _read_complete;
-		bool _write_complete; //TODO set in response
+		bool _write_complete;
 		bool _is_parsed;
 		size_t _content_len;
 		size_t _headers_end_pos;
@@ -33,11 +33,8 @@ class Client {
 		// Getters
 		bool is_read_complete() const;
 		bool is_headers_complete() const;
-<<<<<<< Updated upstream
 		bool is_cgi() const;
-=======
-		bool is_write_complete() const; //TODO write this
->>>>>>> Stashed changes
+		bool is_write_complete() const { return _write_complete; }
 		std::string& get_raw_request();
 		size_t get_headers_end_pos() { return _headers_end_pos; };
 		const std::string& get_method() const;
@@ -58,6 +55,8 @@ class Client {
 		void set_request(const t_request& new_request);
 		void print_request_struct() const;
 
+		//Setter
+		void set_write_complete(bool value) { _write_complete = value; }
 };
 
 #endif
