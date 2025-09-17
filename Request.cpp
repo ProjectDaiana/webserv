@@ -7,15 +7,21 @@ Request::Request() {
 
 Request::~Request() {};
 
-bool is_cgi() { //TODO implement after parser
-	return std::rand() % 2 == 0;
-	// return false;
-}
+bool Request::is_cgi() const {
+    if (_parsed_request.uri.find("/cgi-bin/") == std::string::npos)
+		return false;
 
-// bool Request::is_cgi() const {
-//     return (method == "GET" || method == "POST") 
-//         && uri.find("/cgi-bin/") == 0;
-// }
+	size_t len = _parsed_request.uri.length();
+    if (len >= 4 && _parsed_request.uri.substr(len - 3) == ".py") {
+        char prev_char = _parsed_request.uri[len - 4];
+        // Check for valid filename char
+        return (prev_char >= 'a' && prev_char <= 'z') || 
+               (prev_char >= 'A' && prev_char <= 'Z') || 
+               (prev_char >= '0' && prev_char <= '9') || 
+               prev_char == '_';
+    }
+    return false;
+}
 
 // Parser
 bool Request::parse(const std::string& raw_request) {
@@ -269,6 +275,7 @@ void Request::print_struct() const {
 			  << _parsed_request.http_version << "\n";
 	std::cout << "Path: " << _parsed_request.path << "\n";
 	std::cout << "Query: " << _parsed_request.query << "\n";
+	std::cout << "Cgi?: " << is_cgi() << "\n";
 
 	for (std::map<std::string, std::string>::const_iterator it = _parsed_request.headers.begin();
 			it != _parsed_request.headers.end(); ++it) {
