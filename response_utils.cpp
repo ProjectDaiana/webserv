@@ -97,6 +97,7 @@ bool	method_allowed(const std::string& method, const t_location *location)
 			return true;
 		i++;
 	}
+	printf("%s is not allowed!\n", method.c_str());
 	return false;
 }
 

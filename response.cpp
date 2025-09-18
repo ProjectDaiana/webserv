@@ -7,6 +7,7 @@
 std::string	handle_method(Client &client, const t_server &config)
 {
 	printf("\n__handling method__\n");
+	printf("method is:  '%s'\n", client.get_request().method.c_str());
 	if (!client.get_path().c_str())
 		printf("ERROR: empty uri.\n");
 	t_location *location;
@@ -41,6 +42,7 @@ t_response	build_response(Client &client, const t_server &config)
 	res.version = client.get_request().http_version;
 	res.body = handle_method(client, config); //TODO fix segf
 	res.content_type = get_content_type(client.get_path());
+	printf("content type is: '%s'\n", res.content_type.c_str());
 	printf("_______________________\nthis is uri: '%s'\n", client.get_path().c_str());
 	res.connection = connection_type(client); //TODO change function name
 	res.content_length = res.body.size();

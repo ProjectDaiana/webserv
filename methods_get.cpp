@@ -145,6 +145,7 @@ std::string	file_to_str(Client &client, const std::string &path)
 
 std::string handle_get(Client &client, const t_server &config, t_location *l)
 {
+	printf("GET WAS CALLED\n");
 	(void)config; //TODO remove from ft if not needed
 	struct stat st; //struct that stat fills with information about a file path
 	printf("root is: '%s'\n", l->root);
