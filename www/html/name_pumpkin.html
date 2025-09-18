@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Name Your Pumpkin</title>
+  <style>
+    body {
+      background-color: #111;
+      color: #ff7518;
+      font-family: "Comic Sans MS", cursive;
+      text-align: center;
+      padding: 40px;
+    }
+    img {
+      max-width: 300px;
+      border: 5px solid #ff7518;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    input[type="text"] {
+      padding: 10px;
+      border-radius: 5px;
+      border: 2px solid #ff7518;
+      font-size: 1em;
+    }
+    input[type="submit"] {
+      background: #ff7518;
+      color: black;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+    input[type="submit"]:hover {
+      background: #ffa94d;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎃 Name Your Pumpkin 🎃</h1>
+  <p>Give this pumpkin a spooky name!</p>
+
+  <!-- Pumpkin image chosen by the server -->
+  <img src="/pumpkins/random.png" alt="Pumpkin">
+
+  <form method="POST" action="/uploads">
+    <input type="hidden" name="pumpkin_id" value="random.png">
+    <input type="text" name="pumpkin_name" placeholder="e.g. Midnight Howler" required>
+    <input type="submit" value="Name Pumpkin">
+  </form>
+</body>
+</html>
+
