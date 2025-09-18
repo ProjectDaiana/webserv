@@ -44,7 +44,7 @@
 </head>
 <body>
   <h1>🎃 Name Your Pumpkin 🎃</h1>
-  <p>Give this pumpkin a spooky name!</p>
+  <p>What do you wanna call this little friend?</p>
 
   <!-- Pumpkin image placeholder -->
   <img src="/pumpkins/{{PUMPKIN_IMG}}" alt="Pumpkin">
@@ -55,7 +55,7 @@
   <form method="POST" action="/uploads">
     <input type="hidden" name="pumpkin_id" value="{{PUMPKIN_IMG}}">
     <input type="text" name="pumpkin_name" placeholder="e.g. Midnight Howler" required>
-    <input type="submit" value="Name Pumpkin">
+    <input type="submit" value="Name pumpkin">
   </form>
 </body>
 </html>
