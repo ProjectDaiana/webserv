@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <cstdlib>
+#include <ctime>
 #include "Request.hpp"
 #include "webserv.hpp"
 
@@ -16,8 +17,8 @@ class Client {
 		bool _is_parsed;
 		size_t _content_len;
 		size_t _headers_end_pos;
+		time_t _last_activity; // Track last activity for timeout
 		int _error_code; //TODO change back to 200 when reset
-		t_request request; //NOTE better to store by value, later let getter return references
 
 		Request _request;
 
@@ -26,10 +27,11 @@ class Client {
 		Client(int fd);
 		~Client();
 
+		void update_activity();
 		void add_to_request(char* data, int len);
 		bool parse_request();
 		void reset();
-	
+		
 		// Getters
 		bool is_read_complete() const;
 		bool is_headers_complete() const;
@@ -45,6 +47,7 @@ class Client {
 		const std::string& get_body() const;
 		const s_error& get_parse_error() const;
 		int get_fd() const;
+		time_t get_last_activity() const;
 
 		// Debug
 		void print_raw_request() const;

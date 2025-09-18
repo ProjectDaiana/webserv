@@ -1,6 +1,5 @@
 #include "pollHandler.hpp"
 #include "runCGI.hpp"
-
 #include <cstdlib>
 #include <ctime>
 
@@ -14,7 +13,9 @@ void handle_new_connection(Server &server, std::vector<struct pollfd> &pfds, std
 	if (new_client_fd < 0)
 		perror("accept failed\n"); //OJO perror not allowed after reading or write
 	//printf("File descriptor %d is ready to read\n", new_client_fd);
-	clients.insert(std::make_pair(new_client_fd, Client(new_client_fd))); /// Not sure about this
+	Client new_client(new_client_fd);
+	new_client.update_activity();
+	clients.insert(std::make_pair(new_client_fd, new_client));
 	pfds.push_back(Server::create_pollfd(new_client_fd, POLLIN, 0));
 }
 
@@ -35,6 +36,7 @@ void debug_request(Client& client) {
 
 bool handle_client_read(int fd, std::vector<struct pollfd> &pfds, std::map<int, Client> &clients, size_t &index) {
 	Client &client = clients[fd];
+	client.update_activity();
 	char buffer[256];
 
 	int bytes_read = read(fd, buffer, sizeof(buffer));
@@ -61,7 +63,6 @@ bool handle_client_read(int fd, std::vector<struct pollfd> &pfds, std::map<int, 
 		}
 		debug_request(client);
 		pfds[index].events = POLLOUT;
-		client.reset();
 	}
 	return true;
 }
@@ -69,21 +70,39 @@ bool handle_client_read(int fd, std::vector<struct pollfd> &pfds, std::map<int, 
 void run_server(Server server) {
 	std::vector<struct pollfd> pfds;
 	std::map<int, Client> clients;
+	const int TIMEOUT = 120; // seconds
 
 	pfds.push_back(Server::create_pollfd(server.get_fd(), POLLIN, 0));
 	while (1)
 	{
-		int poll_count = poll(pfds.data(), pfds.size(), -1);
+		int poll_count = poll(pfds.data(), pfds.size(), 1000);	
 		if (poll_count == -1){
 			perror("poll failed or no request\n");
 			break;
 		}
-		for (size_t i = 0; i < pfds.size(); ++i) { //OJO something is wrong here. If we do not close after writing the number of fds will keep increasing infinitely
+		for (size_t i = 0; i < pfds.size(); ++i) {
 			
 			Client &client = clients[pfds[i].fd];
-			
+			time_t now = std::time(NULL);
+			// Timeout check
+			//TODO also close if client closed connection
+			if (pfds[i].fd != server.get_fd() && (now - client.get_last_activity() > TIMEOUT)) {
+				std::time_t result =  client.get_last_activity() ;
+				printf("XXXXXX Client %d timed out, closing connection XXXXXX\n", pfds[i].fd);
+				std::cout << "XXXXXX Now: " <<  std::asctime(std::localtime(&now));
+				std::cout << "XXXXXX Last activity client " << client.get_fd() << ": " << std::asctime(std::localtime(&result));
+				std::cout << "XXXXXX Connection: " << client.get_header("Connection") << std::endl;
+
+				close(pfds[i].fd);
+				clients.erase(pfds[i].fd);
+				pfds.erase(pfds.begin() + i);
+				--i;
+				continue;
+			}
+
 			if (pfds[i].fd == server.get_fd() && pfds[i].revents & POLLIN)
-			handle_new_connection(server, pfds, clients);
+				handle_new_connection(server, pfds, clients);
+
 			if (pfds[i].fd != server.get_fd() && pfds[i].revents & POLLIN) {
 				if (!handle_client_read(pfds[i].fd, pfds, clients, i)) { //OJO parser will be called here
 					close(pfds[i].fd );
@@ -93,20 +112,15 @@ void run_server(Server server) {
 					continue;
 				}
 			}
-			else if (pfds[i].revents & POLLOUT && clients[pfds[i].fd].is_read_complete()){
+			else if (pfds[i].revents & POLLOUT && client.is_read_complete()){
 				// if (is_cgi_request(clients[pfds[i].fd])) {
-				if ( clients[pfds[i].fd].is_cgi()) {
+				if ( client.is_cgi()) {
                     run_cgi("./www/cgi-bin/test.py", pfds[i].fd);
                 }
 				else // If not CGI, we've already set POLLOUT in handle_client_read
 					handle_client_write(client, server.get_config());
-	
-				// This should only happen after client closes connection or timeout
-				//The following will allow us to reuse the fds 
-				// close(pfds[i].fd); //OJO we do not want to close the connection if still writting or cgi is running
-				// clients.erase(pfds[i].fd); //wrong
-				// pfds.erase(pfds.begin() + i);
-				// --i;
+
+				client.reset();
 				pfds[i].events = POLLIN;
 			}
 		}
