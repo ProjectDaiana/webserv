@@ -83,6 +83,9 @@ void Client::update_activity() {
 	_last_activity = std::time(NULL);
 }
 
+time_t Client::get_last_activity() const {
+	return _last_activity;
+}
 
 // Getters
 std::string& Client::get_raw_request() {

@@ -54,7 +54,8 @@ void	handle_client_write(Client &client, const t_server &config)
 {
 	t_response response;
 	std::stringstream sstr;
-	
+	int written;
+
 	response = build_response(client, config);
 	sstr << response.version << " "
 		<< response.status_code << " "
@@ -67,6 +68,12 @@ void	handle_client_write(Client &client, const t_server &config)
 	std::string str_response(sstr.str());
 		printf("\n_______________________________\n");
 		printf("finished response:\n");
-        write(1, str_response.c_str(), str_response.size());
+       // write(1, str_response.c_str(), str_response.size());
         write(client.get_fd(), str_response.c_str(), str_response.size());
+		written = write(client.get_fd(), str_response.c_str(), str_response.size());
+		if (written == (int)str_response.size())
+		{
+			printf("WRITE COMPLETE\n____________________________\n");
+			client.set_write_complete(1);
+		}
 }
