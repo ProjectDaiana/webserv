@@ -19,6 +19,8 @@ std::string	connection_type(Client &client)
 //check whats the suffix after the dot and map content type/ "MIME" type to that
 std::string get_content_type(const std::string &path)
 {
+	if (path == "/")
+		return "text/html";
     printf("GETTING CONTENT TYPE NOW W PATH: '%s'\n", path.c_str());	    
     int dot_pos = path.rfind('.');
     if (dot_pos == (int)std::string::npos)
@@ -40,6 +42,8 @@ std::string get_content_type(const std::string &path)
         return "text/plain";
     else if (suffix == "pdf")
         return "application/pdf";
+	else if (suffix == "ico")
+		return "image/x-icon";
     // TODO mb add more types
     else
         return "application/octet-stream";
