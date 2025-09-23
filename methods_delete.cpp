@@ -1,6 +1,11 @@
 #include "webserv.hpp"
 #include <string>
 #include <sys/stat.h>
+#include <cstdio>
+#include <cstdlib>
+#include <fstream>
+#include <iostream>
+
 
 int	ft_delete(std::string path)
 {

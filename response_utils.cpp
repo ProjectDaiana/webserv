@@ -2,6 +2,7 @@
 #include <string>
 #include <cstddef>
 #include <unistd.h>
+#include <cstdio>
 
 
 std::string	connection_type(Client &client)
@@ -92,7 +93,7 @@ bool	method_allowed(const std::string& method, const t_location *location, Clien
 	int i;
 
 	i = 0;
-	if (client.get_path() == "index.html" && (method == "GET" || method == "DELETE))
+	if (client.get_path() == "index.html" && (method == "GET" || method == "DELETE"))
 		return false;
 	while (i < location->method_count)
 	{
