@@ -78,6 +78,7 @@ std::string	gen_filename(t_location *l)
 
 std::string handle_post(Client &client, const t_server &config, t_location *l)
 {
+	printf("POST WAS CALLED\n");
 	int fd;
 	ssize_t write_count;
 
@@ -102,6 +103,8 @@ std::string handle_post(Client &client, const t_server &config, t_location *l)
 	write_count = write(fd, body.c_str(), body.size());
 	if (write_count < 0 || write_count != (ssize_t)body.size())
 		client.set_error_code(500);
+	else
+		printf("post didnt encounter any issues\n");
 	close(fd);
 	return std::string();
 }

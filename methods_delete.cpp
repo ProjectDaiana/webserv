@@ -4,16 +4,15 @@
 
 int	ft_delete(std::string path)
 {
-	(void)path;
+	if (std::remove(path.c_str()) != 0)
+		return -1;
 	return 0;
-	//TODO figure out how were supposed to delete
-	//return -1 when error
-	
 }
 
 
 std::string	handle_delete(Client &client, const t_server &config, t_location *l)
 {
+	printf("DELETE WAS CALLED\n");
 	(void)config; //TODO remove it from ft if not needed
 	std::string path = std::string(l->root) + client.get_request().uri;
 	struct stat st;
