@@ -4,11 +4,9 @@
 
 int	ft_delete(std::string path)
 {
-	(void)path;
+	if (std::remove(path.c_str()) != 0)
+		return -1;
 	return 0;
-	//TODO figure out how were supposed to delete
-	//return -1 when error
-	
 }
 
 

@@ -66,7 +66,6 @@ static int list_pngs(const std::string &dirpath, std::string files[], int max_fi
 
 std::string name_pumpkin(Client &client, t_location *l)
 {
-    (void)client;
 
     seed_random();
 

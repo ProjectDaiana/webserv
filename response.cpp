@@ -21,11 +21,11 @@ std::string	handle_method(Client &client, const t_server &config)
 		printf("404 set at first instance");
 		return std::string();
 	}
-	else if (client.get_request().method == "GET" && method_allowed("GET", location))
+	else if (client.get_request().method == "GET" && method_allowed("GET", location, client))
 		return handle_get(client, config, location);
-	else if (client.get_request().method == "POST" && method_allowed("POST", location))
+	else if (client.get_request().method == "POST" && method_allowed("POST", location, client))
 		return handle_post(client, config, location);
-	else if (client.get_request().method == "DELETE" && method_allowed("DELETE", location))
+	else if (client.get_request().method == "DELETE" && method_allowed("DELETE", location, client))
 		return handle_delete(client, config, location);
 	client.set_error_code(405);
 	return std::string();
