@@ -48,10 +48,9 @@ std::string run_cgi(const std::string& script_path, int client_fd) {
     std::string content_length(buffer);
 	//std::cout << "this is buffer: " << buffer << std::endl;
 	//std::cout << "this is output: " << output << std::endl;
+
     
     std::string response = "HTTP/1.1 200 OK\r\n";
-    //response += "Content-Length: " + content_length + "\r\n";
-    //response += "\r\n";
     response += output;
     write(client_fd, response.c_str(), response.size());
     return output;

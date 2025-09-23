@@ -6,6 +6,107 @@
 
 //TODO include more headers
 
+#include "webserv.hpp"
+#include <string>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <cstdlib>
+#include <ctime>
+#include <sstream>
+
+static void seed_random()
+{
+    static int seeded = 0;
+    if (!seeded)
+    {
+        std::srand(std::time(NULL));
+        seeded = 1;
+    }
+}
+
+// simple check for .png (case-insensitive)
+static int is_png(const char *name)
+{
+    int len = 0;
+    while (name[len]) len++;
+    if (len < 4) return 0;
+
+    char c1 = name[len-4]; char c2 = name[len-3];
+    char c3 = name[len-2]; char c4 = name[len-1];
+
+    if (c1 != '.' || (c2 != 'p' && c2 != 'P') || (c3 != 'n' && c3 != 'N') || (c4 != 'g' && c4 != 'G'))
+        return 0;
+    return 1;
+}
+
+// list PNG files in directory
+static int list_pngs(const std::string &dirpath, std::string files[], int max_files)
+{
+    DIR *dp = opendir(dirpath.c_str());
+    if (!dp) return 0;
+
+    struct dirent *entry;
+    int count = 0;
+    struct stat st;
+    while ((entry = readdir(dp)) && count < max_files)
+    {
+        if (entry->d_name[0] == '.') continue; // skip . and ..
+        if (!is_png(entry->d_name)) continue;
+
+        std::string full = dirpath + "/" + entry->d_name;
+        if (stat(full.c_str(), &st) == 0 && (st.st_mode & S_IFREG))
+        {
+            files[count] = entry->d_name;
+            count++;
+        }
+    }
+    closedir(dp);
+    return count;
+}
+
+std::string name_pumpkin(Client &client, t_location *l)
+{
+
+    seed_random();
+
+    // pick a random pumpkin
+    std::string files[100];
+    int num_files = list_pngs(std::string(l->root) + "/pumpkins", files, 100);
+    std::string chosen = "";
+    if (num_files > 0)
+        chosen = files[std::rand() % num_files];
+
+    // path to template file
+    std::string template_path = std::string(l->root) + "/name_pumpkin.html";
+
+    // read file into string
+    std::string html = file_to_str(client, template_path); // reuse your file_to_str()
+
+    // replace placeholder {{PUMPKIN_IMG}} with actual filename
+    std::string placeholder = "{{PUMPKIN_IMG}}";
+    size_t pos = html.find(placeholder);
+    if (pos != std::string::npos)
+        html.replace(pos, placeholder.size(), chosen);
+
+    // optional: if no pumpkin available, replace with message
+    if (chosen == "")
+    {
+        std::string no_pumpkin_msg = "<p>No pumpkins available right now!</p>";
+        pos = html.find("{{NO_PUMPKIN_MSG}}");
+        if (pos != std::string::npos)
+            html.replace(pos, std::string("{{NO_PUMPKIN_MSG}}").size(), no_pumpkin_msg);
+    }
+    else
+    {
+        // remove NO_PUMPKIN_MSG placeholder if pumpkin exists
+        pos = html.find("{{NO_PUMPKIN_MSG}}");
+        if (pos != std::string::npos)
+            html.replace(pos, std::string("{{NO_PUMPKIN_MSG}}").size(), "");
+    }
+
+    return html;
+}
+
 std::string autoindex_directory(Client &client, const std::string path)
 {
 	(void)client;
@@ -43,10 +144,13 @@ std::string	file_to_str(Client &client, const std::string &path)
 
 std::string handle_get(Client &client, const t_server &config, t_location *l)
 {
+	printf("GET WAS CALLED\n");
 	(void)config; //TODO remove from ft if not needed
 	struct stat st; //struct that stat fills with information about a file path
 	printf("root is: '%s'\n", l->root);
 	printf("uri is: '%s'\n", client.get_path().c_str());
+	if (client.get_path() == "/name_pumpkin.html")
+		return name_pumpkin(client, l);
 	std::string path = std::string(l->root) + client.get_path();
 	printf("index is being searched at this location : '%s'\n", path.c_str());
 	if (stat(path.c_str(), &st) == -1) //if stat returns -1, the file doesnt exist, path not found

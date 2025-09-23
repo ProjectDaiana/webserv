@@ -7,6 +7,7 @@
 std::string	handle_method(Client &client, const t_server &config)
 {
 	printf("\n__handling method__\n");
+	printf("method is:  '%s'\n", client.get_request().method.c_str());
 	if (!client.get_path().c_str())
 		printf("ERROR: empty uri.\n");
 	t_location *location;
@@ -20,11 +21,11 @@ std::string	handle_method(Client &client, const t_server &config)
 		printf("404 set at first instance");
 		return std::string();
 	}
-	else if (client.get_request().method == "GET" && method_allowed("GET", location))
+	else if (client.get_request().method == "GET" && method_allowed("GET", location, client))
 		return handle_get(client, config, location);
-	else if (client.get_request().method == "POST" && method_allowed("POST", location))
+	else if (client.get_request().method == "POST" && method_allowed("POST", location, client))
 		return handle_post(client, config, location);
-	else if (client.get_request().method == "DELETE" && method_allowed("DELETE", location))
+	else if (client.get_request().method == "DELETE" && method_allowed("DELETE", location, client))
 		return handle_delete(client, config, location);
 	client.set_error_code(405);
 	return std::string();
@@ -41,6 +42,7 @@ t_response	build_response(Client &client, const t_server &config)
 	res.version = client.get_request().http_version;
 	res.body = handle_method(client, config); //TODO fix segf
 	res.content_type = get_content_type(client.get_path());
+	printf("content type is: '%s'\n", res.content_type.c_str());
 	printf("_______________________\nthis is uri: '%s'\n", client.get_path().c_str());
 	res.connection = connection_type(client); //TODO change function name
 	res.content_length = res.body.size();
@@ -68,9 +70,8 @@ void	handle_client_write(Client &client, const t_server &config)
 	std::string str_response(sstr.str());
 		printf("\n_______________________________\n");
 		printf("finished response:\n");
-       // write(1, str_response.c_str(), str_response.size());
-        write(client.get_fd(), str_response.c_str(), str_response.size());
-		written = write(client.get_fd(), str_response.c_str(), str_response.size());
+        //write(1, str_response.c_str(), str_response.size());
+        written = write(client.get_fd(), str_response.c_str(), str_response.size());
 		if (written == (int)str_response.size())
 		{
 			printf("WRITE COMPLETE\n____________________________\n");

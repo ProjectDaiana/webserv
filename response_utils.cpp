@@ -18,6 +18,7 @@ std::string	connection_type(Client &client)
 //check whats the suffix after the dot and map content type/ "MIME" type to that
 std::string get_content_type(const std::string &path)
 {
+    printf("GETTING CONTENT TYPE NOW W PATH: '%s'\n", path.c_str());	    
     int dot_pos = path.rfind('.');
     if (dot_pos == (int)std::string::npos)
         return "application/octet-stream"; // generic MIME type for unknown binary data
@@ -86,17 +87,20 @@ t_location *find_location(std::string uri, const t_server &config)
 	return (best_match);
 }
 
-bool	method_allowed(const std::string& method, const t_location *location)
+bool	method_allowed(const std::string& method, const t_location *location, Client &client)
 {
 	int i;
 
 	i = 0;
+	if (client.get_path() == "index.html" && (method == "GET" || method == "DELETE))
+		return false;
 	while (i < location->method_count)
 	{
 		if (location->accepted_methods[i] == method)
 			return true;
 		i++;
 	}
+	printf("%s is not allowed!\n", method.c_str());
 	return false;
 }
 

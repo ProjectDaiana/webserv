@@ -58,7 +58,7 @@ class Client {
 		const t_request& get_request() const;
 		void set_request(const t_request& new_request);
 		void print_request_struct() const;
-
+  
 		void set_write_complete(bool value) { _write_complete = value; }
 };
 
