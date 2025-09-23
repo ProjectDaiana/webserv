@@ -5,6 +5,15 @@
 #include <cstdio>
 
 
+std::string reload_page(Client &client)
+{
+	std::string referer = client.get_header("Referer");
+	if (referer.empty())
+		return std::string("index.html");
+	else
+		return referer;
+}
+
 std::string	connection_type(Client &client)
 {
 	std::string connection = client.get_header("Connection");
@@ -45,6 +54,7 @@ std::string get_content_type(const std::string &path)
 	else if (suffix == "ico")
 		return "image/x-icon";
     // TODO mb add more types
+	//TODO add video
     else
         return "application/octet-stream";
 }

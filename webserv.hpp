@@ -6,7 +6,7 @@
 /*   By: darotche <darotche@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/23 17:26:54 by ltreser           #+#    #+#             */
-/*   Updated: 2025/09/16 20:05:53 by darotche         ###   ########.fr       */
+/*   Updated: 2025/09/24 00:06:13 by ltreser          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -192,6 +192,6 @@ void    handle_client_write(Client &client, const t_server &config);
 t_response      build_response(Client &client, const t_server &config);
 std::string     handle_method(Client &client, const t_server &config);
 std::string connection_type(Client &client);
-
+std::string reload_page(Client &client);
 
 #endif

@@ -36,12 +36,25 @@ t_response	build_response(Client &client, const t_server &config)
 	(void)config;
 	t_response res;
 
+	//TODO find location here
+	//TODO helper ft for location that handles errors
+	//TODO check location if it contains redirect
+	//TODO if location contains redirect, set it here and put error code "301" which means moved permanently
+	//TODO check if its already in the http error codes
+	//TODO check if mb putting location iinto handle client write could be better and then not passing config makes sense.....? dont think so though
+
 	printf("\n\n\n\n\n__TESTING RESPONSE__\n");
 	printf("client fd: '%d'\n", client.get_fd());
 	printf("is config accessible: server name is: '%s'\n", config.name);
 	res.version = client.get_request().http_version;
 	res.body = handle_method(client, config); //TODO fix segf
-	res.content_type = get_content_type(client.get_path());
+	if (client.get_method() == "GET")
+		res.content_type = get_content_type(client.get_path());
+	else
+	{ 
+		client.set_error_code(303);
+		res.location = reload_page(client);
+	}
 	printf("content type is: '%s'\n", res.content_type.c_str());
 	printf("_______________________\nthis is uri: '%s'\n", client.get_path().c_str());
 	res.connection = connection_type(client); //TODO change function name
@@ -62,15 +75,16 @@ void	handle_client_write(Client &client, const t_server &config)
 	sstr << response.version << " "
 		<< response.status_code << " "
 		<< response.reason_phrase << "\r\n"
-		<< "Content-Type :" << response.content_type << "\r\n"
-		<< "Content-Length " << response.content_length << "\r\n"
+		<< "Location: " << response.location << "\r\n"
+		<< "Content-Type: " << response.content_type << "\r\n"
+		<< "Content-Length: " << response.content_length << "\r\n"
 		<< "Connection: " << response.connection << "\r\n"
 		<< "\r\n" 
 		<< response.body;
 	std::string str_response(sstr.str());
 		printf("\n_______________________________\n");
 		printf("finished response:\n");
-        write(1, str_response.c_str(), str_response.size());
+       // write(1, str_response.c_str(), str_response.size());
         written = write(client.get_fd(), str_response.c_str(), str_response.size());
 		if (written == (int)str_response.size())
 		{
