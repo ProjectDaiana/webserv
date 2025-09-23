@@ -45,8 +45,10 @@ std::string run_cgi(const std::string& script_path, int client_fd) {
 
 	char buffer[32];
     sprintf(buffer, "%lu", (unsigned long)output.size());
-	std::cout << "this is buffer: " << buffer << std::endl;
-	std::cout << "this is output: " << output << std::endl;
+    std::string content_length(buffer);
+	//std::cout << "this is buffer: " << buffer << std::endl;
+	//std::cout << "this is output: " << output << std::endl;
+
     
     std::string response = "HTTP/1.1 200 OK\r\n";
     response += output;

@@ -23,6 +23,21 @@ bool Request::is_cgi() const {
     return false;
 }
 
+void Request::reset_struct() {
+    _parsed_request.method.clear();
+    _parsed_request.uri.clear();
+    _parsed_request.path.clear();
+    _parsed_request.query.clear();
+    _parsed_request.http_version.clear();
+    _parsed_request.headers.clear();
+    _parsed_request.body.clear();
+
+    s_parse_error.code = 200;
+    s_parse_error.msg.clear();
+    _parse_error.clear();
+}
+
+
 // Parser
 bool Request::parse(const std::string& raw_request) {
 	std::cout << "DEBUG: parse() called with " << raw_request.length() << " characters" << std::endl;

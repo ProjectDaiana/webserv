@@ -57,7 +57,7 @@ void	handle_client_write(Client &client, const t_server &config)
 	t_response response;
 	std::stringstream sstr;
 	int written;
-	
+
 	response = build_response(client, config);
 	sstr << response.version << " "
 		<< response.status_code << " "
