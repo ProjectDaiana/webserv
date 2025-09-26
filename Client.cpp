@@ -1,6 +1,6 @@
 #include "Client.hpp"
 
-Client::Client(int fd) : _fd(fd), _headers_complete(0), _read_complete(0), _content_len(0), _headers_end_pos(0), _error_code(200) {}
+Client::Client(int fd) : _fd(fd), _headers_complete(0), _read_complete(0), _content_len(0), _headers_end_pos(0), _error_code(200), cgi_pipe_fd(0) {}
 
 Client::Client() : _fd(-1) {};
 
@@ -41,7 +41,7 @@ void Client::add_to_request(char *data, int len) {
 				// std::cout << "DEBUG: Content-Length found: " << _content_len << std::endl;
 			}
 		}	
-		std::cout << "Reading request" << std::endl;
+		//std::cout << "Reading request" << std::endl;
 	}
 	else {
 		size_t body_size = _raw_request.size() - _headers_end_pos;

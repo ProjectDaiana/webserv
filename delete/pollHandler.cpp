@@ -49,7 +49,7 @@ bool handle_client_read(int fd, std::vector<struct pollfd> &pfds, std::map<int, 
 			std::cout << "Parse error: " << client.get_parse_error().msg << std::endl;
 			return false;
 		}
-		debug_request(client);
+		//debug_request(client);
 		pfds[index].events = POLLOUT;
 	}
 	return true;
