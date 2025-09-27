@@ -197,9 +197,6 @@ void    run_server(Server** servers, int server_count)
 {
     std::vector<struct pollfd> pfds;
     std::map<int, Client> clients;
-   // const int TIMEOUT = 120; // seconds
-	//int		poll_count;
-	//time_t	now;
 	size_t i = 0;
 
 	add_server_sockets(servers, server_count, pfds);
@@ -211,163 +208,13 @@ void    run_server(Server** servers, int server_count)
 		
         while (i < pfds.size())
         {
-			Server *server = find_server(pfds[i].fd, servers, server_count);
-			if (server)
+			Server *server = find_server(pfds[i].fd, servers, server_count); //if fd is server, return server
+			if (server) //if found, handle
 				handle_server_fd(pfds[i], *server, pfds, clients);
-			else
+			else //if client, handle
 				handle_client_fd(pfds[i], pfds, clients, *find_server_for_client(pfds[i].fd, clients, server, server_count));
 		i++;
 		}
 	}
 	close_servers(servers, server_count);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-         /*   if (pfds[i].fd != (*servers)[0].get_fd())
-            {
-                Client &client = clients[pfds[i].fd];
-                //now = std::time(NULL);
-                // Timeout check
-                // TODO also close if client closed connection
-                if ((now - client.get_last_activity() > TIMEOUT))
-                {
-                    std::time_t result = client.get_last_activity();
-                    printf("XXXXXX Client %d timed out, closing connection XXXXXX\n", pfds[i].fd);
-					std::cout << "XXXXXX Now: " << std::asctime(std::localtime(&now));
-					std::cout << "XXXXXX Last activity client " << client.get_fd() << ": " << std::asctime(std::localtime(&result));
-                    std::cout << "XXXXXX Connection: " << client.get_header("Connection") << std::endl;
-                    // TODO move to a cleanup function
-                    close(pfds[i].fd);
-                    clients.erase(pfds[i].fd);
-                    pfds.erase(pfds.begin() + i);
-                    --i;
-                    continue ;
-                }
-                // Handle client read
-                if (pfds[i].revents & POLLIN)
-                {
-                    if (!handle_client_read(pfds[i].fd, pfds, clients, i))
-                    { // OJO parser will be called here
-                        // TODO move to a cleanup function
-                        close(pfds[i].fd);
-                        clients.erase(pfds[i].fd);
-                        pfds.erase(pfds.begin() + i);
-                        --i;
-                        continue ;
-                    }
-                }
-                // Handle client write
-                else if (pfds[i].revents & POLLOUT && client.is_read_complete())
-                {
-                    if (client.is_cgi())
-                        run_cgi("./www/cgi-bin/test.py", pfds[i].fd);
-                    else
-                        handle_client_write(client, (*servers)[0].get_config());
-                    if (client.is_write_complete())
-                    {
-                        client.reset();
-                        pfds[i].events = POLLIN;
-                    }
-                }
-            }
-            i++;
-        }
-    }
-    close((*servers)[0].get_fd());
-}*/
-
-
-/*void	run_server(Server server)
-{
-	size_t	i;
-	int		poll_count;
-	time_t	now;
-
-	std::vector<struct pollfd> pfds;
-	std::map<int, Client> clients;
-	const int TIMEOUT = 120; // seconds
-	i = 0;
-	pfds.push_back(Server::create_pollfd(server.get_fd(), POLLIN, 0));
-	while (1)
-	{
-		poll_count = poll(pfds.data(), pfds.size(), 1000);
-		if (poll_count == -1)
-		{
-			perror("poll failed or no request\n");
-				// TODO replace for proper error
-			break ;
-		}
-		while (i < pfds.size())
-		{
-			if (pfds[i].fd == server.get_fd() && pfds[i].revents & POLLIN)
-				handle_new_connection(server, pfds, clients);
-			if (pfds[i].fd != server.get_fd())
-			{
-				Client &client = clients[pfds[i].fd];
-				now = std::time(NULL);
-				// Timeout check
-				// TODO also close if client closed connection
-				if ((now - client.get_last_activity() > TIMEOUT))
-				{
-					std::time_t result = client.get_last_activity();
-					printf("XXXXXX Client %d timed out,
-						closing connection XXXXXX\n", pfds[i].fd);
-					std::cout << "XXXXXX Now: " << std::asctime(std::localtime(&now));
-					std::cout << "XXXXXX Last activity client " << client.get_fd() << ": " << std::asctime(std::localtime(&result));
-					std::cout << "XXXXXX Connection: " << client.get_header("Connection") << std::endl;
-					// TODO move to a cleanup function
-					close(pfds[i].fd);
-					clients.erase(pfds[i].fd);
-					pfds.erase(pfds.begin() + i);
-					--i;
-					continue ;
-				}
-				// Handle client read
-				if (pfds[i].revents & POLLIN)
-				{
-					if (!handle_client_read(pfds[i].fd, pfds, clients, i))
-					{ // OJO parser will be called here
-						// TODO move to a cleanup function
-						close(pfds[i].fd);
-						clients.erase(pfds[i].fd);
-						pfds.erase(pfds.begin() + i);
-						--i;
-						continue ;
-					}
-				}
-				// Handle client write
-				else if (pfds[i].revents & POLLOUT && client.is_read_complete())
-				{
-					if (client.is_cgi())
-						run_cgi("./www/cgi-bin/test.py", pfds[i].fd);
-					else
-						handle_client_write(client, server.get_config());
-					if (client.is_write_complete())
-					{
-						client.reset();
-						pfds[i].events = POLLIN;
-					}
-				}
-			}
-			i++;
-		}
-	}
-	close(server.get_fd());
-}*/
