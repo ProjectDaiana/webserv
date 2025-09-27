@@ -1,6 +1,6 @@
 #include "Client.hpp"
 
-Client::Client(int fd, Server &server) : _fd(fd), _headers_complete(0), _read_complete(0), _content_len(0), _headers_end_pos(0), _error_code(200), _server(&server) {}
+Client::Client(int fd, Server &server) : _fd(fd), _headers_complete(0), _read_complete(0), _keep_alive(0), _content_len(0), _headers_end_pos(0), _error_code(200), _server(&server) {}
 
 Client::Client() : _fd(-1), _server(NULL) {};
 
@@ -69,6 +69,7 @@ bool Client::parse_request() {
 }
 
 void Client::reset() {
+	printf("Client '%d' is being reset\n", _fd);
 	_raw_request.clear();
 	_request.reset_struct();
 	_headers_complete = false;

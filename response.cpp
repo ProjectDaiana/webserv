@@ -45,6 +45,16 @@ t_response	build_response(Client &client, const t_server &config)
 	printf("content type is: '%s'\n", res.content_type.c_str());
 	printf("_______________________\nthis is uri: '%s'\n", client.get_path().c_str());
 	res.connection = connection_type(client); //TODO change function name
+	if (res.connection == "keep-alive")
+	{
+		printf("KEEP-ALIVE\n");
+		client.set_keep_alive(true);
+	}
+	else
+	{
+		printf("KILLED CONNECTION\n");
+		client.set_keep_alive(false);
+	}
 	res.content_length = res.body.size();
 	res.status_code = client.get_error_code();
 	res.reason_phrase = get_reason_phrase(res.status_code);

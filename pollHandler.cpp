@@ -119,6 +119,7 @@ void close_servers(Server **servers, int server_count)
 
 void cleanup_client(int fd, std::vector<pollfd> &pfds, std::map<int, Client> &clients)
 {
+    printf("Client '%d' is being cleaned up\n", fd);
     close(fd);
     clients.erase(fd);
 
@@ -185,7 +186,8 @@ void handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clie
 
         if (client.is_write_complete())
         {
-            client.reset();
+	    if (!client.get_keep_alive())
+            	client.reset();
             pfd.events = POLLIN; // go back to reading
         }
     }

@@ -19,6 +19,7 @@ class Client {
 		bool _read_complete;
 		bool _write_complete;
 		bool _is_parsed;
+		bool _keep_alive;
 		size_t _content_len;
 		size_t _headers_end_pos;
 		time_t _last_activity; // Track last activity for timeout
@@ -67,6 +68,9 @@ class Client {
 		void print_request_struct() const;
   
 		void set_write_complete(bool value) { _write_complete = value; }
+		void set_keep_alive(bool value) { _keep_alive = value; }
+		bool get_keep_alive() const { return _keep_alive; }
+
 };
 
 #endif
