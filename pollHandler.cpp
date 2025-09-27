@@ -87,12 +87,46 @@ void	add_server_sockets(Server **servers, int server_count, std::vector<struct p
 	}
 }
 
-int ft_poll(std::vector<struct pollfd>& pfds, int timeout_ms)
+void cleanup_client(int fd, std::vector<pollfd> &pfds, std::map<int, Client> &clients)
 {
-    int ret = poll(pfds.data(), pfds.size(), timeout_ms);
-    if (ret == -1)
+    printf("Client '%d' is being cleaned up\n", fd);
+    close(fd);
+    clients.erase(fd);
+
+    size_t i = 0;
+    while (i < pfds.size())
+    {
+        if (pfds[i].fd == fd)
+        {
+            pfds.erase(pfds.begin() + i);
+            break;
+        }
+        i++;
+    }
+}
+
+int ft_poll(std::vector<struct pollfd>& pfds, int timeout_ms, std::map<int, Client> clients)
+{
+	int ret = poll(pfds.data(), pfds.size(), timeout_ms);
+	if (ret == -1)
         perror("poll failed");
-    return ret;
+	if (ret == 0)
+	{
+		time_t now = std::time(NULL);
+		std::map<int, Client>::iterator i = clients.begin();
+		while (i != clients.end())
+		{
+			if (now - i->second.get_last_activity() > 120)
+			{
+				int fd = i->first;
+				i++;
+				cleanup_client(fd, pfds, clients);
+			}
+			else
+				i++;
+		}
+	}
+	return ret;
 }
 
 Server* is_server(int fd, Server** servers, int server_count)
@@ -117,24 +151,6 @@ void close_servers(Server **servers, int server_count)
     }
 }
 
-void cleanup_client(int fd, std::vector<pollfd> &pfds, std::map<int, Client> &clients)
-{
-    printf("Client '%d' is being cleaned up\n", fd);
-    close(fd);
-    clients.erase(fd);
-
-    size_t i = 0;
-    while (i < pfds.size())
-    {
-        if (pfds[i].fd == fd)
-        {
-            pfds.erase(pfds.begin() + i);
-            break;
-        }
-        i++;
-    }
-}
-
 
 const t_server* find_server_for_client(int client_fd, const std::map<int, Client> &clients,
                                  Server **servers, int server_count)
@@ -153,7 +169,7 @@ const t_server* find_server_for_client(int client_fd, const std::map<int, Client
     return NULL;
 }
 
-void handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Client> &clients, const t_server &server_config)
+int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Client> &clients, const t_server &server_config)
 {
     Client &client = clients[pfd.fd];
     time_t now = std::time(NULL);
@@ -164,7 +180,7 @@ void handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clie
     {
         printf("Client %d timed out\n", pfd.fd);
         cleanup_client(pfd.fd, pfds, clients);
-        return;
+        return 1;
     }
 
     // READ
@@ -173,7 +189,7 @@ void handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clie
         if (!handle_client_read(pfd.fd, pfd, client))
         {
             cleanup_client(pfd.fd, pfds, clients);
-            return;
+            return 1;
         }
     }
     // WRITE
@@ -186,11 +202,19 @@ void handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clie
 
         if (client.is_write_complete())
         {
-	    if (!client.get_keep_alive())
+	    if (client.get_keep_alive())
+            {
             	client.reset();
-            pfd.events = POLLIN; // go back to reading
+            	pfd.events = POLLIN; // go back to reading
+	     }
+	     else
+	     {
+		cleanup_client(pfd.fd, pfds, clients);
+	    	return 1;
+	      }
         }
     }
+    return 0;
 }
 
 
@@ -203,17 +227,16 @@ void    run_server(Server** servers, int server_count)
 	add_server_sockets(servers, server_count, pfds);
     while (1)
     {
-        if (ft_poll(pfds, 1000) == -1)
+        if (ft_poll(pfds, 1000, clients) == -1)
 			break;
-		i = 0;
-		
+	i = 0;
         while (i < pfds.size())
         {
 			Server *server = is_server(pfds[i].fd, servers, server_count); //if fd is server, return server
 			if (server) //if found, handle
 				handle_server_fd(pfds[i], *server, pfds, clients);
-			else //if client, handle
-				handle_client_fd(pfds[i], pfds, clients, *find_server_for_client(pfds[i].fd, clients, servers, server_count));
+			else if (handle_client_fd(pfds[i], pfds, clients, *find_server_for_client(pfds[i].fd, clients, servers, server_count))) //if client has been cleaned up, skip iterator++
+				continue ;
 		i++;
 		}
 	}

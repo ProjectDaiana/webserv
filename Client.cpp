@@ -74,7 +74,9 @@ void Client::reset() {
 	_request.reset_struct();
 	_headers_complete = false;
 	_read_complete = false;
+	_write_complete = false;
 	_is_parsed = false;
+	_keep_alive = false;
 	_content_len = 0;
 	_headers_end_pos = 0;
 	_error_code = 200;
