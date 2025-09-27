@@ -15,7 +15,7 @@ void handle_server_fd(pollfd &pfd, Server &server,
             perror("accept failed");
             return;
         }
-        Client new_client(new_client_fd);
+        Client new_client(new_client_fd, server);
         new_client.update_activity();
         clients.insert(std::make_pair(new_client_fd, new_client));
         pfds.push_back(Server::create_pollfd(new_client_fd, POLLIN, 0));
@@ -95,7 +95,7 @@ int ft_poll(std::vector<struct pollfd>& pfds, int timeout_ms)
     return ret;
 }
 
-Server* find_server(int fd, Server** servers, int server_count)
+Server* is_server(int fd, Server** servers, int server_count)
 {
     int i = 0;
     while (i < server_count)
@@ -135,7 +135,7 @@ void cleanup_client(int fd, std::vector<pollfd> &pfds, std::map<int, Client> &cl
 }
 
 
-t_server* find_server_for_client(int client_fd, const std::map<int, Client> &clients,
+const t_server* find_server_for_client(int client_fd, const std::map<int, Client> &clients,
                                  Server **servers, int server_count)
 {
     std::map<int, Client>::const_iterator it = clients.find(client_fd); //find client
@@ -145,8 +145,7 @@ t_server* find_server_for_client(int client_fd, const std::map<int, Client> &cli
     int i = 0;
     while (i < server_count) 
 	{
-        if (client.get_listen_fd() == servers[i]->get_fd()) //check if client was accepted from this fd
-		//TODO store listen fd in client, getter & setter
+        if (client.get_server()->get_fd() == servers[i]->get_fd()) //check if client was accepted from this fd
             return &(servers[i]->get_config());
         i++;
     }
@@ -208,11 +207,11 @@ void    run_server(Server** servers, int server_count)
 		
         while (i < pfds.size())
         {
-			Server *server = find_server(pfds[i].fd, servers, server_count); //if fd is server, return server
+			Server *server = is_server(pfds[i].fd, servers, server_count); //if fd is server, return server
 			if (server) //if found, handle
 				handle_server_fd(pfds[i], *server, pfds, clients);
 			else //if client, handle
-				handle_client_fd(pfds[i], pfds, clients, *find_server_for_client(pfds[i].fd, clients, server, server_count));
+				handle_client_fd(pfds[i], pfds, clients, *find_server_for_client(pfds[i].fd, clients, servers, server_count));
 		i++;
 		}
 	}

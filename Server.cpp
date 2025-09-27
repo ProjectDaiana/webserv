@@ -45,7 +45,7 @@ struct pollfd Server::create_pollfd(int fd, short events, short revents) {
     return pfd;
 }
 
-int Server::get_fd() {
+int Server::get_fd() const {
 	return _fd;
 }
 

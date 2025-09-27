@@ -1,7 +1,6 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
-#pragma once
 
 #include <arpa/inet.h>
 #include <cstdlib>
@@ -74,7 +73,6 @@ struct                          s_server
 
 //NOTE this server only contains runtime data, any static data is stored by the config data in t_server struct
 
-typedef struct s_server         t_server;
 
 class Server {
 	private:
@@ -87,7 +85,7 @@ class Server {
 		// handle_finish_and_exit to avoid closing an fd before finishing writting
 		int closeServer();
 		
-		int get_fd();
+		int get_fd() const;
 		sockaddr_in get_sockaddr();
 		
 		//TODO see if this function goes here or outside of the class

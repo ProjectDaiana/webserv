@@ -7,6 +7,9 @@
 #include <ctime>
 #include "Request.hpp"
 #include "webserv.hpp"
+#include "Server.hpp"
+
+class Server;
 
 class Client {
 	private:
@@ -21,11 +24,12 @@ class Client {
 		time_t _last_activity; // Track last activity for timeout
 		int _error_code; //TODO change back to 200 when reset
 
+		Server *_server;
 		Request _request;
 
 	public:
 		Client();
-		Client(int fd);
+		Client(int fd, Server &server);
 		~Client();
 
 		void update_activity();
@@ -50,6 +54,9 @@ class Client {
 		const s_error& get_parse_error() const;
 		int get_fd() const;
 		time_t get_last_activity() const;
+		const Server *get_server() const {return _server;}
+		// Inside Client class
+
 
 		// Debug
 		void print_raw_request() const;
