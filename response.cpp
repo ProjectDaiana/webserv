@@ -59,6 +59,25 @@ void	handle_client_write(Client &client, const t_server &config)
 	std::stringstream sstr;
 	int written;
 
+	 // Check for CGI output first
+	if (!client.cgi_output.empty()) {
+		std::stringstream sstr;
+		sstr << "HTTP/1.1 200 OK\r\n"
+			<< "Content-Type: text/html\r\n"
+			<< "Content-Length: " << client.cgi_output.size() << "\r\n"
+			<< "Connection: keep-alive\r\n"
+			<< "\r\n"
+			<< client.cgi_output;
+		std::string str_response = sstr.str();
+		int written = write(client.get_fd(), str_response.c_str(), str_response.size());
+		if (written == (int)str_response.size()) {
+			printf("CGI WRITE COMPLETE\n____________________________\n");
+			client.cgi_output.clear();
+			client.set_write_complete(1);
+		}
+		return;
+	}
+
 	response = build_response(client, config);
 	sstr << response.version << " "
 		<< response.status_code << " "
@@ -80,39 +99,3 @@ void	handle_client_write(Client &client, const t_server &config)
 			client.set_write_complete(1);
 		}
 }
-
-// void handle_client_write(Client& client, const t_server& config) {
-//     std::stringstream sstr;
-//     std::string str_response;
-//     ssize_t written;
-
-// 	printf("DEBUG: handle_client_write called for client fd: %d\n", client.get_fd());
-//     if (!client.get_cgi_output().empty()) {
-// 		std::cout << "CGI RESPONSE" << std::endl;
-//         // This is a CGI response.
-//         sstr << "HTTP/1.1 200 OK\r\n"
-//              << "Content-Type: text/html\r\n"
-//              << "Content-Length: " << client.get_cgi_output().size() << "\r\n"
-//              << "\r\n"
-//              << client.get_cgi_output();
-//     } else {
-//         // This is a standard response.
-//         t_response response = build_response(client, config);
-//         sstr << response.version << " "
-//              << response.status_code << " "
-//              << response.reason_phrase << "\r\n"
-//              << "Content-Type: " << response.content_type << "\r\n"
-//              << "Content-Length: " << response.content_length << "\r\n"
-//              << "\r\n"
-//              << response.body;
-//     }
-    
-//     str_response = sstr.str();
-//     written = write(client.get_fd(), str_response.c_str(), str_response.size());
-
-//     if (written == (ssize_t)str_response.size()) {
-//         client.set_write_complete(true);
-//     } else {
-//         client.set_write_complete(false);
-//     }
-// }

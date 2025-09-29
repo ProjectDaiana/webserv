@@ -52,13 +52,22 @@ class Client {
 		int get_fd() const;
 		time_t get_last_activity() const;
 
-		// cgi
+		// Debug
+		void print_raw_request() const;
+		int	get_error_code() const;
+		void set_error_code(int code);
+		const t_request& get_request() const;
+		void set_request(const t_request& new_request);
+		void print_request_struct() const;
+  
+		void set_write_complete(bool value) { _write_complete = value; }
 
+
+		// cgi
 		pid_t cgi_pid;
 		bool cgi_running;
 		std::string cgi_output;
-
-
+		
 		void set_cgi_output(const std::string& output) {
 			cgi_output = output;
 		}
@@ -87,16 +96,6 @@ class Client {
 		int get_cgi_pipe() {
 			return cgi_pipe_fd;
 		}
-
-		// Debug
-		void print_raw_request() const;
-		int	get_error_code() const;
-		void set_error_code(int code);
-		const t_request& get_request() const;
-		void set_request(const t_request& new_request);
-		void print_request_struct() const;
-  
-		void set_write_complete(bool value) { _write_complete = value; }
 };
 
 #endif

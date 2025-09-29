@@ -92,7 +92,7 @@ void run_server(Server server) {
 	std::vector<struct pollfd> pfds;
 	std::map<int, Client> clients;
 	std::map<int, Client*> cgi_pipes;// chek if fds are correct
-//	const int TIMEOUT = 120; // seconds
+	const int TIMEOUT = 120; // seconds
 
 	pfds.push_back(Server::create_pollfd(server.get_fd(), POLLIN, 0));
 	while (1)
@@ -110,24 +110,24 @@ void run_server(Server server) {
 
 			if (pfds[i].fd != server.get_fd()) {
 				Client &client = clients[pfds[i].fd];
-				//time_t now = std::time(NULL);
+				time_t now = std::time(NULL);
 				
 				// Timeout check
 				//TODO also close if client closed connection
-				// if ((now - client.get_last_activity() > TIMEOUT)) {
-				// 	std::time_t result =  client.get_last_activity() ;
-				// 	printf("XXXXXX Client %d timed out, closing connection XXXXXX\n", pfds[i].fd);
-				// 	std::cout << "XXXXXX Now: " <<  std::asctime(std::localtime(&now));
-				// 	std::cout << "XXXXXX Last activity client " << client.get_fd() << ": " << std::asctime(std::localtime(&result));
-				// 	std::cout << "XXXXXX Connection: " << client.get_header("Connection") << std::endl;
+				if ((now - client.get_last_activity() > TIMEOUT)) {
+					std::time_t result =  client.get_last_activity() ;
+					printf("XXXXXX Client %d timed out, closing connection XXXXXX\n", pfds[i].fd);
+					std::cout << "XXXXXX Now: " <<  std::asctime(std::localtime(&now));
+					std::cout << "XXXXXX Last activity client " << client.get_fd() << ": " << std::asctime(std::localtime(&result));
+					std::cout << "XXXXXX Connection: " << client.get_header("Connection") << std::endl;
 
-				// 	//TODO move to a cleanup function
-				// 	close(pfds[i].fd);
-				// 	clients.erase(pfds[i].fd);
-				// 	pfds.erase(pfds.begin() + i);
-				// 	--i;
-				// 	continue;
-				// }
+					//TODO move to a cleanup function
+					close(pfds[i].fd);
+					clients.erase(pfds[i].fd);
+					pfds.erase(pfds.begin() + i);
+					--i;
+					continue;
+				}
 				// Handle client read
 				if (pfds[i].revents & POLLIN) {
 					if (!handle_client_read(pfds[i].fd, pfds, clients, i, cgi_pipes)) { //OJO parser will be called here
@@ -142,11 +142,11 @@ void run_server(Server server) {
 				}
 							// cgi 
 					if (client.is_cgi_running() && client.is_cgi()) {
-						Client* cgi_client = cgi_pipes[pfds[i].fd];
 						if (handle_cgi_write(client.get_cgi_pipe() , client)) {
-							std::cout << "handle_write ok pid:"<<  client.get_cgi_pid() <<  std::endl;				
+							std::cout << "handle_write ok pid:"<<  client.get_cgi_pid() <<  std::endl;
+							std::cout << "handle_write client fd:"<<  client.get_fd() <<  std::endl;		
 							
-							int client_fd = cgi_client->get_fd();  // this is a sefault
+							int client_fd = client.get_fd();
 							// cgi_pipes.erase(pfds[i].fd);
 							// // Remove CGI pipe fd from pfds
 							// pfds.erase(pfds.begin() + i);
@@ -163,7 +163,7 @@ void run_server(Server server) {
 				continue;
 			}
 				// Handle client write
-				if (pfds[i].revents & POLLOUT && client.is_read_complete() && !client.is_cgi()) {
+				if (pfds[i].revents & POLLOUT && client.is_read_complete()) {
 						handle_client_write(client, server.get_config());
 					if (client.is_write_complete()) {
 						client.reset();
