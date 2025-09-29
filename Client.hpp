@@ -67,6 +67,7 @@ class Client {
 		pid_t cgi_pid;
 		bool cgi_running;
 		std::string cgi_output;
+		int cgi_start_time;
 		
 		void set_cgi_output(const std::string& output) {
 			cgi_output = output;
@@ -82,6 +83,10 @@ class Client {
 			cgi_pid = pid;
 		};
 
+		void set_cgi_start_time() {
+			cgi_start_time = std::time(NULL);
+		}
+
 		bool is_cgi_running() {
 			return cgi_running;
 		}
@@ -95,6 +100,10 @@ class Client {
 
 		int get_cgi_pipe() {
 			return cgi_pipe_fd;
+		}
+
+		int get_cgi_start_time() {
+			return cgi_start_time;
 		}
 };
 

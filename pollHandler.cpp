@@ -77,7 +77,8 @@ void run_server(Server server) {
 	std::vector<struct pollfd> pfds;
 	std::map<int, Client> clients;
 	std::map<int, Client*> cgi_pipes;// chek if fds are correct
-	const int TIMEOUT = 120; // seconds
+	const int TIMEOUT = 20; // seconds
+	const int CGI_TIMEOUT = 30;
 
 	pfds.push_back(Server::create_pollfd(server.get_fd(), POLLIN, 0));
 	while (1)
@@ -92,6 +93,9 @@ void run_server(Server server) {
 			if (pfds[i].fd == server.get_fd() && pfds[i].revents & POLLIN)
 				handle_new_connection(server, pfds, clients);
 
+			if (cgi_pipes.find(pfds[i].fd) != cgi_pipes.end()) {
+				continue; // This is a CGI pipe - skip all client socket handling
+			}
 
 			if (pfds[i].fd != server.get_fd()) {
 				Client &client = clients[pfds[i].fd];
@@ -113,6 +117,13 @@ void run_server(Server server) {
 					--i;
 					continue;
 				}
+
+				if (handle_cgi_timeout(client, pfds, cgi_pipes, CGI_TIMEOUT)) {
+                    printf("XXXXXX CGI timed out, switching to POLLOUT for response XXXXXX\n");
+                    pfds[i].events = POLLOUT;  // Switch to write timeout response
+                    continue;
+                }
+
 				// Handle client read
 				if (pfds[i].revents & POLLIN) {
 					if (!handle_client_read(pfds[i].fd, pfds, clients, i, cgi_pipes)) { //OJO parser will be called here
@@ -137,12 +148,13 @@ void run_server(Server server) {
 							// pfds.erase(pfds.begin() + i);
 							// --i;
 						
-						// Re-enable the client socket for writing (search after we've modified pfds)
-						for (size_t j = 0; j < pfds.size(); ++j) {
-							if (pfds[j].fd == client_fd) {
-								pfds[j].events = POLLOUT;
-								break;
-							}
+							// Re-enable the client socket for writing (search after we've modified pfds)
+							//pfds[i].events = POLLOUT;
+							for (size_t j = 0; j < pfds.size(); ++j) {
+								if (pfds[j].fd == client_fd) {
+									pfds[j].events = POLLOUT;
+									break;
+								}
 					}
 				}
 				continue;
