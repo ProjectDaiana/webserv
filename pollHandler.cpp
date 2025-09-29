@@ -69,7 +69,14 @@ bool	handle_client_read(int fd, pollfd &pfd, Client &client)
 			return (false);
 		}
 		debug_request(client);
-		pfd.events = POLLOUT;
+		if (!client.is_cgi()) 
+		//{
+		  //  run_cgi("./www/cgi-bin/test.py", client, pfds, cgi_pipes);
+		   // pfds[i].events = 0; //stop poollin pollout, im reading 
+	//		client.set_cgi_running(1);
+//		} 
+//		else
+			pfd.events = POLLOUT;
 	}
 	return (true);
 }
@@ -182,44 +189,80 @@ int timeout_check(Client &client, int fd, std::vector<pollfd> &pfds, std::map<in
 	return 1;
 }
 
+/*
+void handle_cgi(Client &client, const t_server &server_config, std::vector<pollfd> &pfds, pollfd &pfd)
+{
+	if (!client.is_cgi_running())
+		run_cgi(client); //setup polls etc
+	//init buffer for cgi reading
+	read_cgi_output(client); //read
+	handle_client_write(client, server_config); 
+}*/
+
+
 int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Client> &clients, const t_server &server_config)
 {
-    Client &client = clients[pfd.fd];
-    int connection_alive = 1;
+	Client &client = clients[pfd.fd];
+	std::map<int, Client*> cgi_pipes;
+	int connection_alive = 1;
 
-    connection_alive = timeout_check(client, pfd.fd, pfds, clients);
-    // READ
-    if (pfd.revents & POLLIN)
-    {
-        if (!handle_client_read(pfd.fd, pfd, client))
-        {
-            cleanup_client(pfd.fd, pfds, clients);
-            return 0;
-        }
-    }
-    // WRITE
-    else if (pfd.revents & POLLOUT && client.is_read_complete())
-    {
-        if (client.is_cgi())
-            run_cgi("./www/cgi-bin/test.py", pfd.fd);
-        else
-            handle_client_write(client, server_config);
-
-        if (client.is_write_complete())
-        {
-	    if (client.get_keep_alive())
-            {
-            	client.reset();
-            	pfd.events = POLLIN; // go back to reading
-	     }
-	     else
-	     {
-		cleanup_client(pfd.fd, pfds, clients);
-	    	return 0;
-	      }
-        }
-    }
-    return connection_alive;
+	connection_alive = timeout_check(client, pfd.fd, pfds, clients);
+	//TODO insert cgi timeout
+	
+	// READ
+	if (pfd.revents & POLLIN)
+	{
+		if (!handle_client_read(pfd.fd, pfd, client))
+		{
+			cleanup_client(pfd.fd, pfds, clients);
+			connection_alive = 0;
+			return connection_alive;
+        	}
+		if (client.is_cgi())
+		{
+			run_cgi("./www/cgi-bin/test.py", client, pfds, cgi_pipes);
+                   	pfd.events = 0; //stop poollin pollout, im reading
+        		client.set_cgi_running(1);
+			if (client.is_cgi_running() && handle_cgi_write(client.get_cgi_pipe() , client)) //check why bool/needed?
+			{
+				std::cout << "handle_write ok pid:"<<  client.get_cgi_pid() <<  std::endl; //needed?
+				std::cout << "handle_write client fd:"<<  client.get_fd() <<  std::endl; //"	
+				int client_fd = client.get_fd();
+				for (size_t j = 0; j < pfds.size(); ++j)  //does iterator actually change?
+				{
+					if (pfds[j].fd == client_fd) 
+					{
+						pfds[j].events = POLLOUT;
+						break;
+					}
+				}
+			}
+		//TODO theres a continue after this part (before here it was check if its cgi && running), check whats going on w the iterator in run server
+	
+		}
+		//no segf yet
+	}
+	// WRITE
+	else if (pfd.revents & POLLOUT && client.is_read_complete())
+	{
+		//exit(0);
+		handle_client_write(client, server_config);
+		if (client.is_write_complete())
+		{
+			if (client.get_keep_alive())
+			{
+				client.reset();
+				pfd.events = POLLIN; // go back to reading
+			}
+			else
+			{
+				cleanup_client(pfd.fd, pfds, clients);
+		    		connection_alive = 0;
+				return connection_alive;
+			}
+		}
+	}
+	return connection_alive;
 }
 
 
@@ -229,10 +272,10 @@ void    run_server(Server** servers, int server_count)
     std::map<int, Client> clients;
 	size_t i = 0;
 
-	add_server_sockets(servers, server_count, pfds);
+    add_server_sockets(servers, server_count, pfds);
     while (1)
     {
-        if (ft_poll(pfds, 1000, clients) == -1)
+        if (ft_poll(pfds, 1000, clients) == -1) //TODO check which value instead of 1000
 			break;
 	i = 0;
         while (i < pfds.size())

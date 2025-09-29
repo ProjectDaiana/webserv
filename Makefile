@@ -4,7 +4,7 @@
 
 NAME        := webserv
 CXX         := c++
-CXXFLAGS    := -Wall -Wextra -Werror -std=c++98 -I. -Ihelper
+CXXFLAGS    := -Wall -Wextra -Werror -std=c++98 -I. -g3 -Ihelper
 
 # Source files
 SRC         := helper/atoi.cpp main.cpp pollHandler.cpp \
