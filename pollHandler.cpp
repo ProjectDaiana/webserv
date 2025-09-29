@@ -3,20 +3,6 @@
 #include <cstdlib>
 #include <ctime>
 
-bool is_cgi_request(const Client & /*client*/) {
-	//return std::rand() % 2 == 0;
-	 return false;
-} //TODO keep until request is parsed, thenthis will be moved to Request
-
-// Client* find_cgi_client(int pipe_fd, std::map<int, Client> &clients) {
-//     for (std::map<int, Client>::iterator it = clients.begin(); it != clients.end(); ++it) {
-//         if (it->second.get_cgi_pipe() == pipe_fd) {
-//             return &it->second;
-//         }
-//     }
-//     return NULL;
-// }
-
 void handle_new_connection(Server &server, std::vector<struct pollfd> &pfds, std::map<int, Client> &clients) {
 	int new_client_fd= accept(server.get_fd(), NULL, NULL);
 	if (new_client_fd < 0){
@@ -45,7 +31,7 @@ void debug_request(Client& client) {
 	std::cout << " " << client.get_parse_error().msg << std::endl;
 	std::cout << "DEBUG Path: " << client.get_path() << std::endl;
 
-//    client.print_request_struct();
+    client.print_request_struct();
 }
 
 bool handle_client_read(int fd, std::vector<struct pollfd> &pfds, std::map<int, Client> &clients, size_t &i, std::map<int, Client*> &cgi_pipes) {
@@ -75,9 +61,8 @@ bool handle_client_read(int fd, std::vector<struct pollfd> &pfds, std::map<int, 
 			std::cout << "Parse error passed to client: " << client.get_error_code() << std::endl;
 			return false;
 		}
-		debug_request(client);
+		//debug_request(client);
 		if (client.is_cgi()) {
-		    // Initiate the CGI process and disable polling on the client's socket for now.
 		    run_cgi("./www/cgi-bin/test.py", client, pfds, cgi_pipes);
 		    pfds[i].events = 0; //stop poollin pollout, im reading 
 			client.set_cgi_running(1);
