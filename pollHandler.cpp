@@ -300,7 +300,7 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 			connection_alive = 0;
 			return connection_alive;
         	}
-		if (client.is_cgi())
+		if (client.is_cgi() && !client.is_cgi_running())
 		{
 			printf("TRIGGERS WHEN IT SHOULDNT\n");
 			run_cgi("./www/cgi-bin/test.py", client, pfds, cgi_pipes);
