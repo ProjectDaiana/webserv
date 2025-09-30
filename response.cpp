@@ -44,7 +44,7 @@ t_response	build_response(Client &client, const t_server &config)
 		res.body = client.cgi_output;
 	else if (!client.is_cgi())
 		res.body = handle_method(client, config); //TODO fix segf
-	res.content_type = get_content_type(client.get_path());
+	res.content_type = get_content_type(client);
 	printf("content type is: '%s'\n", res.content_type.c_str());
 	printf("_______________________\nthis is uri: '%s'\n", client.get_path().c_str());
 	res.connection = connection_type(client); //TODO change function name

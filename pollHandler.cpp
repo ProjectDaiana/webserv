@@ -300,14 +300,15 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 			connection_alive = 0;
 			return connection_alive;
         	}
-		if (client.is_cgi() && !client.is_cgi_running())
+		if (client.is_cgi())
 		{
+			printf("TRIGGERS WHEN IT SHOULDNT\n");
 			run_cgi("./www/cgi-bin/test.py", client, pfds, cgi_pipes);
                    	pfd.events = 0; //stop poollin pollout, im reading
         		client.set_cgi_running(1);
 		}
 
-		if (client.is_cgi_running() && handle_cgi_write(client.get_cgi_pipe() , client)) //check why bool/needed?
+		if (client.is_cgi_running() && handle_cgi_write(client.get_cgi_pipe() , client))
 			{
 				set_client_pollout(pfds, client);
 				std::cout << "handle_write ok pid:"<<  client.get_cgi_pid() <<  std::endl; //needed?
@@ -352,11 +353,11 @@ void    run_server(Server** servers, int server_count)
 	i = 0;
         while (i < pfds.size())
         {
-			static int client_five = 0;
-			if (pfds[i].fd == 5)
-				client_five++;
-			if (client_five == 5)
-				exit(0);
+			//static int client_four = 0;
+			//if (pfds[i].fd == 4)
+		//		client_four++;
+	//		if (client_four == 15)
+//				exit(0);
 			printf("\n\n___NEW PFD NOW____\n");
 			printf("fd now is: '%d'\n---------------\n", pfds[i].fd);
 			Server *server = is_server(pfds[i].fd, servers, server_count); //if fd is server, return server

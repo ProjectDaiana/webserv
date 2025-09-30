@@ -95,6 +95,8 @@ class Client {
 		};
 
 		bool is_cgi_running() {
+
+			printf("CGI IS RUNNING?: '%d'\n", (int)cgi_running);
 			return cgi_running;
 		}
 		void set_cgi_running(bool b) {

@@ -17,8 +17,11 @@ std::string	connection_type(Client &client)
 }
 
 //check whats the suffix after the dot and map content type/ "MIME" type to that
-std::string get_content_type(const std::string &path)
+std::string get_content_type(Client &client)
 {
+    if (client.is_cgi())
+	    return "text/html";
+    std::string path = client.get_path();
     printf("GETTING CONTENT TYPE NOW W PATH: '%s'\n", path.c_str());	    
     int dot_pos = path.rfind('.');
     if (dot_pos == (int)std::string::npos)
