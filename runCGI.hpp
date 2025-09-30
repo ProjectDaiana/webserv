@@ -66,7 +66,7 @@ bool cgi_eof(int pipe_fd, Client &client)
 }
 
 bool handle_cgi_write(int pipe_fd, Client &client) {
-    char buf[10];
+    char buf[1000];
     ssize_t n;
     
     printf("=== handle_cgi_write called for pipe fd %d =====================\n", pipe_fd);

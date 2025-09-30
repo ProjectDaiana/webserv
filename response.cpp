@@ -75,8 +75,8 @@ void	handle_client_write(Client &client, const t_server &config)
 	sstr << response.version << " "
 		<< response.status_code << " "
 		<< response.reason_phrase << "\r\n"
-		<< "Content-Type:" << response.content_type << "\r\n"
-		<< "Content-Length:" << response.content_length << "\r\n"
+		<< "Content-Type: " << response.content_type << "\r\n"
+		<< "Content-Length: " << response.content_length << "\r\n"
 		<< "Connection: " << response.connection << "\r\n"
 		<< "\r\n" 
 		<< response.body;
