@@ -98,6 +98,7 @@ class Client {
 			return cgi_running;
 		}
 		void set_cgi_running(bool b) {
+			printf("CGI IS BEING SET TO: '%d'\n", (int)b);
 			cgi_running = b;
 		}
 
@@ -105,7 +106,7 @@ class Client {
 			return cgi_pid;
 		}
 
-		int get_cgi_pipe() {
+		int get_cgi_pipe() const {
 			return cgi_pipe_fd;
 		}
 };

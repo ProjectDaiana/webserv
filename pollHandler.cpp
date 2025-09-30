@@ -159,21 +159,58 @@ void close_servers(Server **servers, int server_count)
 }
 
 
+int find_client_for_cgi(int cgi_fd, const std::map<int, Client> &clients)
+{
+    std::map<int, Client>::const_iterator i = clients.begin();
+    while (i != clients.end())
+    {
+        if (i->second.get_cgi_pipe() == cgi_fd)
+            return i->first;
+        i++;
+    }
+    return -1;
+}
+
+int is_cgi_fd(int fd, const std::map<int, Client> &clients)
+{
+    std::map<int, Client>::const_iterator it = clients.begin();
+    while (it != clients.end())
+    {
+        if (it->first == fd)
+            return 0; // fd is a normal client
+        ++it;
+    }
+    return 1; // fd is cgi
+}
+
+Client& find_client(int fd, std::map<int, Client> &clients)
+{
+        if (is_cgi_fd(fd, clients))
+        {
+               int client_fd = find_client_for_cgi(fd, clients);
+               return clients.at(client_fd);
+	}
+        else
+                return clients.at(fd);
+}
+
 const t_server* find_server_for_client(int client_fd, const std::map<int, Client> &clients,
                                  Server **servers, int server_count)
 {
-    std::map<int, Client>::const_iterator it = clients.find(client_fd); //find client
-    if (it == clients.end())
-        return NULL;
-    const Client &client = it->second;
-    int i = 0;
-    while (i < server_count) 
+	if (is_cgi_fd(client_fd, clients))
+		client_fd = find_client_for_cgi(client_fd, clients);
+	std::map<int, Client>::const_iterator it = clients.find(client_fd); //find client
+	if (it == clients.end())
+		return NULL;
+	const Client &client = it->second;
+    	int i = 0;
+	while (i < server_count) 
 	{
-        if (client.get_server()->get_fd() == servers[i]->get_fd()) //check if client was accepted from this fd
-            return &(servers[i]->get_config());
-        i++;
-    }
-    return NULL;
+		if (client.get_server()->get_fd() == servers[i]->get_fd()) //check if client was accepted from this fd
+			return &(servers[i]->get_config());
+		i++;
+	}
+	return NULL;
 }
 
 int timeout_check(Client &client, int fd, std::vector<pollfd> &pfds, std::map<int, Client> &clients)
@@ -199,48 +236,83 @@ void handle_cgi(Client &client, const t_server &server_config, std::vector<pollf
 	handle_client_write(client, server_config); 
 }*/
 
+void set_client_pollout(std::vector<pollfd> &pfds, Client &client)
+{
+	 int client_fd = client.get_fd();
+         for (size_t j = 0; j < pfds.size(); ++j)  //does iterator actually change?
+         {
+                if (pfds[j].fd == client_fd)
+                {
+                     pfds[j].events = POLLOUT;
+                     break;
+                 }
+         }
+
+}
+
+void cleanup_cgi(std::vector<pollfd> &pfds, pollfd &pfd, Client &client)
+{
+	cgi_eof(pfd.fd, client);
+        size_t i = 0;
+        while (i < pfds.size())
+        {
+             if (pfds[i].fd == pfd.fd)
+             {
+                  pfds.erase(pfds.begin() + i);
+                  break;
+              }
+              i++;
+         }
+	set_client_pollout(pfds, client);
+}
 
 int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Client> &clients, const t_server &server_config)
 {
-	Client &client = clients[pfd.fd];
+	//write(1, "NO SGF YET\n", 11);
+	printf("HANDLING PFD NR: '%d' now!\n", pfd.fd);
+	if (pfd.revents & POLLIN)
+		printf("POLLIN\n");
+	if (pfd.revents & POLLOUT)
+		printf("POLLOUT\n");
+	printf("fd %d revents = 0x%x\n", pfd.fd, pfd.revents);
+	Client &client = find_client(pfd.fd, clients);
 	std::map<int, Client*> cgi_pipes;
 	int connection_alive = 1;
 
 	connection_alive = timeout_check(client, pfd.fd, pfds, clients);
 	//TODO insert cgi timeout
 	
+	//HANDE CGI EOF
+	if (pfd.revents & POLLHUP)
+	{
+		cleanup_cgi(pfds, pfd, client);
+		connection_alive = 0;
+		return connection_alive;
+	}
+
 	// READ
 	if (pfd.revents & POLLIN)
 	{
-		if (!handle_client_read(pfd.fd, pfd, client))
+
+		if (!is_cgi_fd(pfd.fd, clients) && !handle_client_read(pfd.fd, pfd, client))
 		{
 			cleanup_client(pfd.fd, pfds, clients);
 			connection_alive = 0;
 			return connection_alive;
         	}
-		if (client.is_cgi())
+		if (client.is_cgi() && !client.is_cgi_running())
 		{
 			run_cgi("./www/cgi-bin/test.py", client, pfds, cgi_pipes);
                    	pfd.events = 0; //stop poollin pollout, im reading
         		client.set_cgi_running(1);
-			if (client.is_cgi_running() && handle_cgi_write(client.get_cgi_pipe() , client)) //check why bool/needed?
+		}
+
+		if (client.is_cgi_running() && handle_cgi_write(client.get_cgi_pipe() , client)) //check why bool/needed?
 			{
+				set_client_pollout(pfds, client);
 				std::cout << "handle_write ok pid:"<<  client.get_cgi_pid() <<  std::endl; //needed?
 				std::cout << "handle_write client fd:"<<  client.get_fd() <<  std::endl; //"	
-				int client_fd = client.get_fd();
-				for (size_t j = 0; j < pfds.size(); ++j)  //does iterator actually change?
-				{
-					if (pfds[j].fd == client_fd) 
-					{
-						pfds[j].events = POLLOUT;
-						break;
-					}
-				}
 			}
-		//TODO theres a continue after this part (before here it was check if its cgi && running), check whats going on w the iterator in run server
-	
-		}
-		//no segf yet
 	}
 	// WRITE
 	else if (pfd.revents & POLLOUT && client.is_read_complete())
@@ -270,7 +342,7 @@ void    run_server(Server** servers, int server_count)
 {
     std::vector<struct pollfd> pfds;
     std::map<int, Client> clients;
-	size_t i = 0;
+    size_t i = 0;
 
     add_server_sockets(servers, server_count, pfds);
     while (1)
@@ -280,6 +352,13 @@ void    run_server(Server** servers, int server_count)
 	i = 0;
         while (i < pfds.size())
         {
+			static int client_five = 0;
+			if (pfds[i].fd == 5)
+				client_five++;
+			if (client_five == 5)
+				exit(0);
+			printf("\n\n___NEW PFD NOW____\n");
+			printf("fd now is: '%d'\n---------------\n", pfds[i].fd);
 			Server *server = is_server(pfds[i].fd, servers, server_count); //if fd is server, return server
 			if (server) //if found, handle
 				handle_server_fd(pfds[i], *server, pfds, clients);

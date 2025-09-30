@@ -34,6 +34,7 @@ bool run_cgi(const std::string& script_path, Client& client, std::vector<struct 
     }
 	printf("=== CGI After execve ===================== \n\n");
     close(pipefd[1]);
+    printf("fd '%d' is being added to poll\n", pipefd[0]);
 	pfds.push_back(Server::create_pollfd(pipefd[0], POLLIN, 0)); //POLLIN
     cgi_pipes[pipefd[0]] = &client;
 	client.set_cgi_pipe_fd(pipefd[0]);
@@ -41,6 +42,27 @@ bool run_cgi(const std::string& script_path, Client& client, std::vector<struct 
 	client.set_cgi_running(1);
 
 	return true; 
+}
+
+bool cgi_eof(int pipe_fd, Client &client)
+{
+	printf("=== CGI pipe closed (EOF), writing response =====================\n");
+
+        // Save PID before resetting it!
+        pid_t cgi_pid = client.get_cgi_pid();
+        // Reset client CGI state
+        client.set_cgi_running(0);
+        client.set_cgi_pipe_fd(-1);
+        client.set_cgi_pid(-1);
+
+        // Close pipe and wait for child
+        close(pipe_fd);
+        std::cout << "pipde fd "<< client.get_cgi_pipe() << std::endl;
+
+        int ret_pid = waitpid(cgi_pid, NULL, WNOHANG);  // Use saved PID, not -1!
+        printf("=== CGI complete output: pid %d,  %s =====================\n", ret_pid, client.cgi_output.c_str());
+        return true;  // CGI finished
+
 }
 
 bool handle_cgi_write(int pipe_fd, Client &client) {
@@ -59,25 +81,8 @@ bool handle_cgi_write(int pipe_fd, Client &client) {
         return false;  // Keep reading
     }
 
-    if (n == 0) {
-        printf("=== CGI pipe closed (EOF), writing response =====================\n");    
-		
-        // Save PID before resetting it!
-        pid_t cgi_pid = client.get_cgi_pid();
-        // Reset client CGI state
-        client.set_cgi_running(0);
-        client.set_cgi_pipe_fd(-1);
-        client.set_cgi_pid(-1); 
-		
-        // Close pipe and wait for child
-        close(pipe_fd);
-        std::cout << "pipde fd "<< client.get_cgi_pipe() << std::endl;
-
-        int ret_pid = waitpid(cgi_pid, NULL, WNOHANG);  // Use saved PID, not -1!
-        printf("=== CGI complete output: pid %d,  %s =====================\n", ret_pid, client.cgi_output.c_str());
-
-        return true;  // CGI finished
-    }
+    if (n == 0) 
+        return cgi_eof(pipe_fd, client);  // CGI finished
     
     if (n < 0) {
         // Error occurred
