@@ -1,0 +1,9 @@
+http://localhost:8080/cgi
+http://localhost:8080/about
+http://localhost:8080/contact
+http://localhost:8080/products
+http://localhost:8080/products/widget-1
+http://localhost:8080/products/widget-2
+http://localhost:8080/blog
+http://localhost:8080/blog/post-1
+http://localhost:8080/blog/post-2
