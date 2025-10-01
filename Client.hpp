@@ -79,7 +79,7 @@ class Client {
 		pid_t cgi_pid;
 		bool cgi_running;
 		std::string cgi_output;
-		int cgi_start_time;
+		time_t cgi_start_time;
 
 		void set_cgi_output(const std::string& output) {
 			cgi_output = output;
@@ -117,7 +117,7 @@ class Client {
 			return cgi_pipe_fd;
 		}
 
-		int get_cgi_start_time() {
+		time_t get_cgi_start_time() {
 			return cgi_start_time;
 		}
 };

@@ -11,13 +11,15 @@ bool run_cgi(const std::string& script_path, Client& client, std::vector<struct 
     printf("=== CGI will run now ===================== \n\n");
     pid_t pid = fork();
 
+	printf("Client currently is: '%d'\n", client.get_fd());
+    client.set_cgi_start_time();
     if (pid == 0) {
         // ---- child ----
         dup2(pipefd[1], STDOUT_FILENO);
         close(pipefd[0]);
         close(pipefd[1]);
 
-        client.set_cgi_start_time();
+        //client.set_cgi_start_time();
         std::cout << "XXXXXXXX cgi start time: " <<  client.get_cgi_start_time() << std::endl;
 	    client.set_cgi_running(1);
 		//TODO get methods from config
@@ -55,7 +57,7 @@ bool cgi_eof(int pipe_fd, Client &client)
         pid_t cgi_pid = client.get_cgi_pid();
         // Reset client CGI state
         client.set_cgi_running(0);
-        client.set_cgi_pipe_fd(-1);
+        //client.set_cgi_pipe_fd(-1);
         client.set_cgi_pid(-1);
 
         // Close pipe and wait for child
@@ -107,6 +109,7 @@ bool handle_cgi_write(int pipe_fd, Client &client) {
 }
 
 bool check_cgi_timeout(Client& client, int timeout) {
+	printf("\nCGI TIMEOUT CHECK NOW!\n");
 	if (!client.is_cgi_running()) {
 		return false;  // Not running CGI
     }
@@ -116,6 +119,10 @@ bool check_cgi_timeout(Client& client, int timeout) {
     std::cout << "XXXXXXXX cgi start time: " <<  client.get_cgi_start_time() << std::endl;
 	//pid_t cgi_pid = client.get_cgi_pid();
     
+		printf("time elapsed: '%lld'\n", (long long)elapsed);
+		printf("cgi start time: '%lld'\n", (long long)client.get_cgi_start_time());
+		printf("timeout: '%d'\n", timeout);
+		printf("client fd is: '%d'\n", client.get_fd());
     if (elapsed > timeout) {
         std::cout << "XXXXXXXXXX CGI Timeout" << std::endl;
         pid_t cgi_pid = client.get_cgi_pid();
@@ -147,7 +154,7 @@ bool check_cgi_timeout(Client& client, int timeout) {
 
 bool handle_cgi_timeout(Client& client, std::vector<struct pollfd>& pfds, 
                        std::map<int, Client*>& cgi_pipes) {
-    const int CGI_TIMEOUT = 10;           
+    const int CGI_TIMEOUT = 0;           
     if (!client.is_cgi_running()) {
         std::cout << "XXXXX No cgi running" << std::endl;
         return false;
@@ -160,11 +167,11 @@ bool handle_cgi_timeout(Client& client, std::vector<struct pollfd>& pfds,
                            "Content-Type: text/html\r\n"
                            "Content-Length: 54\r\n"
                            "\r\n"
-                           "<html><body><h1>504 Gateway Timeout</h1></body></html>";
+                           "<html><body><h1>504 Gateway Timeout</h1></body></html>"; //TODO overwrite cgi buffer so this gets handled in the response
 
         client.set_error_code(504);
         client.set_cgi_running(0);
-        client.set_cgi_pipe_fd(-1);
+        //client.set_cgi_pipe_fd(-1);
         client.set_cgi_pid(-1);
         client.set_cgi_start_time();
 

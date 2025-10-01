@@ -253,10 +253,11 @@ void set_client_pollout(std::vector<pollfd> &pfds, Client &client)
 void cleanup_cgi(std::vector<pollfd> &pfds, pollfd &pfd, Client &client)
 {
 	cgi_eof(pfd.fd, client);
+	printf("ERASING fd nr: '%d'\n", client.get_cgi_pipe());
         size_t i = 0;
         while (i < pfds.size())
         {
-             if (pfds[i].fd == pfd.fd)
+             if (pfds[i].fd == client.get_cgi_pipe())
              {
                   pfds.erase(pfds.begin() + i);
                   break;
@@ -280,11 +281,13 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 	int connection_alive = 1;
 
 	connection_alive = timeout_check(client, pfd.fd, pfds, clients);
-	//TODO insert cgi timeout
-	if (client.is_cgi_running() && handle_cgi_timeout(client, pfds, cgi_pipes)) {
-		std::cout << "CGI has timed out" << std::endl;
-		pfd.events = POLLOUT;
-	};
+	//CGI TIMEOUT
+//	if (client.is_cgi_running() && handle_cgi_timeout(client, pfds, cgi_pipes)) 
+//	{
+//		std::cout << "CGI has timed out" << std::endl;
+//		set_client_pollout(pfds, client);
+//		return connection_alive;
+//	}
 	
 	//HANDE CGI EOF
 	if (pfd.revents & POLLHUP)
@@ -299,18 +302,26 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 	if (pfd.revents & POLLIN)
 	{
 		printf("POLLIN\n");
+		if (client.is_cgi_running() && handle_cgi_timeout(client, pfds, cgi_pipes))
+	    {
+  	 	     std::cout << "CGI has timed out" << std::endl;
+			 cleanup_cgi(pfds, pfd, client);
+			 connection_alive = 0;
+   	    	 return connection_alive;
+   		}
 		if (!is_cgi_fd(pfd.fd, clients) && !handle_client_read(pfd.fd, pfd, client))
 		{
 			cleanup_client(pfd.fd, pfds, clients);
 			connection_alive = 0;
 			return connection_alive;
-        	}
+        }
 		if (client.is_cgi() && !client.is_cgi_running())
 		{
 			printf("TRIGGERS WHEN IT SHOULDNT\n");
 			run_cgi("./www/cgi-bin/test.py", client, pfds, cgi_pipes);
-                   	pfd.events = 0; //stop poollin pollout, im reading
-        		client.set_cgi_running(1);
+			printf("FD '%d' is being set to 0/STOP\n", pfd.fd);
+          	pfd.events = 0; //stop poollin pollout, im reading
+        	client.set_cgi_running(1);
 		}
 
 		if (client.is_cgi_running() && handle_cgi_write(client.get_cgi_pipe() , client))
