@@ -44,7 +44,7 @@ bool run_cgi(const std::string& script_path, Client& client, std::vector<struct 
 	return true; 
 }
 
-bool cgi_eof(int pipe_fd, Client &client)
+bool cgi_eof(int pipe_fd, Client &client, std::vector<struct pollfd>& pfds)
 {
 	printf("=== CGI pipe closed (EOF), writing response =====================\n");
 
@@ -57,6 +57,16 @@ bool cgi_eof(int pipe_fd, Client &client)
 
         // Close pipe and wait for child
         close(pipe_fd);
+		// IMPORTANT: Remove fd from pfds vector
+			for (size_t i = 0; i < pfds.size(); i++) {
+				if (pfds[i].fd == pipe_fd) {
+					printf("Removing pipe fd %d from pfds\n", pipe_fd);
+					pfds.erase(pfds.begin() + i);
+					break;
+				}
+			}
+
+
         std::cout << "pipde fd "<< client.get_cgi_pipe() << std::endl;
 
         int ret_pid = waitpid(cgi_pid, NULL, WNOHANG);  // Use saved PID, not -1!
@@ -65,7 +75,7 @@ bool cgi_eof(int pipe_fd, Client &client)
 
 }
 
-bool handle_cgi_write(int pipe_fd, Client &client) {
+bool handle_cgi_write(int pipe_fd, Client &client,  std::vector<struct pollfd>& pfds) {
     char buf[10];
     ssize_t n;
     
@@ -82,7 +92,7 @@ bool handle_cgi_write(int pipe_fd, Client &client) {
     }
 
     if (n == 0) 
-        return cgi_eof(pipe_fd, client);  // CGI finished
+        return cgi_eof(pipe_fd, client, pfds);  // CGI finished
     
     if (n < 0) {
         // Error occurred

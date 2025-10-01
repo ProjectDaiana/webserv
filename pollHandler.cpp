@@ -252,7 +252,7 @@ void set_client_pollout(std::vector<pollfd> &pfds, Client &client)
 
 void cleanup_cgi(std::vector<pollfd> &pfds, pollfd &pfd, Client &client)
 {
-	cgi_eof(pfd.fd, client);
+	cgi_eof(pfd.fd, client, pfds);
         size_t i = 0;
         while (i < pfds.size())
         {
@@ -308,7 +308,7 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
         		client.set_cgi_running(1);
 		}
 
-		if (client.is_cgi_running() && handle_cgi_write(client.get_cgi_pipe() , client))
+		if (client.is_cgi_running() && handle_cgi_write(client.get_cgi_pipe() , client,  pfds))
 			{
 				set_client_pollout(pfds, client);
 				std::cout << "handle_write ok pid:"<<  client.get_cgi_pid() <<  std::endl; //needed?
