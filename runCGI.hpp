@@ -13,6 +13,7 @@ bool run_cgi(const std::string& script_path, Client& client, std::vector<struct 
 
 	printf("Client currently is: '%d'\n", client.get_fd());
     client.set_cgi_start_time();
+	//client.set_cgi_running(1);
     if (pid == 0) {
         // ---- child ----
         dup2(pipefd[1], STDOUT_FILENO);
@@ -21,7 +22,7 @@ bool run_cgi(const std::string& script_path, Client& client, std::vector<struct 
 
         //client.set_cgi_start_time();
         std::cout << "XXXXXXXX cgi start time: " <<  client.get_cgi_start_time() << std::endl;
-	    client.set_cgi_running(1);
+	    //client.set_cgi_running(1);
 		//TODO get methods from config
         char* const envp[] = {
             (char*)"REQUEST_METHOD=GET",
@@ -35,7 +36,7 @@ bool run_cgi(const std::string& script_path, Client& client, std::vector<struct 
             (char*)script_path.c_str(),
             NULL
         };
-                    sleep (19);
+                   // sleep (19);
         execve(script_path.c_str(), argv, envp);
         _exit(1); //TODO replace, exit not allowed
     }
@@ -67,7 +68,6 @@ bool cgi_eof(int pipe_fd, Client &client)
         int ret_pid = waitpid(cgi_pid, NULL, WNOHANG);  // Use saved PID, not -1!
         printf("=== CGI complete output: pid %d,  %s =====================\n", ret_pid, client.cgi_output.c_str());
         return true;  // CGI finished
-
 }
 
 bool handle_cgi_write(int pipe_fd, Client &client) {
@@ -97,7 +97,7 @@ bool handle_cgi_write(int pipe_fd, Client &client) {
         pid_t cgi_pid = client.get_cgi_pid();
         
         client.set_cgi_running(0);
-        client.set_cgi_pipe_fd(-1);
+        //client.set_cgi_pipe_fd(-1);
         client.set_cgi_pid(-1);
         
         close(pipe_fd);
@@ -170,7 +170,7 @@ bool handle_cgi_timeout(Client& client, std::vector<struct pollfd>& pfds,
                            "<html><body><h1>504 Gateway Timeout</h1></body></html>"; //TODO overwrite cgi buffer so this gets handled in the response
 
         client.set_error_code(504);
-        client.set_cgi_running(0);
+        //client.set_cgi_running(0);
         //client.set_cgi_pipe_fd(-1);
         client.set_cgi_pid(-1);
         client.set_cgi_start_time();

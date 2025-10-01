@@ -94,22 +94,55 @@ void	add_server_sockets(Server **servers, int server_count, std::vector<struct p
 	}
 }
 
-void cleanup_client(int fd, std::vector<pollfd> &pfds, std::map<int, Client> &clients)
+int	find_pfd(int fd, std::vector<pollfd> &pfds)
 {
-    printf("Client '%d' is being cleaned up\n", fd);
-    close(fd);
-    clients.erase(fd);
-
     size_t i = 0;
     while (i < pfds.size())
     {
         if (pfds[i].fd == fd)
-        {
-            pfds.erase(pfds.begin() + i);
-            break;
-        }
+			return pfds[i].fd;
         i++;
     }
+	return (-1);
+}
+
+Client& find_client(int fd, std::map<int, Client> &clients)
+{
+        if (is_cgi_fd(fd, clients))
+        {
+               int client_fd = find_client_for_cgi(fd, clients);
+               return clients.at(client_fd);
+    }
+        else
+                return clients.at(fd);
+}
+
+
+void cleanup_cgi(std::vector<pollfd> &pfds, pollfd &pfd, Client &client)
+{
+    cgi_eof(pfd.fd, client);
+    printf("ERASING fd nr: '%d'\n", client.get_cgi_pipe());
+        size_t i = 0;
+        while (i < pfds.size())
+        {
+             if (pfds[i].fd == client.get_cgi_pipe())
+             {
+                  pfds.erase(pfds.begin() + i);
+                  break;
+              }
+              i++;
+         }
+    set_client_pollout(pfds, client);
+}
+
+void cleanup_client(int fd, std::vector<pollfd> &pfds, std::map<int, Client> &clients)
+{
+    printf("Client '%d' is being cleaned up\n", fd);
+	if (find_client(fd, clients).is_cgi())
+		cleanup_cgi(pfds, pfds[find_pfd(fd, pfds)], find_client(fd, clients));
+    close(fd);
+    clients.erase(fd);        
+	pfds.erase(pfds.begin() + find_pfd(fd, pfds));
 }
 
 int ft_poll(std::vector<struct pollfd>& pfds, int timeout_ms, std::map<int, Client> clients)
@@ -183,16 +216,6 @@ int is_cgi_fd(int fd, const std::map<int, Client> &clients)
     return 1; // fd is cgi
 }
 
-Client& find_client(int fd, std::map<int, Client> &clients)
-{
-        if (is_cgi_fd(fd, clients))
-        {
-               int client_fd = find_client_for_cgi(fd, clients);
-               return clients.at(client_fd);
-	}
-        else
-                return clients.at(fd);
-}
 
 const t_server* find_server_for_client(int client_fd, const std::map<int, Client> &clients,
                                  Server **servers, int server_count)
@@ -250,22 +273,6 @@ void set_client_pollout(std::vector<pollfd> &pfds, Client &client)
 
 }
 
-void cleanup_cgi(std::vector<pollfd> &pfds, pollfd &pfd, Client &client)
-{
-	cgi_eof(pfd.fd, client);
-	printf("ERASING fd nr: '%d'\n", client.get_cgi_pipe());
-        size_t i = 0;
-        while (i < pfds.size())
-        {
-             if (pfds[i].fd == client.get_cgi_pipe())
-             {
-                  pfds.erase(pfds.begin() + i);
-                  break;
-              }
-              i++;
-         }
-	set_client_pollout(pfds, client);
-}
 
 int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Client> &clients, const t_server &server_config)
 {
@@ -302,29 +309,29 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 	if (pfd.revents & POLLIN)
 	{
 		printf("POLLIN\n");
-		if (client.is_cgi_running() && handle_cgi_timeout(client, pfds, cgi_pipes))
+		if (client.is_cgi_running() && handle_cgi_timeout(client, pfds, cgi_pipes)) //timeout check
 	    {
   	 	     std::cout << "CGI has timed out" << std::endl;
 			 cleanup_cgi(pfds, pfd, client);
 			 connection_alive = 0;
    	    	 return connection_alive;
    		}
-		if (!is_cgi_fd(pfd.fd, clients) && !handle_client_read(pfd.fd, pfd, client))
+		if (!is_cgi_fd(pfd.fd, clients) && !handle_cgi_timeout(client, pfds, cgi_pipes) && !handle_client_read(pfd.fd, pfd, client)) //if we dont wanna continue reading, cleanup client
 		{
 			cleanup_client(pfd.fd, pfds, clients);
 			connection_alive = 0;
 			return connection_alive;
         }
-		if (client.is_cgi() && !client.is_cgi_running())
+		if (client.is_cgi() && !client.is_cgi_running() && !handle_cgi_timeout(client, pfds, cgi_pipes)) //run cgi
 		{
-			printf("TRIGGERS WHEN IT SHOULDNT\n");
 			run_cgi("./www/cgi-bin/test.py", client, pfds, cgi_pipes);
-			printf("FD '%d' is being set to 0/STOP\n", pfd.fd);
-          	pfd.events = 0; //stop poollin pollout, im reading
+			//printf("FD '%d' is being set to 0/STOP\n", pfd.fd);
+          	//pfd.events = 0; //stop poollin pollout, im reading
         	client.set_cgi_running(1);
+			return connection_alive;
 		}
 
-		if (client.is_cgi_running() && handle_cgi_write(client.get_cgi_pipe() , client))
+		if (client.is_cgi_running() && is_cgi_fd(pfd.fd, clients) && handle_cgi_write(client.get_cgi_pipe() , client) && !handle_cgi_timeout(client, pfds, cgi_pipes))
 			{
 				set_client_pollout(pfds, client);
 				std::cout << "handle_write ok pid:"<<  client.get_cgi_pid() <<  std::endl; //needed?
@@ -374,8 +381,7 @@ void    run_server(Server** servers, int server_count)
 		//		client_four++;
 	//		if (client_four == 15)
 //				exit(0);
-			//printf("\n\n___NEW PFD NOW____\n");
-			printf("fd now is: '%d'\n---------------\n", pfds[i].fd);
+			printf("\n\n___NEW PFD NOW____\n");
 			Server *server = is_server(pfds[i].fd, servers, server_count); //if fd is server, return server
 			if (server) //if found, handle
 				handle_server_fd(pfds[i], *server, pfds, clients);

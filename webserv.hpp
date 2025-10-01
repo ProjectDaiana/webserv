@@ -6,7 +6,7 @@
 /*   By: darotche <darotche@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/23 17:26:54 by ltreser           #+#    #+#             */
-/*   Updated: 2025/09/27 01:46:32 by ltreser          ###   ########.fr       */
+/*   Updated: 2025/10/01 18:09:11 by ltreser          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,6 +129,28 @@ void							init_servers(t_data *data);
 //helper
 int							ft_atoi(const char *nptr);
 uint32_t						iptoi(const char *ip_str);
+
+//polling
+void handle_server_fd(pollfd &pfd, Server &server, std::vector<pollfd> &pfds, std::map<int, Client> &clients);
+void    debug_request(Client &client);
+bool    handle_client_read(int fd, pollfd &pfd, Client &client);
+void    add_server_sockets(Server **servers, int server_count, std::vector<struct pollfd> &pfds);
+int find_pfd(int fd, std::vector<pollfd> &pfds);
+Client& find_client(int fd, std::map<int, Client> &clients);
+void cleanup_cgi(std::vector<pollfd> &pfds, pollfd &pfd, Client &client);
+void cleanup_client(int fd, std::vector<pollfd> &pfds, std::map<int, Client> &clients);
+int ft_poll(std::vector<struct pollfd>& pfds, int timeout_ms, std::map<int, Client> clients);
+Server* is_server(int fd, Server** servers, int server_count);
+void close_servers(Server **servers, int server_count);
+int find_client_for_cgi(int cgi_fd, const std::map<int, Client> &clients);
+int is_cgi_fd(int fd, const std::map<int, Client> &clients);
+const t_server* find_server_for_client(int client_fd, const std::map<int, Client> &clients,
+                                 Server **servers, int server_count);
+int timeout_check(Client &client, int fd, std::vector<pollfd> &pfds, std::map<int, Client> &clients);
+void set_client_pollout(std::vector<pollfd> &pfds, Client &client);
+int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Client> &clients, const t_server &server_config);
+void    run_server(Server** servers, int server_count);
+
 
 //response
 std::string     handle_delete(Client &client, const t_server &config, t_location *l);
