@@ -68,7 +68,7 @@ bool	handle_client_read(int fd, pollfd &pfd, Client &client)
 			std::cout << "Parse error passed to client: " << client.get_error_code() << std::endl;
 			return (false);
 		}
-		debug_request(client);
+		//debug_request(client);
 		if (!client.is_cgi()) 
 		//{
 		  //  run_cgi("./www/cgi-bin/test.py", client, pfds, cgi_pipes);
@@ -216,7 +216,7 @@ const t_server* find_server_for_client(int client_fd, const std::map<int, Client
 int timeout_check(Client &client, int fd, std::vector<pollfd> &pfds, std::map<int, Client> &clients)
 {
 	time_t now = std::time(NULL);
-	const int TIMEOUT = 120; // seconds
+	const int TIMEOUT = 30; // seconds
 	if (now - client.get_last_activity() > TIMEOUT)
 	{
 		printf("Client %d timed out\n", fd);
@@ -270,10 +270,10 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 {
 	//write(1, "NO SGF YET\n", 11);
 	printf("HANDLING PFD NR: '%d' now!\n", pfd.fd);
-	if (pfd.revents & POLLIN)
-		printf("POLLIN\n");
-	if (pfd.revents & POLLOUT)
-		printf("POLLOUT\n");
+	// if (pfd.revents & POLLIN)
+	// 	printf("POLLIN\n");
+	// if (pfd.revents & POLLOUT)
+	// 	printf("POLLOUT\n");
 	printf("fd %d revents = 0x%x\n", pfd.fd, pfd.revents);
 	Client &client = find_client(pfd.fd, clients);
 	std::map<int, Client*> cgi_pipes;
@@ -281,10 +281,15 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 
 	connection_alive = timeout_check(client, pfd.fd, pfds, clients);
 	//TODO insert cgi timeout
+	if (client.is_cgi_running() && handle_cgi_timeout(client, pfds, cgi_pipes)) {
+		std::cout << "CGI has timed out" << std::endl;
+		pfd.events = POLLOUT;
+	};
 	
 	//HANDE CGI EOF
 	if (pfd.revents & POLLHUP)
-	{
+	{ 
+		std::cout << "POLLHUP" << std::endl;
 		cleanup_cgi(pfds, pfd, client);
 		connection_alive = 0;
 		return connection_alive;
@@ -293,7 +298,7 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 	// READ
 	if (pfd.revents & POLLIN)
 	{
-
+		printf("POLLIN\n");
 		if (!is_cgi_fd(pfd.fd, clients) && !handle_client_read(pfd.fd, pfd, client))
 		{
 			cleanup_client(pfd.fd, pfds, clients);
@@ -318,7 +323,7 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 	// WRITE
 	else if (pfd.revents & POLLOUT && client.is_read_complete())
 	{
-		//exit(0);
+		printf("POLLOUT\n");
 		handle_client_write(client, server_config);
 		if (client.is_write_complete())
 		{
@@ -358,7 +363,7 @@ void    run_server(Server** servers, int server_count)
 		//		client_four++;
 	//		if (client_four == 15)
 //				exit(0);
-			printf("\n\n___NEW PFD NOW____\n");
+			//printf("\n\n___NEW PFD NOW____\n");
 			printf("fd now is: '%d'\n---------------\n", pfds[i].fd);
 			Server *server = is_server(pfds[i].fd, servers, server_count); //if fd is server, return server
 			if (server) //if found, handle

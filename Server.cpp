@@ -11,16 +11,16 @@ Server::Server(t_server *config)
 
 	_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (_fd < 0 && (perror("Socket creation failed\n"), 1)) //TODO make nicer, helper
-		exit(0);	
+		exit(0); //TODO exit not allowed
 	address.sin_family = AF_INET;
 	address.sin_port = htons(config->lb->port);
 	address.sin_addr.s_addr = iptoi(config->lb->host);
 	signal(SIGPIPE, SIG_IGN);
 	setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &reuseadr, sizeof(reuseadr));
 	if (bind(_fd, (struct sockaddr*)&address, sizeof(address)) < 0 && (perror ("Bind failed\n"), 1)) 
-		exit(0);
+		exit(0); //TODO exit not allowed
 	if (listen(_fd, SOMAXCONN) < 0 && (perror("Listen failed\n"), 1))
-		exit(0);
+		exit(0); //TODO exit not allowed
 	_config = *config;
 }
 
@@ -32,7 +32,7 @@ Server::~Server() {
 int Server::closeServer(){
 	if (_fd >= 0) {
 		close(_fd);
-		exit(0);
+		exit(0); //TODO exit not allowed
 	}
 	return 0;
 }

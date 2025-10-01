@@ -3,18 +3,23 @@
 #include <sys/wait.h>
 #include <string>
 #include <errno.h>
+#include <signal.h>
 
 bool run_cgi(const std::string& script_path, Client& client, std::vector<struct pollfd>& pfds, std::map<int, Client*>& cgi_pipes) {
     int pipefd[2];
     pipe(pipefd);
-	printf("=== CGI will run now ===================== \n\n");
+    printf("=== CGI will run now ===================== \n\n");
     pid_t pid = fork();
+
     if (pid == 0) {
         // ---- child ----
         dup2(pipefd[1], STDOUT_FILENO);
         close(pipefd[0]);
         close(pipefd[1]);
 
+        client.set_cgi_start_time();
+        std::cout << "XXXXXXXX cgi start time: " <<  client.get_cgi_start_time() << std::endl;
+	    client.set_cgi_running(1);
 		//TODO get methods from config
         char* const envp[] = {
             (char*)"REQUEST_METHOD=GET",
@@ -28,9 +33,9 @@ bool run_cgi(const std::string& script_path, Client& client, std::vector<struct 
             (char*)script_path.c_str(),
             NULL
         };
-
+                    sleep (19);
         execve(script_path.c_str(), argv, envp);
-        _exit(1); // only runs if execve fails
+        _exit(1); //TODO replace, exit not allowed
     }
 	printf("=== CGI After execve ===================== \n\n");
     close(pipefd[1]);
@@ -39,8 +44,6 @@ bool run_cgi(const std::string& script_path, Client& client, std::vector<struct 
     cgi_pipes[pipefd[0]] = &client;
 	client.set_cgi_pipe_fd(pipefd[0]);
     client.set_cgi_pid(pid);
-	client.set_cgi_running(1);
-
 	return true; 
 }
 
@@ -101,4 +104,71 @@ bool handle_cgi_write(int pipe_fd, Client &client) {
     }
     
     return false;
+}
+
+bool check_cgi_timeout(Client& client, int timeout) {
+	if (!client.is_cgi_running()) {
+		return false;  // Not running CGI
+    }
+    
+    time_t now = std::time(NULL);
+    time_t elapsed = now - client.get_cgi_start_time();
+    std::cout << "XXXXXXXX cgi start time: " <<  client.get_cgi_start_time() << std::endl;
+	//pid_t cgi_pid = client.get_cgi_pid();
+    
+    if (elapsed > timeout) {
+        std::cout << "XXXXXXXXXX CGI Timeout" << std::endl;
+        pid_t cgi_pid = client.get_cgi_pid();
+        if (cgi_pid > 0) {
+            kill(cgi_pid, SIGTERM);
+            usleep(100000);
+
+            if (kill(cgi_pid, 0) == 0) {
+                kill(cgi_pid, SIGKILL);   // Force kill
+            }
+        }
+
+		if (cgi_pid > 0) {
+            kill(cgi_pid, SIGTERM);  // Try graceful termination
+            usleep(100000);
+            
+            // Force kill if still alive
+            if (kill(cgi_pid, 0) == 0) {
+                kill(cgi_pid, SIGKILL);
+            }
+            waitpid(cgi_pid, NULL, WNOHANG);
+        }
+        //cleanup_cgi_process(client, pipe_fd, true);  // Sets 504 response
+        return true;
+    }
+    
+    return false;
+}
+
+bool handle_cgi_timeout(Client& client, std::vector<struct pollfd>& pfds, 
+                       std::map<int, Client*>& cgi_pipes) {
+    const int CGI_TIMEOUT = 10;           
+    if (!client.is_cgi_running()) {
+        std::cout << "XXXXX No cgi running" << std::endl;
+        return false;
+    }
+	(void) cgi_pipes;
+	(void) pfds;
+	if (check_cgi_timeout(client, CGI_TIMEOUT)) {
+        //TODO this is hardcoded
+        client.cgi_output = "HTTP/1.1 504 Gateway Timeout\r\n"
+                           "Content-Type: text/html\r\n"
+                           "Content-Length: 54\r\n"
+                           "\r\n"
+                           "<html><body><h1>504 Gateway Timeout</h1></body></html>";
+
+        client.set_error_code(504);
+        client.set_cgi_running(0);
+        client.set_cgi_pipe_fd(-1);
+        client.set_cgi_pid(-1);
+        client.set_cgi_start_time();
+
+        return true;  // Timeout occurred
+    }
+    return false;  // No timeout
 }

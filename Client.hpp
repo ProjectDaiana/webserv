@@ -58,27 +58,28 @@ class Client {
 		int get_fd() const;
 		time_t get_last_activity() const;
 		const Server *get_server() const {return _server;}
+		int	get_error_code() const;
+		bool get_keep_alive() const { return _keep_alive; }
+		const t_request& get_request() const;
 		//bool is_cgi_done() const { return _cgi_done; }
 		// Inside Client class
-
-//TODO seperate debug from setters
+		
+		//Setters
+		void set_error_code(int code);
+		void set_keep_alive(bool value) { _keep_alive = value; }
+		void set_request(const t_request& new_request);
+		void set_write_complete(bool value) { _write_complete = value; }
+		//void set_cgi_done(bool done) { _cgi_done = done; }
+		
 		// Debug
 		void print_raw_request() const;
-		int	get_error_code() const;
-		void set_error_code(int code);
-		const t_request& get_request() const;
-		void set_request(const t_request& new_request);
 		void print_request_struct() const;
-  
-		void set_write_complete(bool value) { _write_complete = value; }
-		void set_keep_alive(bool value) { _keep_alive = value; }
-		bool get_keep_alive() const { return _keep_alive; }
-		//void set_cgi_done(bool done) { _cgi_done = done; }
 
 		//CGI
 		pid_t cgi_pid;
 		bool cgi_running;
 		std::string cgi_output;
+		int cgi_start_time;
 
 		void set_cgi_output(const std::string& output) {
 			cgi_output = output;
@@ -93,6 +94,10 @@ class Client {
 		void set_cgi_pid(pid_t pid) {
 			cgi_pid = pid;
 		};
+
+		void set_cgi_start_time() {
+			cgi_start_time = std::time(NULL);
+		}
 
 		bool is_cgi_running() {
 
@@ -110,6 +115,10 @@ class Client {
 
 		int get_cgi_pipe() const {
 			return cgi_pipe_fd;
+		}
+
+		int get_cgi_start_time() {
+			return cgi_start_time;
 		}
 };
 
