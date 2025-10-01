@@ -118,23 +118,6 @@ Client& find_client(int fd, std::map<int, Client> &clients)
 }
 
 
-void cleanup_cgi(std::vector<pollfd> &pfds, pollfd &pfd, Client &client)
-{
-    cgi_eof(pfd.fd, client);
-    printf("ERASING fd nr: '%d'\n", client.get_cgi_pipe());
-        size_t i = 0;
-        while (i < pfds.size())
-        {
-             if (pfds[i].fd == client.get_cgi_pipe())
-             {
-                  pfds.erase(pfds.begin() + i);
-                  break;
-              }
-              i++;
-         }
-    set_client_pollout(pfds, client);
-}
-
 void cleanup_client(int fd, std::vector<pollfd> &pfds, std::map<int, Client> &clients)
 {
     printf("Client '%d' is being cleaned up\n", fd);
@@ -273,6 +256,21 @@ void set_client_pollout(std::vector<pollfd> &pfds, Client &client)
 
 }
 
+void cleanup_cgi(std::vector<pollfd> &pfds, pollfd &pfd, Client &client)
+{
+	cgi_eof(pfd.fd, client, pfds);
+        size_t i = 0;
+        while (i < pfds.size())
+        {
+             if (pfds[i].fd == pfd.fd)
+             {
+                  pfds.erase(pfds.begin() + i);
+                  break;
+              }
+              i++;
+         }
+	set_client_pollout(pfds, client);
+}
 
 int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Client> &clients, const t_server &server_config)
 {
@@ -331,7 +329,7 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 			return connection_alive;
 		}
 
-		if (client.is_cgi_running() && is_cgi_fd(pfd.fd, clients) && handle_cgi_write(client.get_cgi_pipe() , client) && !handle_cgi_timeout(client, pfds, cgi_pipes))
+		if (client.is_cgi_running() && handle_cgi_write(client.get_cgi_pipe() , client,  pfds))
 			{
 				set_client_pollout(pfds, client);
 				std::cout << "handle_write ok pid:"<<  client.get_cgi_pid() <<  std::endl; //needed?
