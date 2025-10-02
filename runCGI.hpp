@@ -157,7 +157,7 @@ bool check_cgi_timeout(Client& client, int timeout) {
         //cleanup_cgi_process(client, pipe_fd, true);  // Sets 504 response
         return true;
     }
-    
+
     return false;
 }
 

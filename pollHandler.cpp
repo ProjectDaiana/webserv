@@ -314,13 +314,13 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 			 connection_alive = 0;
    	    	 return connection_alive;
    		}
-		if (!is_cgi_fd(pfd.fd, clients) && !handle_cgi_timeout(client, pfds, cgi_pipes) && !handle_client_read(pfd.fd, pfd, client)) //if we dont wanna continue reading, cleanup client
+		if (!is_cgi_fd(pfd.fd, clients) && !client.is_cgi_running() && !handle_client_read(pfd.fd, pfd, client)) //if we dont wanna continue reading, cleanup client
 		{
 			cleanup_client(pfd.fd, pfds, clients);
 			connection_alive = 0;
 			return connection_alive;
         }
-		if (client.is_cgi() && !client.is_cgi_running() && !handle_cgi_timeout(client, pfds, cgi_pipes)) //run cgi
+		if (client.is_cgi() && !client.is_cgi_running()) //run cgi
 		{
 			run_cgi("./www/cgi-bin/test.py", client, pfds, cgi_pipes);
 			//printf("FD '%d' is being set to 0/STOP\n", pfd.fd);
