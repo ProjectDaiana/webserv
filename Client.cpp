@@ -1,6 +1,16 @@
 #include "Client.hpp"
 
-Client::Client(int fd, Server &server) : _fd(fd), _headers_complete(0), _read_complete(0), _write_complete(0), _keep_alive(0), _content_len(0), _headers_end_pos(0), _error_code(200), _server(&server), cgi_running(0), cgi_start_time(0) {}
+Client::Client(int fd, Server &server) : 
+	_fd(fd), _headers_complete(0),
+	_read_complete(0), _write_complete(0),
+	_keep_alive(0),
+	_content_len(0),
+	_headers_end_pos(0),
+	_error_code(200),
+	_server(&server),
+	cgi_running(0),
+	cgi_start_time(0)
+{}
 
 Client::Client() : _fd(-1), _server(NULL) {};
 
@@ -113,6 +123,10 @@ const std::string& Client::get_method() const {
 
 const std::string& Client::get_uri() const {
 	return _request.get_parsed_request().uri;
+}
+
+const std::string& Client::get_http_version() const {
+	return _request.get_parsed_request().http_version;
 }
 
 const std::string& Client::get_path() const {
