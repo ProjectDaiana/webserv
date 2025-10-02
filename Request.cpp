@@ -2,8 +2,17 @@
 #include "Request.hpp"
 
 Request::Request() {
-	//std::cout << "DEBUG: Request constructor called" << std::endl;
-};
+	_parsed_request.method.clear();
+	_parsed_request.uri.clear();
+	_parsed_request.path.clear();
+	_parsed_request.query.clear();
+	_parsed_request.http_version.clear();
+	_parsed_request.headers.clear();
+	_parsed_request.body.clear();
+	s_parse_error.code = 200;
+	s_parse_error.msg.clear();
+	_parse_error.clear();
+}
 
 Request::~Request() {};
 
