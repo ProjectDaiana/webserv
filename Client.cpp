@@ -125,6 +125,10 @@ const std::string& Client::get_uri() const {
 	return _request.get_parsed_request().uri;
 }
 
+const std::string& Client::get_http_version() const {
+	return _request.get_parsed_request().http_version;
+}
+
 const std::string& Client::get_path() const {
 	return _request.get_parsed_request().path;
 }

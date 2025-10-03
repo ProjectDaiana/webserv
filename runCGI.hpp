@@ -5,45 +5,33 @@
 #include <errno.h>
 #include <signal.h>
 
-bool run_cgi(const std::string& script_path, Client& client, std::vector<struct pollfd>& pfds, std::map<int, Client*>& cgi_pipes) {
+bool run_cgi(const std::string& cgi_path, const std::string& built_path, Client& client, std::vector<struct pollfd>& pfds) {
     int pipefd[2];
     pipe(pipefd);
-    printf("=== CGI will run now ===================== \n\n");
+    printf("=== CGI will run for Client %d ===================== \n\n", client.get_fd());
     pid_t pid = fork();
 
-	printf("Client currently is: '%d'\n", client.get_fd());
     client.set_cgi_start_time();
-	//client.set_cgi_running(1);
+	client.set_cgi_running(1);
     if (pid == 0) {
-        // ---- child ----
         dup2(pipefd[1], STDOUT_FILENO);
         close(pipefd[0]);
         close(pipefd[1]);
 
-        //client.set_cgi_start_time();
-        std::cout << "XXXXXXXX cgi start time: " <<  client.get_cgi_start_time() << std::endl;
-	    //client.set_cgi_running(1);
-		//TODO get methods from config
-        char* const envp[] = {
-            (char*)"REQUEST_METHOD=GET",
-            (char*)"SCRIPT_NAME=test.py",
-            (char*)"SERVER_PROTOCOL=HTTP/1.1",
-            NULL
-        };
+		char** envp = client.build_cgi_envp(built_path);
+		char* const argv[] = {
+			const_cast<char*>(cgi_path.c_str()), // Interpreter (e.g., python3)
+			const_cast<char*>(built_path.c_str()), // www/cgi-bin/test.py
+			NULL
+		};
+        execve(cgi_path.c_str(), argv, envp);
 
-		//TODO take paths from struct
-        char* const argv[] = {
-            (char*)script_path.c_str(),
-            NULL
-        };
-        execve(script_path.c_str(), argv, envp);
         _exit(1); //TODO replace, exit not allowed
     }
-	printf("=== CGI After execve ===================== \n\n");
+	printf("=== CGI After execvefd '%d' is being added to poll\n \n\n", pipefd[0]);
     close(pipefd[1]);
-    printf("fd '%d' is being added to poll\n", pipefd[0]);
 	pfds.push_back(Server::create_pollfd(pipefd[0], POLLIN, 0)); //POLLIN
-    cgi_pipes[pipefd[0]] = &client;
+//    cgi_pipes[pipefd[0]] = &client;
 	client.set_cgi_pipe_fd(pipefd[0]);
     client.set_cgi_pid(pid);
 	return true; 
@@ -157,19 +145,17 @@ bool check_cgi_timeout(Client& client, int timeout) {
         //cleanup_cgi_process(client, pipe_fd, true);  // Sets 504 response
         return true;
     }
-   //return true;
+//    return true; // Trigger timeout
     return false;
 }
 
-bool handle_cgi_timeout(Client& client, std::vector<struct pollfd>& pfds, 
-                       std::map<int, Client*>& cgi_pipes) {
-    const int CGI_TIMEOUT = 100;           
+bool handle_cgi_timeout(Client& client) {
+    const int CGI_TIMEOUT = 0;           
     if (!client.is_cgi_running()) {
         std::cout << "XXXXX No cgi running" << std::endl;
         return false;
     }
-	(void) cgi_pipes;
-	(void) pfds;
+
 	if (check_cgi_timeout(client, CGI_TIMEOUT)) {
         //TODO this is hardcoded
         client.cgi_output = "HTTP/1.1 504 Gateway Timeout\r\n"

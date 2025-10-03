@@ -1,7 +1,56 @@
 #include "pollHandler.hpp"
+#include "CGI.hpp"
 #include "runCGI.hpp"
 #include <cstdlib>
 #include <ctime>
+#include <sys/stat.h>
+
+int validate_path(const t_server& config, const std::string& request_path,
+                  std::string& built_path, std::string& cgi_path) {
+
+    t_location* location = find_location(request_path, config);
+    if (!location) {
+        printf("No matching location for path: %s\n", request_path.c_str());
+        return 404;
+    }
+    
+    size_t dot_pos = request_path.find_last_of(".");
+    if (dot_pos == std::string::npos) {
+        printf("No file extension in path: %s\n", request_path.c_str());
+        return 400;
+    }
+    
+    std::string file_ext = request_path.substr(dot_pos);
+    bool is_cgi_extension = false;
+    for (int i = 0; i < location->cgi_count; i++) {
+        if (file_ext == location->cgi_extensions[i]) {
+            is_cgi_extension = true;
+            break;
+        }
+    }
+    
+    if (!is_cgi_extension) {
+        printf("Unsupported CGI extension: %s\n", file_ext.c_str());
+        return 400;
+    }
+
+    built_path = std::string(location->root) + request_path;
+    
+    // Check if file exists
+    struct stat file_stat; //TODO is this allowed?
+    if (stat(built_path.c_str(), &file_stat) != 0) {
+        printf("Script file not found: %s\n", built_path.c_str());
+        return 404;
+    }
+
+    if (!location->cgi_path) {
+        printf("No interpreter defined for extension: %s\n", file_ext.c_str());
+        return 500;
+    }
+
+    cgi_path = location->cgi_path;
+    return 200;
+}
 
 void handle_server_fd(pollfd &pfd, Server &server,
                       std::vector<pollfd> &pfds,
@@ -64,7 +113,7 @@ bool	handle_client_read(int fd, pollfd &pfd, Client &client)
 			std::cout << "Parse error passed to client: " << client.get_error_code() << std::endl;
 			return (false);
 		}
-		//debug_request(client);
+		debug_request(client);
 		if (!client.is_cgi()) 
 			pfd.events = POLLOUT;
 	}
@@ -271,8 +320,7 @@ void cleanup_cgi(std::vector<pollfd> &pfds, pollfd &pfd, Client &client)
 
 int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Client> &clients, const t_server &server_config)
 {
-	printf("HANDLING PFD NR: '%d' now!\n", pfd.fd);
-	printf("fd %d revents = 0x%x\n", pfd.fd, pfd.revents);
+	printf("HANDLING PFD NR: '%d', fd %d revents  now!\n", pfd.fd, pfd.revents);
 	Client &client = find_client(pfd.fd, clients);
 	printf("DEBUG: Client object address: %p, fd=%d\n", &client, client.get_fd());
 	std::map<int, Client*> cgi_pipes;
@@ -293,7 +341,7 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 	if (pfd.revents & POLLIN)
 	{
 		printf("POLLIN\n");
-		if (client.is_cgi_running() && handle_cgi_timeout(client, pfds, cgi_pipes)) //timeout check
+		if (client.is_cgi_running() && handle_cgi_timeout(client)) //timeout check
 	    {
   	 	     std::cout << "CGI has timed out" << std::endl;
 			 cleanup_cgi(pfds, pfd, client);
@@ -306,9 +354,18 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 			connection_alive = 0;
 			return connection_alive;
         }
-		if (client.is_cgi() && !client.is_cgi_running()) //run cgi
+		if (client.is_cgi() && !client.is_cgi_running() && !handle_cgi_timeout(client)) //run cgi
 		{
-			run_cgi("./www/cgi-bin/test.py", client, pfds, cgi_pipes);
+			std::string built_path;
+    		std::string cgi_path;
+
+			int status_code = validate_path(server_config, client.get_path(), built_path, cgi_path);
+			if (status_code != 200) {
+				client.set_error_code(status_code);
+				set_client_pollout(pfds, client); //cgi not running yet, not in poll
+				return connection_alive;
+			}
+			run_cgi(cgi_path, built_path, client, pfds);
 			//printf("FD '%d' is being set to 0/STOP\n", pfd.fd);
           	//pfd.events = 0; //stop poollin pollout, im reading
         	client.set_cgi_running(1);
