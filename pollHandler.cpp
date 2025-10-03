@@ -24,11 +24,6 @@ void handle_server_fd(pollfd &pfd, Server &server,
 
 void	debug_request(Client &client)
 {
-	if (!client.parse_request())
-	{
-		std::cout << "Parse error: " << client.get_parse_error().code << std::endl;
-		std::cout << "Parse error: " << client.get_parse_error().msg << std::endl;
-	}
 	client.print_raw_request();
 	std::cout << "DEBUG Host: " << client.get_header("Host") << std::endl;
 	std::cout << "DEBUG Error: " << client.get_parse_error().code;
@@ -61,6 +56,7 @@ bool	handle_client_read(int fd, pollfd &pfd, Client &client)
 	client.add_to_request(buffer, bytes_read);
 	if (client.is_read_complete())
 	{
+		client.get_method().c_str(), client.get_uri().c_str();
 		if (!client.parse_request())
 		{ // Calling parser, will also set_error
 			std::cout << "Parse error: " << client.get_parse_error().code << std::endl;
@@ -70,12 +66,6 @@ bool	handle_client_read(int fd, pollfd &pfd, Client &client)
 		}
 		//debug_request(client);
 		if (!client.is_cgi()) 
-		//{
-		  //  run_cgi("./www/cgi-bin/test.py", client, pfds, cgi_pipes);
-		   // pfds[i].events = 0; //stop poollin pollout, im reading 
-	//		client.set_cgi_running(1);
-//		} 
-//		else
 			pfd.events = POLLOUT;
 	}
 	return (true);
@@ -100,7 +90,7 @@ int	find_pfd(int fd, std::vector<pollfd> &pfds)
     while (i < pfds.size())
     {
         if (pfds[i].fd == fd)
-			return pfds[i].fd;
+			return i;
         i++;
     }
 	return (-1);
@@ -108,13 +98,23 @@ int	find_pfd(int fd, std::vector<pollfd> &pfds)
 
 Client& find_client(int fd, std::map<int, Client> &clients)
 {
-        if (is_cgi_fd(fd, clients))
-        {
-               int client_fd = find_client_for_cgi(fd, clients);
-               return clients.at(client_fd);
+    // First check if it's a normal client fd
+    std::map<int, Client>::iterator it = clients.find(fd);
+    if (it != clients.end())
+    {
+        printf("DEBUG find_client: Found normal client fd %d\n", fd);
+        return it->second;
     }
-        else
-                return clients.at(fd);
+    
+    // If not found, check if it's a CGI fd
+    int client_fd = find_client_for_cgi(fd, clients);
+    if (client_fd != -1)
+    {
+        return clients.at(client_fd);
+    }
+    
+    // This should not happen - throw or handle error
+    return clients.at(fd); // This will throw if fd doesn't exist
 }
 
 
@@ -122,10 +122,16 @@ void cleanup_client(int fd, std::vector<pollfd> &pfds, std::map<int, Client> &cl
 {
     printf("Client '%d' is being cleaned up\n", fd);
 	if (find_client(fd, clients).is_cgi())
-		cleanup_cgi(pfds, pfds[find_pfd(fd, pfds)], find_client(fd, clients));
+	{
+		int pfd_index = find_pfd(fd, pfds);
+		if (pfd_index != -1)
+			cleanup_cgi(pfds, pfds[pfd_index], find_client(fd, clients));
+	}
     close(fd);
     clients.erase(fd);        
-	pfds.erase(pfds.begin() + find_pfd(fd, pfds));
+	int pfd_index = find_pfd(fd, pfds);
+	if (pfd_index != -1)
+		pfds.erase(pfds.begin() + pfd_index);
 }
 
 int ft_poll(std::vector<struct pollfd>& pfds, int timeout_ms, std::map<int, Client> clients)
@@ -196,7 +202,7 @@ int is_cgi_fd(int fd, const std::map<int, Client> &clients)
             return 0; // fd is a normal client
         ++it;
     }
-    return 1; // fd is cgi
+    return 1; // fd is cgi  ❌ This is WRONG!
 }
 
 
@@ -232,15 +238,6 @@ int timeout_check(Client &client, int fd, std::vector<pollfd> &pfds, std::map<in
 	return 1;
 }
 
-/*
-void handle_cgi(Client &client, const t_server &server_config, std::vector<pollfd> &pfds, pollfd &pfd)
-{
-	if (!client.is_cgi_running())
-		run_cgi(client); //setup polls etc
-	//init buffer for cgi reading
-	read_cgi_output(client); //read
-	handle_client_write(client, server_config); 
-}*/
 
 void set_client_pollout(std::vector<pollfd> &pfds, Client &client)
 {
@@ -274,26 +271,15 @@ void cleanup_cgi(std::vector<pollfd> &pfds, pollfd &pfd, Client &client)
 
 int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Client> &clients, const t_server &server_config)
 {
-	//write(1, "NO SGF YET\n", 11);
 	printf("HANDLING PFD NR: '%d' now!\n", pfd.fd);
-	// if (pfd.revents & POLLIN)
-	// 	printf("POLLIN\n");
-	// if (pfd.revents & POLLOUT)
-	// 	printf("POLLOUT\n");
 	printf("fd %d revents = 0x%x\n", pfd.fd, pfd.revents);
 	Client &client = find_client(pfd.fd, clients);
+	printf("DEBUG: Client object address: %p, fd=%d\n", &client, client.get_fd());
 	std::map<int, Client*> cgi_pipes;
 	int connection_alive = 1;
 
 	connection_alive = timeout_check(client, pfd.fd, pfds, clients);
-	//CGI TIMEOUT
-//	if (client.is_cgi_running() && handle_cgi_timeout(client, pfds, cgi_pipes)) 
-//	{
-//		std::cout << "CGI has timed out" << std::endl;
-//		set_client_pollout(pfds, client);
-//		return connection_alive;
-//	}
-	
+
 	//HANDE CGI EOF
 	if (pfd.revents & POLLHUP)
 	{ 
@@ -314,7 +300,7 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 			 connection_alive = 0;
    	    	 return connection_alive;
    		}
-		if (!is_cgi_fd(pfd.fd, clients) && !client.is_cgi_running() && !handle_client_read(pfd.fd, pfd, client)) //if we dont wanna continue reading, cleanup client
+		if (clients.find(pfd.fd) != clients.end() && !client.is_cgi_running() && !is_cgi_fd(pfd.fd, clients) && !handle_client_read(pfd.fd, pfd, client)) //if we dont wanna continue reading, cleanup client
 		{
 			cleanup_client(pfd.fd, pfds, clients);
 			connection_alive = 0;
@@ -339,7 +325,7 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 	// WRITE
 	else if (pfd.revents & POLLOUT && client.is_read_complete())
 	{
-		printf("POLLOUT\n");
+		printf("POLLOUT: Before handle_client_write - method='%s', uri='%s'\n", client.get_method().c_str(), client.get_uri().c_str());
 		handle_client_write(client, server_config);
 		if (client.is_write_complete())
 		{
@@ -374,11 +360,6 @@ void    run_server(Server** servers, int server_count)
 	i = 0;
         while (i < pfds.size())
         {
-			//static int client_four = 0;
-			//if (pfds[i].fd == 4)
-		//		client_four++;
-	//		if (client_four == 15)
-//				exit(0);
 			printf("\n\n___NEW PFD NOW____\n");
 			Server *server = is_server(pfds[i].fd, servers, server_count); //if fd is server, return server
 			if (server) //if found, handle

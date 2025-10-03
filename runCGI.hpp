@@ -84,7 +84,7 @@ bool handle_cgi_write(int pipe_fd, Client &client,  std::vector<struct pollfd>& 
     ssize_t n;
     
     printf("=== handle_cgi_write called for pipe fd %d =====================\n", pipe_fd);
-    n = read(pipe_fd, buf, sizeof(buf));
+    n = read(pipe_fd, buf, sizeof(buf) - 1);
     
     if (n > 0) {
         printf("=== CGI Reading from pipe, got %zd bytes =====================\n", n);
@@ -157,13 +157,13 @@ bool check_cgi_timeout(Client& client, int timeout) {
         //cleanup_cgi_process(client, pipe_fd, true);  // Sets 504 response
         return true;
     }
-
+   //return true;
     return false;
 }
 
 bool handle_cgi_timeout(Client& client, std::vector<struct pollfd>& pfds, 
                        std::map<int, Client*>& cgi_pipes) {
-    const int CGI_TIMEOUT = 0;           
+    const int CGI_TIMEOUT = 100;           
     if (!client.is_cgi_running()) {
         std::cout << "XXXXX No cgi running" << std::endl;
         return false;

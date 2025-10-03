@@ -1,8 +1,18 @@
 #include "Client.hpp"
 
-Client::Client(int fd, Server &server) : _fd(fd), _headers_complete(0), _read_complete(0), _write_complete(0), _keep_alive(0), _content_len(0), _headers_end_pos(0), _error_code(200), _server(&server), cgi_running(0), cgi_start_time(0) {}
+Client::Client(int fd, Server &server) :
+							_fd(fd), _headers_complete(0),\
+							_read_complete(0), _write_complete(0),
+							_is_parsed(false),
+							_keep_alive(0), _content_len(0),
+							_headers_end_pos(0),
+							_error_code(200),
+							_server(&server),
+							cgi_running(0),
+							cgi_start_time(0)
+							{}
 
-Client::Client() : _fd(-1), _server(NULL) {};
+Client::Client() : _fd(-1), _is_parsed(false), _server(NULL) {};
 
 Client::~Client() {};
 
@@ -61,7 +71,7 @@ bool Client::parse_request() {
     std::cout << "DEBUG: _read_complete = " << _read_complete << std::endl;
     std::cout << "DEBUG: Raw request length = " << _raw_request.length() << std::endl;
 
-	if (!_is_parsed) {
+	if (!_is_parsed && _read_complete) {
 		_is_parsed = _request.parse(_raw_request);
 	}
 	set_error_code(_request.get_parse_error().code);
