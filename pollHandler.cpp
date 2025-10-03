@@ -37,9 +37,6 @@ bool	handle_client_read(int fd, pollfd &pfd, Client &client)
 	char	buffer[256];
 	int		bytes_read;
 
-	printf("DEBUG handle_client_read: fd=%d, client address=%p, before read - method='%s', uri='%s'\n", 
-		   fd, &client, client.get_method().c_str(), client.get_uri().c_str());
-	
 	client.update_activity();
 	bytes_read = read(fd, buffer, sizeof(buffer));
 	if (bytes_read <= 0)
@@ -59,8 +56,7 @@ bool	handle_client_read(int fd, pollfd &pfd, Client &client)
 	client.add_to_request(buffer, bytes_read);
 	if (client.is_read_complete())
 	{
-		printf("DEBUG handle_client_read: before parse - method='%s', uri='%s'\n", 
-			   client.get_method().c_str(), client.get_uri().c_str());
+		client.get_method().c_str(), client.get_uri().c_str();
 		if (!client.parse_request())
 		{ // Calling parser, will also set_error
 			std::cout << "Parse error: " << client.get_parse_error().code << std::endl;
@@ -68,20 +64,10 @@ bool	handle_client_read(int fd, pollfd &pfd, Client &client)
 			std::cout << "Parse error passed to client: " << client.get_error_code() << std::endl;
 			return (false);
 		}
-		printf("DEBUG handle_client_read: after parse - method='%s', uri='%s'\n", 
-			   client.get_method().c_str(), client.get_uri().c_str());
-		debug_request(client);
+		//debug_request(client);
 		if (!client.is_cgi()) 
-		//{
-		  //  run_cgi("./www/cgi-bin/test.py", client, pfds, cgi_pipes);
-		   // pfds[i].events = 0; //stop poollin pollout, im reading 
-	//		client.set_cgi_running(1);
-//		} 
-//		else
 			pfd.events = POLLOUT;
 	}
-	printf("DEBUG handle_client_read: end - method='%s', uri='%s'\n", 
-		   client.get_method().c_str(), client.get_uri().c_str());
 	return (true);
 }
 
@@ -112,8 +98,6 @@ int	find_pfd(int fd, std::vector<pollfd> &pfds)
 
 Client& find_client(int fd, std::map<int, Client> &clients)
 {
-    printf("DEBUG find_client: Looking for fd %d\n", fd);
-    
     // First check if it's a normal client fd
     std::map<int, Client>::iterator it = clients.find(fd);
     if (it != clients.end())
@@ -123,16 +107,13 @@ Client& find_client(int fd, std::map<int, Client> &clients)
     }
     
     // If not found, check if it's a CGI fd
-    printf("DEBUG find_client: fd %d not found as normal client, checking CGI\n", fd);
     int client_fd = find_client_for_cgi(fd, clients);
     if (client_fd != -1)
     {
-        printf("DEBUG find_client: Found CGI fd %d maps to client %d\n", fd, client_fd);
         return clients.at(client_fd);
     }
     
     // This should not happen - throw or handle error
-    printf("DEBUG find_client: ERROR - fd %d not found anywhere!\n", fd);
     return clients.at(fd); // This will throw if fd doesn't exist
 }
 
@@ -298,14 +279,7 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 	int connection_alive = 1;
 
 	connection_alive = timeout_check(client, pfd.fd, pfds, clients);
-	//CGI TIMEOUT
-//	if (client.is_cgi_running() && handle_cgi_timeout(client, pfds, cgi_pipes)) 
-//	{
-//		std::cout << "CGI has timed out" << std::endl;
-//		set_client_pollout(pfds, client);
-//		return connection_alive;
-//	}
-	
+
 	//HANDE CGI EOF
 	if (pfd.revents & POLLHUP)
 	{ 
