@@ -72,7 +72,7 @@ bool handle_cgi_write(int pipe_fd, Client &client,  std::vector<struct pollfd>& 
     ssize_t n;
     
     printf("=== handle_cgi_write called for pipe fd %d =====================\n", pipe_fd);
-    n = read(pipe_fd, buf, sizeof(buf));
+    n = read(pipe_fd, buf, sizeof(buf) - 1);
     
     if (n > 0) {
         printf("=== CGI Reading from pipe, got %zd bytes =====================\n", n);
