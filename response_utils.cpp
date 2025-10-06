@@ -4,7 +4,6 @@
 #include <unistd.h>
 #include <cstdio>
 
-
 std::string reload_page(Client &client)
 {
 	std::string referer = client.get_header("Referer");
@@ -100,6 +99,35 @@ t_location *find_location(std::string uri, const t_server &config)
 	if (best_match)
 		printf("MATCH FOUND!\n");
 	return (best_match);
+}
+
+std::string check_redirect(t_location *location, Client &client)
+{
+	if (!location->redirect)
+		return std::string();
+	else
+	{
+		client.set_error_code(301);
+		return std::string(location->redirect);
+	}
+}
+
+t_location *handle_location(Client &client, const t_server &config)
+{
+	if (client.get_path().empty())
+		printf("ERROR: empty uri.\n"); //DEBUG
+	t_location *location;
+
+        location = find_location(client.get_request().uri, config);
+	if (location)
+                printf("location passed!\n");
+        if (!location)
+        {
+                client.set_error_code(404);
+                printf("404 set at first instance");
+                return NULL;
+        }
+	return location;
 }
 
 bool	method_allowed(const std::string& method, const t_location *location, Client &client)

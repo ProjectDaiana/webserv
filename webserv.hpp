@@ -190,8 +190,10 @@ std::string get_content_type(const std::string &path);
 std::string get_reason_phrase(int code);
 void    handle_client_write(Client &client, const t_server &config);
 t_response      build_response(Client &client, const t_server &config);
-std::string     handle_method(Client &client, const t_server &config);
+std::string     handle_method(Client &client, const t_server &config, t_location *location);
 std::string connection_type(Client &client);
 std::string reload_page(Client &client);
+t_location *handle_location(Client &client, const t_server &config);
+std::string check_redirect(t_location *location, Client &client);
 
 #endif

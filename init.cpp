@@ -53,7 +53,8 @@ void	init_config(t_data *d, t_arena *mem)
 	d->s[0]->locations[0]->accepted_methods[0] = "GET";
 	d->s[0]->locations[0]->accepted_methods[1] = "POST";
 	d->s[0]->locations[0]->accepted_methods[2] = "DELETE";
-	d->s[0]->locations[0]->redirect = "https://cataas.com/cat";
+	d->s[0]->locations[0]->redirect = NULL;
+	//d->s[0]->locations[0]->redirect = "https://cataas.com/cat";
 	d->s[0]->locations[0]->root = "www/html";
 	d->s[0]->locations[0]->autoindex = 0; //OJO disabled
 	d->s[0]->locations[0]->default_file = "index.html";

@@ -20,6 +20,11 @@ std::string	handle_delete(Client &client, const t_server &config, t_location *l)
 	printf("DELETE WAS CALLED\n");
 	(void)config; //TODO remove it from ft if not needed
 	std::string path = std::string(l->root) + client.get_request().uri;
+	if (path.find("..") != std::string::npos) //check that file is in root for security
+   	{
+       		client.set_error_code(403); // forbidden
+        	return std::string();
+    	}
 	struct stat st;
 	if (stat(path.c_str(), &st) < 0)
 	{
@@ -31,7 +36,7 @@ std::string	handle_delete(Client &client, const t_server &config, t_location *l)
 		client.set_error_code(403); //not allowed
 		return std::string();
 	}
-	if (ft_delete(path.c_str()) == -1)
+	if (ft_delete(path) == -1)
 		client.set_error_code(500); //server error
 	return std::string(); //empty body anyways
 }
