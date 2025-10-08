@@ -4,8 +4,12 @@
 #include <string>
 #include <iostream>
 #include <cstdlib>
+#include <ctime>
 #include "Request.hpp"
 #include "webserv.hpp"
+#include "Server.hpp"
+
+class Server;
 
 class Client {
 	private:
@@ -14,22 +18,28 @@ class Client {
 		bool _headers_complete;
 		bool _read_complete;
 		bool _write_complete;
+		//bool _cgi_done;
 		bool _is_parsed;
+		bool _keep_alive;
 		size_t _content_len;
 		size_t _headers_end_pos;
+		time_t _last_activity; // Track last activity for timeout
 		int _error_code; //TODO change back to 200 when reset
-		t_request request; 
+		int cgi_pipe_fd;
 
+		Server *_server;
 		Request _request;
 
 	public:
 		Client();
-		Client(int fd);
+		Client(int fd, Server &server);
 		~Client();
 
+		void update_activity();
 		void add_to_request(char* data, int len);
 		bool parse_request();
-	
+		void reset();
+		
 		// Getters
 		bool is_read_complete() const;
 		bool is_headers_complete() const;
@@ -46,17 +56,70 @@ class Client {
 		const std::string& get_body() const;
 		const s_error& get_parse_error() const;
 		int get_fd() const;
-
+		time_t get_last_activity() const;
+		const Server *get_server() const {return _server;}
+		int	get_error_code() const;
+		bool get_keep_alive() const { return _keep_alive; }
+		const t_request& get_request() const;
+		//bool is_cgi_done() const { return _cgi_done; }
+		// Inside Client class
+		
+		//Setters
+		void set_error_code(int code);
+		void set_keep_alive(bool value) { _keep_alive = value; }
+		void set_request(const t_request& new_request);
+		void set_write_complete(bool value) { _write_complete = value; }
+		//void set_cgi_done(bool done) { _cgi_done = done; }
+		
 		// Debug
 		void print_raw_request() const;
-		int	get_error_code() const;
-		void set_error_code(int code);
-		const t_request& get_request() const;
-		void set_request(const t_request& new_request);
 		void print_request_struct() const;
 
-		//Setter
-		void set_write_complete(bool value) { _write_complete = value; }
+		//CGI
+		pid_t cgi_pid;
+		bool cgi_running;
+		std::string cgi_output;
+		time_t cgi_start_time;
+
+		void set_cgi_output(const std::string& output) {
+			cgi_output = output;
+		}
+		const std::string& get_cgi_output() const {
+        	return cgi_output;
+    	}
+
+		void set_cgi_pipe_fd(int fd) {
+			cgi_pipe_fd = fd;
+		};
+		void set_cgi_pid(pid_t pid) {
+			cgi_pid = pid;
+		};
+
+		void set_cgi_start_time() {
+			cgi_start_time = std::time(NULL);
+		}
+
+		bool is_cgi_running() {
+
+			printf("CGI IS RUNNING?: '%d'\n", (int)cgi_running);
+			return cgi_running;
+		}
+		void set_cgi_running(bool b) {
+			printf("CGI IS BEING SET TO: '%d'\n", (int)b);
+			cgi_running = b;
+		}
+
+		pid_t get_cgi_pid () {
+			return cgi_pid;
+		}
+
+		int get_cgi_pipe() const {
+			return cgi_pipe_fd;
+		}
+
+		time_t get_cgi_start_time() {
+			return cgi_start_time;
+		}
 };
 
 #endif

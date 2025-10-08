@@ -19,7 +19,6 @@ struct  s_request
     std::string path;
     std::string query;
     std::string http_version; // eg: "HTTP/1.1", which version did the client use, impacts how we respond
-    //TODO for which headers to implement -> check what each do and what we think makes sense to implement and what to leave out, also check subject if any headers are specifically required
     std::map<std::string, std::string> headers; //we should use a map here bc its easy to implement and use
     std::string body; //data the user is posting/putting into the website, for method post, so the body can be empty, depending on the request type
 };
@@ -53,6 +52,7 @@ class Request {
 	
 		bool parse(const std::string& raw_request);
 		bool is_cgi() const;
+		void reset_struct();
 
 		// Getters
 		const t_request& get_parsed_request() const;

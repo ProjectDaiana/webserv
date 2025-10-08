@@ -80,6 +80,7 @@ Arena implementation.
 - ` siege -c 3 -r 1 -f urls.txt ` to run differents conections with differents urls
 - `curl http://localhost:8080`
 - `curl -v -H "Connection: close" http://localhost:8080` -H to write in Connection Header
+- `siege -c50 -t1M -b 'http://localhost:8080/cgi-bin/test.py'` 50 connections 1 minute 
 
 ## NGINX commands
 - `sudo systemctl start nginx`

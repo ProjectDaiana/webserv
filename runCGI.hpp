@@ -2,18 +2,28 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <string>
+#include <errno.h>
+#include <signal.h>
 
-std::string run_cgi(const std::string& script_path, int client_fd) {
+bool run_cgi(const std::string& script_path, Client& client, std::vector<struct pollfd>& pfds, std::map<int, Client*>& cgi_pipes) {
     int pipefd[2];
     pipe(pipefd);
-	printf("=== CGI will run now ===================== \n\n");
+    printf("=== CGI will run now ===================== \n\n");
     pid_t pid = fork();
+
+	printf("Client currently is: '%d'\n", client.get_fd());
+    client.set_cgi_start_time();
+	//client.set_cgi_running(1);
     if (pid == 0) {
         // ---- child ----
         dup2(pipefd[1], STDOUT_FILENO);
         close(pipefd[0]);
         close(pipefd[1]);
 
+        //client.set_cgi_start_time();
+        std::cout << "XXXXXXXX cgi start time: " <<  client.get_cgi_start_time() << std::endl;
+	    //client.set_cgi_running(1);
+		//TODO get methods from config
         char* const envp[] = {
             (char*)"REQUEST_METHOD=GET",
             (char*)"SCRIPT_NAME=test.py",
@@ -21,35 +31,160 @@ std::string run_cgi(const std::string& script_path, int client_fd) {
             NULL
         };
 
+		//TODO take paths from struct
         char* const argv[] = {
             (char*)script_path.c_str(),
             NULL
         };
-		//write(pipefd[1], "hola\n", 5);
-		//write(pipefd[0], "hola\n", 5);
         execve(script_path.c_str(), argv, envp);
-        _exit(1); // only runs if execve fails
+        _exit(1); //TODO replace, exit not allowed
+    }
+	printf("=== CGI After execve ===================== \n\n");
+    close(pipefd[1]);
+    printf("fd '%d' is being added to poll\n", pipefd[0]);
+	pfds.push_back(Server::create_pollfd(pipefd[0], POLLIN, 0)); //POLLIN
+    cgi_pipes[pipefd[0]] = &client;
+	client.set_cgi_pipe_fd(pipefd[0]);
+    client.set_cgi_pid(pid);
+	return true; 
+}
+
+bool cgi_eof(int pipe_fd, Client &client, std::vector<struct pollfd>& pfds)
+{
+	printf("=== CGI pipe closed (EOF), writing response =====================\n");
+
+        // Save PID before resetting it!
+        pid_t cgi_pid = client.get_cgi_pid();
+        // Reset client CGI state
+        client.set_cgi_running(0);
+        //client.set_cgi_pipe_fd(-1);
+        client.set_cgi_pid(-1);
+
+        // Close pipe and wait for child
+        close(pipe_fd);
+		// IMPORTANT: Remove fd from pfds vector
+			for (size_t i = 0; i < pfds.size(); i++) {
+				if (pfds[i].fd == pipe_fd) {
+					printf("Removing pipe fd %d from pfds\n", pipe_fd);
+					pfds.erase(pfds.begin() + i);
+					break;
+				}
+			}
+
+
+        std::cout << "pipde fd "<< client.get_cgi_pipe() << std::endl;
+
+        int ret_pid = waitpid(cgi_pid, NULL, WNOHANG);  // Use saved PID, not -1!
+        printf("=== CGI complete output: pid %d,  %s =====================\n", ret_pid, client.cgi_output.c_str());
+        return true;  // CGI finished
+}
+
+bool handle_cgi_write(int pipe_fd, Client &client,  std::vector<struct pollfd>& pfds) {
+    char buf[10];
+    ssize_t n;
+    
+    printf("=== handle_cgi_write called for pipe fd %d =====================\n", pipe_fd);
+    n = read(pipe_fd, buf, sizeof(buf) - 1);
+    
+    if (n > 0) {
+        printf("=== CGI Reading from pipe, got %zd bytes =====================\n", n);
+        // Null terminate for debug output
+        buf[n] = '\0';
+        printf("=== CGI output chunk: %s =====================\n", buf);
+        client.cgi_output.append(buf, n);
+        return false;  // Keep reading
     }
 
-    // ---- parent ----
-    close(pipefd[1]);
-    std::string output;
-    char buf[1024];
-    ssize_t n;
-    while ((n = read(pipefd[0], buf, sizeof(buf))) > 0) {
-        output.append(buf, n);
-	}
-    close(pipefd[0]);
-
-    waitpid(pid, NULL, 0);
-
-	char buffer[32];
-    sprintf(buffer, "%lu", (unsigned long)output.size());
-	std::cout << "this is buffer: " << buffer << std::endl;
-	std::cout << "this is output: " << output << std::endl;
+    if (n == 0) 
+        return cgi_eof(pipe_fd, client, pfds);  // CGI finished
     
-    std::string response = "HTTP/1.1 200 OK\r\n";
-    response += output;
-    write(client_fd, response.c_str(), response.size());
-    return output;
+    if (n < 0) {
+        // Error occurred
+        printf("=== CGI read error: %s =====================\n", strerror(errno));
+        
+        // Save PID before resetting
+        pid_t cgi_pid = client.get_cgi_pid();
+        
+        client.set_cgi_running(0);
+        //client.set_cgi_pipe_fd(-1);
+        client.set_cgi_pid(-1);
+        
+        close(pipe_fd);
+        waitpid(cgi_pid, NULL, WNOHANG);  // Use saved PID
+        return true;
+    }
+    
+    return false;
+}
+
+bool check_cgi_timeout(Client& client, int timeout) {
+	printf("\nCGI TIMEOUT CHECK NOW!\n");
+	if (!client.is_cgi_running()) {
+		return false;  // Not running CGI
+    }
+    
+    time_t now = std::time(NULL);
+    time_t elapsed = now - client.get_cgi_start_time();
+    std::cout << "XXXXXXXX cgi start time: " <<  client.get_cgi_start_time() << std::endl;
+	//pid_t cgi_pid = client.get_cgi_pid();
+    
+		printf("time elapsed: '%lld'\n", (long long)elapsed);
+		printf("cgi start time: '%lld'\n", (long long)client.get_cgi_start_time());
+		printf("timeout: '%d'\n", timeout);
+		printf("client fd is: '%d'\n", client.get_fd());
+    if (elapsed > timeout) {
+        std::cout << "XXXXXXXXXX CGI Timeout" << std::endl;
+        pid_t cgi_pid = client.get_cgi_pid();
+        if (cgi_pid > 0) {
+            kill(cgi_pid, SIGTERM);
+            usleep(100000);
+
+            if (kill(cgi_pid, 0) == 0) {
+                kill(cgi_pid, SIGKILL);   // Force kill
+            }
+        }
+
+		if (cgi_pid > 0) {
+            kill(cgi_pid, SIGTERM);  // Try graceful termination
+            usleep(100000);
+            
+            // Force kill if still alive
+            if (kill(cgi_pid, 0) == 0) {
+                kill(cgi_pid, SIGKILL);
+            }
+            waitpid(cgi_pid, NULL, WNOHANG);
+        }
+        //cleanup_cgi_process(client, pipe_fd, true);  // Sets 504 response
+        return true;
+    }
+   //return true;
+    return false;
+}
+
+bool handle_cgi_timeout(Client& client, std::vector<struct pollfd>& pfds, 
+                       std::map<int, Client*>& cgi_pipes) {
+    const int CGI_TIMEOUT = 100;           
+    if (!client.is_cgi_running()) {
+        std::cout << "XXXXX No cgi running" << std::endl;
+        return false;
+    }
+	(void) cgi_pipes;
+	(void) pfds;
+	if (check_cgi_timeout(client, CGI_TIMEOUT)) {
+        //TODO this is hardcoded
+        client.cgi_output = "HTTP/1.1 504 Gateway Timeout\r\n"
+                           "Content-Type: text/html\r\n"
+                           "Content-Length: 54\r\n"
+                           "\r\n"
+                           "<html><body><h1>504 Gateway Timeout</h1></body></html>"; //TODO overwrite cgi buffer so this gets handled in the response
+
+        client.set_error_code(504);
+        //client.set_cgi_running(0);
+        //client.set_cgi_pipe_fd(-1);
+        client.set_cgi_pid(-1);
+        client.set_cgi_start_time();
+
+        return true;  // Timeout occurred
+    }
+    return false;  // No timeout
 }

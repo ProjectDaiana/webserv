@@ -55,20 +55,6 @@ bool handle_client_read(int fd, std::vector<struct pollfd> &pfds, std::map<int, 
 	return true;
 }
 
-void handle_client_write(Client &client, const t_server &config) 
-{
-	(void)config;
-	const char *response = 	/// For now we return this string as response
-		"HTTP/1.1 200 OK\r\n"
-		"Content-Length: 12\r\n"
-		"Content-Type: text/plain\r\n"
-		"\r\n"
-		"Hello world!";
-
-	printf("=== Sending response to fd %d\n\n", client.get_fd());
-	write(client.get_fd(), response, strlen(response)); //TODO we need to write in chunks later
-}
-
 void run_server(Server server) {
 	std::vector<struct pollfd> pfds;
 	std::map<int, Client> clients;

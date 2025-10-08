@@ -31,11 +31,13 @@ t_response	build_response(Client &client, const t_server &config)
 	location = handle_location(client, config);
 	res.location = check_redirect(location, client);
 	res.version = client.get_request().http_version;
-	//if (!res.location.c_str()) //TODO what to do w methods when redirect?
-	res.body = handle_method(client, config, location); 
+	if (client.is_cgi() && !client.cgi_output.empty())
+		res.body = client.cgi_output;
+	else if (!client.is_cgi())
+		res.body = handle_method(client, config); 
 	//TODO integrate this into redirect logic when everything is working
 	if (client.get_method() == "GET")
-		res.content_type = get_content_type(client.get_path());
+		res.content_type = get_content_type(client.get_path()); //TODO check content type for del & post
 	else
 	{ 
 		client.set_error_code(303); //TODO test if content type still works
@@ -44,6 +46,16 @@ t_response	build_response(Client &client, const t_server &config)
 	printf("content type is: '%s'\n", res.content_type.c_str());
 	printf("_______________________\nthis is uri: '%s'\n", client.get_path().c_str());
 	res.connection = connection_type(client); //TODO change function name
+	if (res.connection == "keep-alive")
+	{
+		printf("KEEP-ALIVE\n");
+		client.set_keep_alive(true);
+	}
+	else
+	{
+		printf("KILLED CONNECTION\n");
+		client.set_keep_alive(false);
+	}
 	res.content_length = res.body.size();
 	res.status_code = client.get_error_code();
 	res.reason_phrase = get_reason_phrase(res.status_code);
@@ -57,15 +69,15 @@ void	handle_client_write(Client &client, const t_server &config)
 	t_response response;
 	std::stringstream sstr;
 	int written;
-	
+
 	response = build_response(client, config);
 	sstr << response.version << " "
 		<< response.status_code << " "
 		<< response.reason_phrase << "\r\n";
 	if (!response.location.empty())
 		sstr << "Location: " << response.location << "\r\n";
-
 	sstr << "Content-Type: " << response.content_type << "\r\n"
+		<< response.reason_phrase << "\r\n"
 		<< "Content-Length: " << response.content_length << "\r\n"
 		<< "Connection: " << response.connection << "\r\n"
 		<< "\r\n" 
@@ -73,10 +85,12 @@ void	handle_client_write(Client &client, const t_server &config)
 	std::string str_response(sstr.str());
 		printf("\n_______________________________\n");
 		printf("finished response:\n");
-        write(1, str_response.c_str(), str_response.size());
-        written = write(client.get_fd(), str_response.c_str(), str_response.size());
+		printf("status code is: '%d'\n", response.status_code);
+        //write(1, str_response.c_str(), str_response.size());
 		if (written == (int)str_response.size())
 		{
+			if (client.is_cgi())
+				client.cgi_output.clear();
 			printf("WRITE COMPLETE\n____________________________\n");
 			client.set_write_complete(1);
 		}

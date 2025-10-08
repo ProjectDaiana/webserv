@@ -3,17 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: darotche <darotche@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ltreser <ltreser@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/08/23 17:26:54 by ltreser           #+#    #+#             */
-/*   Updated: 2025/09/24 00:06:13 by ltreser          ###   ########.fr       */
+/*   Created: 2025/10/08 20:20:41 by ltreser           #+#    #+#             */
+/*   Updated: 2025/10/08 20:20:49 by ltreser          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
 
 #ifndef WEBSERV_HPP
 # define WEBSERV_HPP
 
-# define PERM_MEM_SIZE 2000 // TODO always update
+# define PERM_MEM_SIZE 5000 // TODO always update
 # define push_struct(type, arena) (type *)arena_alloc(arena, sizeof(type));
 
 # include <stddef.h>
@@ -23,6 +24,7 @@
 # include <string>
 # include <map>
 # include "Client.hpp"
+# include "Server.hpp"
 
 typedef struct s_arena			t_arena;
 typedef struct s_data			t_data;
@@ -32,6 +34,7 @@ typedef struct s_location		t_location;
 typedef struct s_request		t_request;
 typedef struct s_response		t_response;
 class Client;
+class Server;
 
 typedef enum e_error
 {
@@ -66,54 +69,6 @@ typedef enum e_error
  	ERR_UNKNOWN = 499 /* Unknown error */
  } t_error;
 
-struct							s_location
-{
-	const char *path;              // URL path prefix (e.g. "/images")
-	const char **accepted_methods; // e.g. "GET", "POST"
-	int method_count;              // number of methods in the array
-	const char *redirect;          // URL to redirect to (NULL if not)
-	const char *root;              // filesystem root for this location
-	int autoindex;                 // automatic directory listing enable flag
-	const char					*default_file;
-	// if client requests directory instead of a specific file path,
-	// this file is shown per default
-	int upload_enabled;          // flag - 1 enabled, 0 disabled
-	const char *upload_store;    // directory where uploads are stored
-	int	upload_count;		//how many uploads were made
-	const char **cgi_extensions; // array of extensions that trigger cgi,
-	//	can be .php and .phtml bc they handled by the sam einterpreter,
-	//	we only need to handle one file extension (e.g. only .py or only .php) so we can also just have a const string here in theory
-	int cgi_count; // number of extensions in the array
-	const char					*cgi_path;
-	// the binary (interpreter) of the .php/.phtml files/whatever file extension we will choose
-};
-
-struct							s_server
-{
-	const char *name; // server name
-	t_listen_binding			*lb;
-	// pointer to array of listen bindings NOTE keeping it modular even if theres only one lb per server,
-	//bc this way there can be a compare listen binding ft and not too much stuff has to be passed
-	const char	* *error_pages; // array of file paths for error codes
-	int error_page_count;                                                                                                  
-		// amount of error pages
-	int *error_codes;                                                                                                      
-		// array of status codes (eg 404)
-	int error_code_count;                                                                                                  
-		// amount of error codes
-	size_t max_bdy_size;                                                                                                   
-		// maximum allowed body size of the requests
-	t_location **locations;                                                                                                
-		// pointer to locations array
-	int location_count;                                                                                                    
-		// length of that array
-};
-
-struct							s_listen_binding
-{
-	const char					*host;
-	int							port;
-};
 
 struct							s_arena
 {
@@ -127,6 +82,7 @@ struct s_data
 	t_arena *perm_memory;
 	t_server **s; //NOTE mb rename as config
 	int server_count;
+	Server **servers;
 };
 
 /*
@@ -167,12 +123,35 @@ void							*arena_alloc(t_arena *mem, size_t size);
 // init
 t_data							*init_data(void);
 void							init_config(t_data *d, t_arena *mem);
+void							init_servers(t_data *data);
 
 // parser
 
 //helper
 int							ft_atoi(const char *nptr);
 uint32_t						iptoi(const char *ip_str);
+
+//polling
+void handle_server_fd(pollfd &pfd, Server &server, std::vector<pollfd> &pfds, std::map<int, Client> &clients);
+void    debug_request(Client &client);
+bool    handle_client_read(int fd, pollfd &pfd, Client &client);
+void    add_server_sockets(Server **servers, int server_count, std::vector<struct pollfd> &pfds);
+int find_pfd(int fd, std::vector<pollfd> &pfds);
+Client& find_client(int fd, std::map<int, Client> &clients);
+void cleanup_cgi(std::vector<pollfd> &pfds, pollfd &pfd, Client &client);
+void cleanup_client(int fd, std::vector<pollfd> &pfds, std::map<int, Client> &clients);
+int ft_poll(std::vector<struct pollfd>& pfds, int timeout_ms, std::map<int, Client> clients);
+Server* is_server(int fd, Server** servers, int server_count);
+void close_servers(Server **servers, int server_count);
+int find_client_for_cgi(int cgi_fd, const std::map<int, Client> &clients);
+int is_cgi_fd(int fd, const std::map<int, Client> &clients);
+const t_server* find_server_for_client(int client_fd, const std::map<int, Client> &clients,
+                                 Server **servers, int server_count);
+int timeout_check(Client &client, int fd, std::vector<pollfd> &pfds, std::map<int, Client> &clients);
+void set_client_pollout(std::vector<pollfd> &pfds, Client &client);
+int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Client> &clients, const t_server &server_config);
+void    run_server(Server** servers, int server_count);
+
 
 //response
 std::string     handle_delete(Client &client, const t_server &config, t_location *l);
@@ -186,7 +165,7 @@ int init_counter_from_dir(const std::string &upload_dir);
 int extract_number(const char *name);
 bool    method_allowed(const std::string& method, const t_location *location, Client &client);
 t_location *find_location(std::string uri, const t_server &config);
-std::string get_content_type(const std::string &path);
+std::string get_content_type(Client &client);
 std::string get_reason_phrase(int code);
 void    handle_client_write(Client &client, const t_server &config);
 t_response      build_response(Client &client, const t_server &config);

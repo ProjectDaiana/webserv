@@ -6,11 +6,23 @@
 /*   By: ltreser <ltreser@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/24 16:34:29 by ltreser           #+#    #+#             */
-/*   Updated: 2025/09/18 21:44:14 by ltreser          ###   ########.fr       */
+/*   Updated: 2025/09/27 02:00:25 by ltreser          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserv.hpp"
+
+void    init_servers(t_data *data)
+{
+    int i;
+
+    i = 0;
+    while(i < data->server_count)
+    {
+        new (data->servers[i]) Server(data->s[i]);
+        i++;
+    }
+}
 
 t_data *init_data(void)
 {
@@ -32,6 +44,8 @@ void	init_config(t_data *d, t_arena *mem)
 {
 	d->server_count = 1;
 	d->s = (t_server **)arena_alloc(mem, d->server_count * sizeof(t_server));
+	d->servers = (Server **)arena_alloc(mem, d->server_count * sizeof(Server));
+	d->servers[0] = (Server *)arena_alloc(mem, sizeof(Server));
 	d->s[0] = (t_server *)arena_alloc(mem, sizeof(t_server));
 	d->s[0]->name = "PumpkinServer";
 	d->s[0]->lb = (t_listen_binding *)arena_alloc(mem, sizeof(t_listen_binding));
