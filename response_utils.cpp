@@ -4,6 +4,14 @@
 #include <unistd.h>
 #include <cstdio>
 
+std::string reload_page(Client &client)
+{
+	std::string referer = client.get_header("Referer");
+	if (referer.empty())
+		return std::string("index.html");
+	else
+		return referer;
+}
 
 std::string	connection_type(Client &client)
 {
@@ -19,9 +27,11 @@ std::string	connection_type(Client &client)
 //check whats the suffix after the dot and map content type/ "MIME" type to that
 std::string get_content_type(Client &client)
 {
+    std::string path = client.get_path();
+	if (path == "/")
+		return "text/html";
     if (client.is_cgi())
 	    return "text/html";
-    std::string path = client.get_path();
     printf("GETTING CONTENT TYPE NOW W PATH: '%s'\n", path.c_str());	    
     int dot_pos = path.rfind('.');
     if (dot_pos == (int)std::string::npos)
@@ -43,7 +53,10 @@ std::string get_content_type(Client &client)
         return "text/plain";
     else if (suffix == "pdf")
         return "application/pdf";
+	else if (suffix == "ico")
+		return "image/x-icon";
     // TODO mb add more types
+	//TODO add video
     else
         return "application/octet-stream";
 }
@@ -89,6 +102,35 @@ t_location *find_location(std::string uri, const t_server &config)
 	if (best_match)
 		printf("MATCH FOUND!\n");
 	return (best_match);
+}
+
+std::string check_redirect(t_location *location, Client &client)
+{
+	if (!location->redirect)
+		return std::string();
+	else
+	{
+		client.set_error_code(301);
+		return std::string(location->redirect);
+	}
+}
+
+t_location *handle_location(Client &client, const t_server &config)
+{
+	if (client.get_path().empty())
+		printf("ERROR: empty uri.\n"); //DEBUG
+	t_location *location;
+
+        location = find_location(client.get_request().uri, config);
+	if (location)
+                printf("location passed!\n");
+        if (!location)
+        {
+                client.set_error_code(404);
+                printf("404 set at first instance");
+                return NULL;
+        }
+	return location;
 }
 
 bool	method_allowed(const std::string& method, const t_location *location, Client &client)
