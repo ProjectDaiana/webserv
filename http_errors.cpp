@@ -8,6 +8,7 @@ std::string get_reason_phrase(int code)
         // Success
         case 200: return "OK";
         case 201: return "Created";
+		case 204: return "No Content";
 
         // Redirection
         case 300: return "Multiple Choices";

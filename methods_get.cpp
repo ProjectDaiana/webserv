@@ -107,16 +107,53 @@ std::string name_pumpkin(Client &client, t_location *l)
     return html;
 }
 
+#include <string>
+#include <sstream>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <cstdio>
+
 std::string autoindex_directory(Client &client, const std::string path)
 {
-	(void)client;
-	(void)path;
-	return std::string();
-	//open the directory q opendir()
-	//loop through entries w readdir()
-	//generate a html line in an html string for each entry
-	//close the directory w closedir()
-	//return the html str as the body
+    (void)client; // unused, but kept for signature
+
+    DIR *dir = opendir(path.c_str());
+    if (!dir)
+    {
+        perror("opendir failed");
+        return "<html><body><h1>Cannot open directory</h1></body></html>";
+    }
+
+    std::stringstream html;
+    html << "<!DOCTYPE html>\n<html>\n<head>\n"
+         << "<meta charset=\"UTF-8\">\n"
+         << "<title>Index of " << path << "</title>\n"
+         << "<style>body { font-family: monospace; }</style>\n"
+         << "</head>\n<body>\n"
+         << "<h1>Index of " << path << "</h1>\n"
+         << "<ul>\n";
+
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL)
+    {
+        std::string name(entry->d_name);
+
+        // skip "." and ".." if you want
+        if (name == ".")
+            continue;
+
+        std::string fullpath = path + "/" + name;
+        struct stat st;
+        if (stat(fullpath.c_str(), &st) == 0 && S_ISDIR(st.st_mode))
+            name += "/"; // append slash for directories
+
+        html << "<li><a href=\"" << name << "\">" << name << "</a></li>\n";
+    }
+
+    html << "</ul>\n</body>\n</html>\n";
+
+    closedir(dir);
+    return html.str();
 }
 
 std::string	file_to_str(Client &client, const std::string &path)
