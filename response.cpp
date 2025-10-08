@@ -34,10 +34,10 @@ t_response	build_response(Client &client, const t_server &config)
 	if (client.is_cgi() && !client.cgi_output.empty())
 		res.body = client.cgi_output;
 	else if (!client.is_cgi())
-		res.body = handle_method(client, config); 
+		res.body = handle_method(client, config, location); 
 	//TODO integrate this into redirect logic when everything is working
 	if (client.get_method() == "GET")
-		res.content_type = get_content_type(client.get_path()); //TODO check content type for del & post
+		res.content_type = get_content_type(client); //TODO check content type for del & post
 	else
 	{ 
 		client.set_error_code(303); //TODO test if content type still works
@@ -68,7 +68,7 @@ void	handle_client_write(Client &client, const t_server &config)
 {
 	t_response response;
 	std::stringstream sstr;
-	int written;
+	int written = 0;
 
 	response = build_response(client, config);
 	sstr << response.version << " "
@@ -77,7 +77,6 @@ void	handle_client_write(Client &client, const t_server &config)
 	if (!response.location.empty())
 		sstr << "Location: " << response.location << "\r\n";
 	sstr << "Content-Type: " << response.content_type << "\r\n"
-		<< response.reason_phrase << "\r\n"
 		<< "Content-Length: " << response.content_length << "\r\n"
 		<< "Connection: " << response.connection << "\r\n"
 		<< "\r\n" 
@@ -85,8 +84,8 @@ void	handle_client_write(Client &client, const t_server &config)
 	std::string str_response(sstr.str());
 		printf("\n_______________________________\n");
 		printf("finished response:\n");
-		printf("status code is: '%d'\n", response.status_code);
-        //write(1, str_response.c_str(), str_response.size());
+	//	printf("status code is: '%d'\n", response.status_code);
+        write(1, str_response.c_str(), str_response.size());
 		if (written == (int)str_response.size())
 		{
 			if (client.is_cgi())
