@@ -8,6 +8,7 @@
 #include "Request.hpp"
 #include "webserv.hpp"
 #include "Server.hpp"
+#include "CGI.hpp"
 
 class Server;
 
@@ -29,6 +30,7 @@ class Client {
 
 		Server *_server;
 		Request _request;
+		CGI _cgi;
 
 	public:
 		Client();
@@ -51,6 +53,7 @@ class Client {
 		const std::string& get_uri() const;
 		const std::string& get_path() const;
 		const std::string& get_query() const;
+		const std::string& get_http_version() const;
 		const std::map<std::string, std::string>& get_headers() const;
 		const std::string& get_header(const std::string& key) const;
 		const std::string& get_body() const;
@@ -80,13 +83,15 @@ class Client {
 		bool cgi_running;
 		std::string cgi_output;
 		time_t cgi_start_time;
+		// std::vector<std::string> env_storage;
+    	// std::vector<char*> env_ptrs;
 
-		void set_cgi_output(const std::string& output) {
-			cgi_output = output;
-		}
-		const std::string& get_cgi_output() const {
-        	return cgi_output;
-    	}
+		// void set_cgi_output(const std::string& output) {
+		// 	_cgi.set_output(output);
+		// }
+		// const std::string& get_cgi_output() const {
+        // 	return _cgi.get_output();
+    	// }
 
 		void set_cgi_pipe_fd(int fd) {
 			cgi_pipe_fd = fd;
@@ -109,6 +114,8 @@ class Client {
 			cgi_running = b;
 		}
 
+		CGI& get_cgi() { return _cgi; }
+
 		pid_t get_cgi_pid () {
 			return cgi_pid;
 		}
@@ -120,6 +127,15 @@ class Client {
 		time_t get_cgi_start_time() {
 			return cgi_start_time;
 		}
+
+		char** build_cgi_envp(const std::string& script_path) {
+        return _cgi.build_envp(
+            script_path,
+            get_method(),
+            get_http_version()
+        );
+    }
+    
 };
 
 #endif
