@@ -6,19 +6,23 @@
 #include <signal.h>
 
 bool run_cgi(const std::string& cgi_path, const std::string& built_path, Client& client, std::vector<struct pollfd>& pfds) {
-    int pipefd[2];
-    pipe(pipefd);
+	int pipefd_out[2]; // To Server
+    int pipefd_in[2]; // From Server
+    pipe(pipefd_out);
     printf("=== CGI will run for Client %d ===================== \n\n", client.get_fd());
     pid_t pid = fork();
 
     client.set_cgi_start_time();
 	client.set_cgi_running(1);
     if (pid == 0) {
-        dup2(pipefd[1], STDOUT_FILENO);
-        close(pipefd[0]);
-        close(pipefd[1]);
+        dup2(pipefd_out[1], STDOUT_FILENO);
+		dup2(pipefd_in[0], STDIN_FILENO);
+        close(pipefd_out[0]);
+        close(pipefd_out[1]);
+		close(pipefd_in[0]);
+        close(pipefd_in[1]);
 
-		char** envp = client.build_cgi_envp(built_path);
+		char** envp = client.build_cgi_envp(built_path); // add content length here and may
 		char* const argv[] = {
 			const_cast<char*>(cgi_path.c_str()), // Interpreter (e.g., python3)
 			const_cast<char*>(built_path.c_str()), // www/cgi-bin/test.py
@@ -28,12 +32,23 @@ bool run_cgi(const std::string& cgi_path, const std::string& built_path, Client&
 
         _exit(1); //TODO replace, exit not allowed
     }
-	printf("=== CGI After execvefd '%d' is being added to poll\n \n\n", pipefd[0]);
-    close(pipefd[1]);
-	pfds.push_back(Server::create_pollfd(pipefd[0], POLLIN, 0)); //POLLIN
-//    cgi_pipes[pipefd[0]] = &client;
-	client.set_cgi_pipe_fd(pipefd[0]);
+	printf("=== CGI After execvefd '%d' is being added to poll\n \n\n", pipefd_out[0]);
+    close(pipefd_out[1]);
+	close(pipefd_in[0]);
+	pfds.push_back(Server::create_pollfd(pipefd_out[0], POLLIN, 0)); //POLLIN
+//    cgi_pipes[pipefd_out[0]] = &client;
+	client.set_cgi_pipe_fd(pipefd_out[0]);
+	client.set_cgi_pipe_fd(pipefd_out[1]);
     client.set_cgi_pid(pid);
+
+//	if (client.is_post_req() == 'POST' && client.has_request_body()) {
+    //     pfds.push_back(Server::create_pollfd(pipefd_in[1], POLLOUT, 0));
+    // } else {
+    //     // No body to send, close stdin immediately
+    //     close(pipefd_in[1]);
+    //     client.set_cgi_stdin_fd(-1);
+    // }
+
 	return true; 
 }
 

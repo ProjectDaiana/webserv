@@ -129,11 +129,14 @@ class Client {
 		}
 
 		char** build_cgi_envp(const std::string& script_path) {
-        return _cgi.build_envp(
-            script_path,
-            get_method(),
-            get_http_version()
-        );
+			return _cgi.build_envp(
+				script_path,
+				get_method(),
+				get_http_version()
+				// get_content_length() //
+				// get_content_type() ?
+				// what else?			
+			);
     }
     
 };
