@@ -22,7 +22,7 @@ bool run_cgi(const std::string& cgi_path, const std::string& built_path, Client&
 		close(pipefd_in[0]);
         close(pipefd_in[1]);
 
-		char** envp = client.build_cgi_envp(built_path); // add content length here and may
+		char** envp = client.build_cgi_envp(built_path); // headers need to go here
 		char* const argv[] = {
 			const_cast<char*>(cgi_path.c_str()), // Interpreter (e.g., python3)
 			const_cast<char*>(built_path.c_str()), // www/cgi-bin/test.py
@@ -82,11 +82,11 @@ bool cgi_eof(int pipe_fd, Client &client, std::vector<struct pollfd>& pfds)
         return true;  // CGI finished
 }
 
-bool handle_cgi_write(int pipe_fd, Client &client,  std::vector<struct pollfd>& pfds) {
+bool handle_cgi_read_from_pipe(int pipe_fd, Client &client,  std::vector<struct pollfd>& pfds) {
     char buf[10];
     ssize_t n;
     
-    printf("=== handle_cgi_write called for pipe fd %d =====================\n", pipe_fd);
+    printf("=== handle_cgi_read_from_pipe called for pipe fd %d =====================\n", pipe_fd);
     n = read(pipe_fd, buf, sizeof(buf) - 1);
     
     if (n > 0) {
@@ -173,11 +173,11 @@ bool handle_cgi_timeout(Client& client) {
 
 	if (check_cgi_timeout(client, CGI_TIMEOUT)) {
         //TODO this is hardcoded
-        client.cgi_output = "HTTP/1.1 504 Gateway Timeout\r\n"
-                           "Content-Type: text/html\r\n"
-                           "Content-Length: 54\r\n"
-                           "\r\n"
-                           "<html><body><h1>504 Gateway Timeout</h1></body></html>"; //TODO overwrite cgi buffer so this gets handled in the response
+        // client.cgi_output = "HTTP/1.1 504 Gateway Timeout\r\n"
+        //                    "Content-Type: text/html\r\n"
+        //                    "Content-Length: 54\r\n"
+        //                    "\r\n"
+        //                    "<html><body><h1>504 Gateway Timeout</h1></body></html>"; //TODO overwrite cgi buffer so this gets handled in the response
 
         client.set_error_code(504);
         //client.set_cgi_running(0);
@@ -188,4 +188,70 @@ bool handle_cgi_timeout(Client& client) {
         return true;  // Timeout occurred
     }
     return false;  // No timeout
+}
+
+
+bool handle_cgi_write_to_pipe(int pipe_fd, Client &client,  std::vector<struct pollfd>& pfds) {
+	char buf[10]; // from a buffer or from raw_request or client.get_body();
+    ssize_t n;
+    
+    printf("=== handle_cgi_write_to_pipe called for pipe fd %d =====================\n", pipe_fd);
+    //n = read(pipe_fd, buf, sizeof(buf) - 1);
+	std::string body = client.get_body();
+	int n = write(pipe_fd, body.c_str(), sizeof(buf));
+	int written = client.written_to_cgi + n; //restet this variable after writting to pipe is done;
+	int content_len = atoi(client.get_header("Content-Length").c_str());
+    if (n < content_len) {
+        printf("=== CGI writting to pipe %zd bytes =====================\n", n);
+        // Null terminate for debug output
+        //buf[n] = '\0';
+        printf("=== CGI input chunk: %s =====================\n", buf);
+        client.cgi_input.append(buf, n);
+        return false;  // Keep writting
+
+    if (n == content_len) {
+		printf("=== CGI pipe in closed (done writting), writing response =====================\n");
+
+        // Save PID before resetting it!
+        pid_t cgi_pid = client.get_cgi_pid();
+        // Reset client CGI state
+        client.set_cgi_running(0);
+        //client.set_cgi_pipe_fd(-1);
+        client.set_cgi_pid(-1);
+
+        // Close pipe and wait for child
+        close(pipe_fd);
+		// IMPORTANT: Remove fd from pfds vector
+			for (size_t i = 0; i < pfds.size(); i++) {
+				if (pfds[i].fd == pipe_fd) {
+					printf("Removing pipe fd %d from pfds\n", pipe_fd);
+					pfds.erase(pfds.begin() + i);
+					break;
+				}
+			}
+        //std::cout << "pipde fd "<< client.get_cgi_pipe() << std::endl;
+
+        int ret_pid = waitpid(cgi_pid, NULL, WNOHANG);  // Use saved PID, not -1!
+        printf("=== CGI complete output: pid %d,  %s =====================\n", ret_pid, client.cgi_input.c_str());
+        return true;  // CGI finished
+	}
+
+    
+    if (n > 0) {
+        // Error occurred
+        printf("=== CGI writting out of bounds: %s =====================\n", strerror(errno));
+        
+        // Save PID before resetting
+        pid_t cgi_pid = client.get_cgi_pid();
+        
+        client.set_cgi_running(0);
+        //client.set_cgi_pipe_fd(-1);
+        client.set_cgi_pid(-1);
+        
+        close(pipe_fd);
+        waitpid(cgi_pid, NULL, WNOHANG);  // Use saved PID
+        return true;
+    }
+    
+    return false;
 }

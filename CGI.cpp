@@ -97,11 +97,11 @@ char** CGI::build_envp(const std::string& script_path,
 //     return true;
 // }
 
-// bool CGI::handle_cgi_write(std::vector<struct pollfd>& pfds, Client* client) {
+// bool CGI::handle_cgi_read_from_pipe(std::vector<struct pollfd>& pfds, Client* client) {
 //     char buf[1024];
 //     ssize_t n;
     
-//     printf("=== handle_cgi_write called for pipe fd %d =====================\n", _pipe_fd);
+//     printf("=== handle_cgi_read_from_pipe called for pipe fd %d =====================\n", _pipe_fd);
 //     n = read(_pipe_fd, buf, sizeof(buf));
     
 //     if (n > 0) {

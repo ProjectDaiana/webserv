@@ -372,7 +372,7 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 			return connection_alive;
 		}
 
-		if (client.is_cgi_running() && handle_cgi_write(client.get_cgi_pipe() , client,  pfds))
+		if (client.is_cgi_running() && handle_cgi_read_from_pipe(client.get_cgi_pipe() , client,  pfds))
 			{
 				set_client_pollout(pfds, client);
 				std::cout << "handle_write ok pid:"<<  client.get_cgi_pid() <<  std::endl; //needed?
@@ -383,7 +383,10 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 	else if (pfd.revents & POLLOUT && client.is_read_complete())
 	{
 		printf("POLLOUT: Before handle_client_write - method='%s', uri='%s'\n", client.get_method().c_str(), client.get_uri().c_str());
-		handle_client_write(client, server_config);
+		//if is_cgi_running() && handle_cgi_write_to_pipe()
+			//client.set_write_complete();
+		//else
+			handle_client_write(client, server_config);
 		if (client.is_write_complete())
 		{
 			if (client.get_keep_alive())

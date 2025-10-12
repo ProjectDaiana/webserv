@@ -82,6 +82,7 @@ class Client {
 		pid_t cgi_pid;
 		bool cgi_running;
 		std::string cgi_output;
+		std::string cgi_input;
 		time_t cgi_start_time;
 		// std::vector<std::string> env_storage;
     	// std::vector<char*> env_ptrs;
