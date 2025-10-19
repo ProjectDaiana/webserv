@@ -1,16 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   webserv.hpp                                        :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: ltreser <ltreser@student.42berlin.de>      +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/10/08 20:20:41 by ltreser           #+#    #+#             */
-/*   Updated: 2025/10/08 20:20:49 by ltreser          ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
-
 #ifndef WEBSERV_HPP
 # define WEBSERV_HPP
 
@@ -140,7 +127,7 @@ int find_pfd(int fd, std::vector<pollfd> &pfds);
 Client& find_client(int fd, std::map<int, Client> &clients);
 void cleanup_cgi(std::vector<pollfd> &pfds, pollfd &pfd, Client &client);
 void cleanup_client(int fd, std::vector<pollfd> &pfds, std::map<int, Client> &clients);
-int ft_poll(std::vector<struct pollfd>& pfds, int timeout_ms, std::map<int, Client> clients);
+int ft_poll(std::vector<struct pollfd>& pfds, int timeout_ms, std::map<int, Client> &clients);
 Server* is_server(int fd, Server** servers, int server_count);
 void close_servers(Server **servers, int server_count);
 int find_client_for_cgi(int cgi_fd, const std::map<int, Client> &clients);

@@ -65,11 +65,11 @@ void Client::add_to_request(char *data, int len) {
 };
 
 bool Client::parse_request() {
-	std::cout << "DEBUG: Client::parse_request called" << std::endl;
-    std::cout << "DEBUG: _is_parsed = " << _is_parsed << std::endl;
-    std::cout << "DEBUG: _headers_complete = " << _headers_complete << std::endl;
-    std::cout << "DEBUG: _read_complete = " << _read_complete << std::endl;
-    std::cout << "DEBUG: Raw request length = " << _raw_request.length() << std::endl;
+	// std::cout << "DEBUG: Client::parse_request called" << std::endl;
+    // std::cout << "DEBUG: _is_parsed = " << _is_parsed << std::endl;
+    // std::cout << "DEBUG: _headers_complete = " << _headers_complete << std::endl;
+    // std::cout << "DEBUG: _read_complete = " << _read_complete << std::endl;
+    // std::cout << "DEBUG: Raw request length = " << _raw_request.length() << std::endl;
 
 	if (!_is_parsed && _read_complete) {
 		_is_parsed = _request.parse(_raw_request);
