@@ -26,7 +26,8 @@ class Client {
 		size_t _headers_end_pos;
 		time_t _last_activity; // Track last activity for timeout
 		int _error_code; //TODO change back to 200 when reset
-		int cgi_pipe_fd;
+		int cgi_stdout_fd;
+		int cgi_stdin_fd;
 
 		Server *_server;
 		Request _request;
@@ -64,8 +65,6 @@ class Client {
 		int	get_error_code() const;
 		bool get_keep_alive() const { return _keep_alive; }
 		const t_request& get_request() const;
-		//bool is_cgi_done() const { return _cgi_done; }
-		// Inside Client class
 		
 		//Setters
 		void set_error_code(int code);
@@ -73,73 +72,46 @@ class Client {
 		void set_request(const t_request& new_request);
 		void set_write_complete(bool value) { _write_complete = value; }
 		//void set_cgi_done(bool done) { _cgi_done = done; }
-		
-		// Debug
-		void print_raw_request() const;
-		void print_request_struct() const;
 
 		//CGI
 		pid_t cgi_pid;
 		bool cgi_running;
 		std::string cgi_output;
-		std::string cgi_input;
 		time_t cgi_start_time;
-		// std::vector<std::string> env_storage;
-    	// std::vector<char*> env_ptrs;
-
-		// void set_cgi_output(const std::string& output) {
-		// 	_cgi.set_output(output);
-		// }
-		// const std::string& get_cgi_output() const {
-        // 	return _cgi.get_output();
-    	// }
-
-		void set_cgi_pipe_fd(int fd) {
-			cgi_pipe_fd = fd;
-		};
-		void set_cgi_pid(pid_t pid) {
-			cgi_pid = pid;
-		};
-
-		void set_cgi_start_time() {
-			cgi_start_time = std::time(NULL);
-		}
 
 		bool is_cgi_running() {
-
-			printf("CGI IS RUNNING?: '%d'\n", (int)cgi_running);
+			// printf("CGI IS RUNNING?: '%d'\n", (int)cgi_running);
 			return cgi_running;
 		}
+		bool is_cgi_writing() {  return _cgi.is_writing(); }
+
+		// CGI Setters
+		void set_cgi_stdout_fd(int fd) { cgi_stdout_fd = fd; };
+		void set_cgi_stdin_fd(int fd) { cgi_stdin_fd = fd; }
+		void set_cgi_pid(pid_t pid) { cgi_pid = pid; };		
+		void set_cgi_start_time() { cgi_start_time = std::time(NULL); }
 		void set_cgi_running(bool b) {
 			printf("CGI IS BEING SET TO: '%d'\n", (int)b);
 			cgi_running = b;
 		}
-
+		void set_cgi_writing(bool b) {
+			printf("CGI Writting: '%d'\n", (int)b);
+			_cgi.set_writing(b);
+		}
+		void set_cgi_written(int n) { _cgi.set_written(n); }
+		
+		// CGI Getters
 		CGI& get_cgi() { return _cgi; }
+		pid_t get_cgi_pid () { return cgi_pid; }
+		int get_cgi_stdout_fd() const { return cgi_stdout_fd; }
+		int get_cgi_stdin_fd() const { return cgi_stdin_fd; }
+		time_t get_cgi_start_time() { return cgi_start_time; }
+		int get_cgi_written() { return _cgi.get_written();}
 
-		pid_t get_cgi_pid () {
-			return cgi_pid;
-		}
-
-		int get_cgi_pipe() const {
-			return cgi_pipe_fd;
-		}
-
-		time_t get_cgi_start_time() {
-			return cgi_start_time;
-		}
-
-		char** build_cgi_envp(const std::string& script_path) {
-			return _cgi.build_envp(
-				script_path,
-				get_method(),
-				get_http_version()
-				// get_content_length() //
-				// get_content_type() ?
-				// what else?			
-			);
-    }
-    
+		
+		// Debug
+		void print_raw_request() const;
+		void print_request_struct() const;
 };
 
 #endif
