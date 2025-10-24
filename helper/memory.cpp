@@ -16,9 +16,11 @@
 void *arena_alloc(t_arena *mem, size_t size)
 {
 	void *result;
-
 	if (!mem || ((mem->used + size) > mem->size))
+	{
+		printf("ERROR: allocation fail\n");
 		return (NULL);
+	}
 	result = mem->start + mem->used;
 	mem->used += size;
 	return (result);

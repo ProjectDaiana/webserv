@@ -14,7 +14,7 @@
 #ifndef WEBSERV_HPP
 # define WEBSERV_HPP
 
-# define PERM_MEM_SIZE 5000 // TODO always update
+# define PERM_MEM_SIZE 500000 // TODO always update
 # define push_struct(type, arena) (type *)arena_alloc(arena, sizeof(type));
 
 # include <stddef.h>
@@ -33,6 +33,9 @@ typedef struct s_server			t_server;
 typedef struct s_location		t_location;
 typedef struct s_request		t_request;
 typedef struct s_response		t_response;
+typedef struct s_token			t_token;
+typedef struct s_lexer			t_lexer;
+typedef struct s_parser 		t_parser;
 class Client;
 class Server;
 
@@ -69,6 +72,40 @@ typedef enum e_error
  	ERR_UNKNOWN = 499 /* Unknown error */
  } t_error;
 
+enum TokenType
+{
+	TOK_EOF,
+	TOK_STRING,
+	TOK_LBRACE,
+	TOK_RBRACE,
+	TOK_SEMICOLON,
+};
+
+struct 							s_token
+{
+	TokenType type;
+	const char * value;
+	int line;
+	int col;
+};
+
+struct s_lexer
+{
+    const char *input;
+    size_t pos;
+    int line;
+    int col;
+    t_token *tokens; //TODO change to container
+    int token_count;
+    int capacity;
+};
+
+struct s_parser
+{
+	t_lexer *lx;
+	int	pos;
+	t_arena *mem;
+};
 
 struct							s_arena
 {
@@ -126,6 +163,8 @@ void							init_config(t_data *d, t_arena *mem);
 void							init_servers(t_data *data);
 
 // parser
+void lexer(t_lexer *lx, const std::string &config_content, t_arena *mem);
+
 
 //helper
 int							ft_atoi(const char *nptr);

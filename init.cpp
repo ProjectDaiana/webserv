@@ -17,8 +17,10 @@ void    init_servers(t_data *data)
     int i;
 
     i = 0;
+    d->servers = (Server **)arena_alloc(mem, d->server_count * sizeof(Server));
     while(i < data->server_count)
     {
+	d->servers[i] = (Server *)arena_alloc(mem, sizeof(Server));
         new (data->servers[i]) Server(data->s[i]);
         i++;
     }
@@ -37,17 +39,18 @@ t_data *init_data(void)
 	return (d);
 }
 
+
 //allocating and hardcoding config for listen_binding, server, location
 //OJO only string literals, cant be changed later, but dont have to be
 //chunky monkey, make smaller once hardcoding is deleted
 void	init_config(t_data *d, t_arena *mem)
 {
-	d->server_count = 1;
-	d->s = (t_server **)arena_alloc(mem, d->server_count * sizeof(t_server));
-	d->servers = (Server **)arena_alloc(mem, d->server_count * sizeof(Server));
-	d->servers[0] = (Server *)arena_alloc(mem, sizeof(Server));
-	d->s[0] = (t_server *)arena_alloc(mem, sizeof(t_server));
-	d->s[0]->name = "PumpkinServer";
+	//d->server_count = 1;
+	//d->s = (t_server **)arena_alloc(mem, d->server_count * sizeof(t_server));
+	//d->servers = (Server **)arena_alloc(mem, d->server_count * sizeof(Server));
+	//d->servers[0] = (Server *)arena_alloc(mem, sizeof(Server));
+	//d->s[0] = (t_server *)arena_alloc(mem, sizeof(t_server));
+	//d->s[0]->name = "PumpkinServer";
 	d->s[0]->lb = (t_listen_binding *)arena_alloc(mem, sizeof(t_listen_binding));
 	d->s[0]->lb->host = "0.0.0.0";
 	d->s[0]->lb->port = 8080;
@@ -67,7 +70,7 @@ void	init_config(t_data *d, t_arena *mem)
 	d->s[0]->locations[0]->accepted_methods[0] = "GET";
 	d->s[0]->locations[0]->accepted_methods[1] = "POST";
 	d->s[0]->locations[0]->accepted_methods[2] = "DELETE";
-	d->s[0]->locations[0]->redirect = NULL;
+		d->s[0]->locations[0]->redirect = NULL;
 	//d->s[0]->locations[0]->redirect = "https://cataas.com/cat";
 	d->s[0]->locations[0]->root = "www/html";
 	d->s[0]->locations[0]->autoindex = 0; //OJO disabled

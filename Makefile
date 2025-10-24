@@ -10,8 +10,10 @@ CXXFLAGS    := -Wall -Wextra -Werror -std=c++98 -I. -g3 -Ihelper
 SRC         := helper/atoi.cpp main.cpp pollHandler.cpp \
                Client.cpp init.cpp Request.cpp CGI.cpp \
                helper/memory.cpp Server.cpp helper/server_utils.cpp \
-			   methods_post.cpp response.cpp response_utils.cpp \
-			   methods_delete.cpp http_errors.cpp methods_get.cpp	
+	       methods_post.cpp response.cpp response_utils.cpp \
+	       methods_delete.cpp http_errors.cpp methods_get.cpp \
+	       config.cpp config_lexer.cpp
+
 
 # Object files
 OBJ         := $(SRC:.cpp=.o)
