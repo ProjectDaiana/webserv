@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <signal.h>
 #include <fcntl.h> ///
+#include "webserv.hpp"
 
 bool run_cgi(Client& client, std::vector<struct pollfd>& pfds)
 {
@@ -134,11 +135,11 @@ bool handle_cgi_read_from_pipe(int pipe_fd, Client &client,  std::vector<struct 
     char buf[1000];
     ssize_t n;
     
-    //printf("=== handle_cgi_read_from_pipe called for pipe fd %d =====================\n", pipe_fd);
+	//printf("\033[32m=== handle_cgi_read_from_pipe called for pipe fd %d =====================\033[0m\n", pipe_fd);
     n = read(pipe_fd, buf, sizeof(buf) - 1);
     
     if (n > 0) {
-    //	printf(stderr, "=== CGI output chunk(%zd bytes): %s =====================\n",n, buf); //OJO this printf connflicts with buffer and will break everything
+    	//fprintf(stderr, "=== CGI output chunk(%zd bytes): %s =====================\n",n, buf); //OJO this printf connflicts with buffer and will break everything
         client.cgi_output.append(buf, n);
         return false;  // Keep reading
     }
@@ -213,26 +214,16 @@ bool check_cgi_timeout(Client& client, int timeout) {
 }
 
 bool handle_cgi_timeout(Client& client) {
-    const int CGI_TIMEOUT = 0;           
     if (!client.is_cgi_running()) {
         std::cout << "XXXXX No cgi running" << std::endl;
         return false;
     }
 
-	if (check_cgi_timeout(client, CGI_TIMEOUT)) {
-        //TODO this is hardcoded
-        client.cgi_output = "HTTP/1.1 504 Gateway Timeout\r\n"
-                           "Content-Type: text/html\r\n"
-                           "Content-Length: 54\r\n"
-                           "\r\n"
-                           "<html><body><h1>504 Gateway Timeout</h1></body></html>"; //TODO overwrite cgi buffer so this gets handled in the response
-
+    if (check_cgi_timeout(client, CGI_TIMEOUT)) {
         client.set_error_code(504);
         client.set_cgi_running(0);
-        //client.set_cgi_stdout_fd(-1);
         client.set_cgi_pid(-1);
         client.set_cgi_start_time();
-
         return true;  // Timeout occurred
     }
     return false;  // No timeout

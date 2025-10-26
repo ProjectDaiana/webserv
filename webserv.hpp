@@ -4,6 +4,9 @@
 # define PERM_MEM_SIZE 5000 // TODO always update
 # define push_struct(type, arena) (type *)arena_alloc(arena, sizeof(type));
 
+#define CGI_TIMEOUT 5
+#define CLIENT_INACTIVITY_TIMEOUT 120
+
 # include <stddef.h>
 # include <stdint.h>
 # include <stdio.h>
