@@ -125,8 +125,7 @@ bool cgi_eof(int pipe_fd, Client &client, std::vector<struct pollfd>& pfds)
 			}
 		}
 
-        int ret_pid = waitpid(cgi_pid, NULL, WNOHANG);  // Use saved PID, not -1!
-		(void)ret_pid;
+		waitpid(cgi_pid, NULL, WNOHANG);  // Use saved PID, not -1!
         // printf("=== CGI complete output: pid %d,  %s END=====================\n", ret_pid, client.cgi_output.c_str());
         return true;  // CGI finished
 }
@@ -275,9 +274,9 @@ bool handle_cgi_write_to_pipe(int pipe_fd, Client &client,  std::vector<struct p
             return true;
         }
         // partial write, keep fd in poll for POLLOUT and return to be retried on next event
-        int pidx = find_pfd(pipe_fd, pfds);
-        if (pidx != -1)
-			pfds[pidx].events |= POLLOUT;
+        int pfd_idx = find_pfd(pipe_fd, pfds);
+        if (pfd_idx != -1)
+			pfds[pfd_idx].events |= POLLOUT;
         return false;
     }
 
