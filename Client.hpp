@@ -19,15 +19,12 @@ class Client {
 		bool _headers_complete;
 		bool _read_complete;
 		bool _write_complete;
-		//bool _cgi_done;
 		bool _is_parsed;
 		bool _keep_alive;
 		size_t _content_len;
 		size_t _headers_end_pos;
 		time_t _last_activity; // Track last activity for timeout
 		int _error_code; //TODO change back to 200 when reset
-		int cgi_stdout_fd;
-		int cgi_stdin_fd;
 
 		Server *_server;
 		Request _request;
@@ -71,28 +68,25 @@ class Client {
 		void set_keep_alive(bool value) { _keep_alive = value; }
 		void set_request(const t_request& new_request);
 		void set_write_complete(bool value) { _write_complete = value; }
-		//void set_cgi_done(bool done) { _cgi_done = done; }
 
 		//CGI
-		pid_t cgi_pid;
-		bool cgi_running;
-		std::string cgi_output;
-		time_t cgi_start_time;
+		std::string cgi_output; //TODO move tp private or to CGI class?
+		//time_t cgi_start_time;
 
 		bool is_cgi_running() {
 			// printf("CGI IS RUNNING?: '%d'\n", (int)cgi_running);
-			return cgi_running;
+			return _cgi.is_running();
 		}
 		bool is_cgi_writing() {  return _cgi.is_writing(); }
 
 		// CGI Setters
-		void set_cgi_stdout_fd(int fd) { cgi_stdout_fd = fd; };
-		void set_cgi_stdin_fd(int fd) { cgi_stdin_fd = fd; }
-		void set_cgi_pid(pid_t pid) { cgi_pid = pid; };		
-		void set_cgi_start_time() { cgi_start_time = std::time(NULL); }
+		void set_cgi_stdout_fd(int fd) { _cgi.set_stdout(fd); }
+		void set_cgi_stdin_fd(int fd) { _cgi.set_stdin(fd); }
+		void set_cgi_pid(pid_t pid) { _cgi.set_pid(pid); };		
+		void set_cgi_start_time() { _cgi.set_start_time(); }
 		void set_cgi_running(bool b) {
 			printf("CGI IS BEING SET TO: '%d'\n", (int)b);
-			cgi_running = b;
+			_cgi.set_running(b);
 		}
 		void set_cgi_writing(bool b) {
 			printf("CGI Writting: '%d'\n", (int)b);
@@ -102,10 +96,11 @@ class Client {
 		
 		// CGI Getters
 		CGI& get_cgi() { return _cgi; }
-		pid_t get_cgi_pid () { return cgi_pid; }
-		int get_cgi_stdout_fd() const { return cgi_stdout_fd; }
-		int get_cgi_stdin_fd() const { return cgi_stdin_fd; }
-		time_t get_cgi_start_time() { return cgi_start_time; }
+		const CGI& get_cgi() const { return _cgi; }
+		pid_t get_cgi_pid () { return _cgi.get_pid(); }
+		int get_cgi_stdout_fd() const{ return _cgi.get_stdout(); }
+		int get_cgi_stdin_fd() const { return _cgi.get_stdin(); }
+		time_t get_cgi_start_time() { return _cgi.get_start_time(); }
 		int get_cgi_written() { return _cgi.get_written();}
 
 		

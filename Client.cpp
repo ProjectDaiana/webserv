@@ -7,9 +7,7 @@ Client::Client(int fd, Server &server) :
 							_keep_alive(0), _content_len(0),
 							_headers_end_pos(0),
 							_error_code(200),
-							_server(&server),
-							cgi_running(0),
-							cgi_start_time(0)
+							_server(&server)
 							{}
 
 Client::Client() : _fd(-1), _is_parsed(false), _server(NULL) {};

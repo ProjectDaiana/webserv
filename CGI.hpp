@@ -26,7 +26,7 @@ private:
     std::string _interpreter;
     
 public:
-	CGI() : _pid(-1), _running(false), _output(""), _start_time(0), _stdout_fd(-1), _written(0) {}
+	CGI() : _pid(-1), _running(false), _output(""), _start_time(0), _stdout_fd(-1), _stdin_fd(-1), _written(0) {}
     ~CGI();
     
     void reset() {
@@ -62,16 +62,18 @@ public:
     const std::string& get_script_name()     const { return _script_name; }
     const std::string& get_document_root()   const { return _document_root; }
     const std::string& get_interpreter()     const { return _interpreter; }
+	int get_stdout() const { return _stdout_fd; }
+	int get_stdin() const { return _stdin_fd; }
 
     // Getters Setters
     const std::string& get_output() const { return _output; }
     pid_t get_pid() const { return _pid; }
-    //int get_stdout_fd() const { return _stdout_fd; }
     time_t get_start_time() const { return _start_time; }
 	int  get_written() const {return _written; }
 
+	void set_stdout(int fd) { _stdout_fd = fd; }
+	void set_stdin(int fd) { _stdin_fd = fd; }
     void set_output(const std::string& output) { _output = output; }
-    //void set_stdout_fd(int fd) { _stdout_fd = fd; }
     void set_pid(pid_t pid) { _pid = pid; }
     void set_start_time() { _start_time = std::time(NULL); }
     void set_running(bool running) { _running = running; }
