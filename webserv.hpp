@@ -164,7 +164,26 @@ void							init_servers(t_data *data);
 
 // parser
 void lexer(t_lexer *lx, const std::string &config_content, t_arena *mem);
-
+void lexer_pretty_print(const t_lexer *lx); //DEL
+s_token lexer_next_token(t_lexer *lx, t_arena *mem);
+void    parser(t_data *d, t_parser *p, t_lexer *lx, t_arena *mem);
+t_server* parse_server(t_parser *p);
+t_location* parse_location(t_parser *p);
+void parse_directive(t_parser *p, t_server *s, t_location *l = NULL); //if no l, l = null
+t_listen_binding  *parse_listen_binding(t_parser *p);
+t_location* create_location(t_parser *p, t_arena *mem);
+t_server* create_server(t_data *d, t_parser *p, t_arena *mem);
+void    init_parser(t_data *d, t_parser *p, t_lexer *lx, t_arena *mem);
+int count_allowed_methods(t_parser *p);
+int count_locations(t_parser *p);
+int count_cgi_extensions(t_parser *p);
+int count_error_pages(t_parser *p);
+int count_servers(t_lexer *lx);
+bool parser_match(t_parser *p, int type);
+bool parser_advance(t_parser *p);
+const t_token* parser_current(t_parser *p);
+std::string read_config(const char *path);
+std::string read_config(const char *path);
 
 //helper
 int							ft_atoi(const char *nptr);

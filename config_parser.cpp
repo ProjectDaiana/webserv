@@ -1,9 +1,22 @@
-//TODO write recursive descent for directive
 
-
-void parse_listen_binding(t_parser *p)
+t_listen_binding  *parse_listen_binding(t_parser *p)
 {
-	//TODO handle bc its only in one token, the port and host, and needs to be destinguished
+	t_listen_binding *lb;
+	const char *token = parser_current(p).value;
+	if (token != TOK_STRING)
+	{
+		//ft_error("Parser Error: expected listen binding value!\n");
+		return NULL;
+	}
+	const char *colon = strchr(token, ":");
+	if (colon)
+	{	
+		memcpy(lb->host, token, (size_t)colon - token); //cpp style, working?
+		lb->port = atoi(colon + 1);
+	}
+	else
+		lb->port = atoi(token);
+	return (lb);
 }
 
 void parse_directive(t_parser *p, t_server *s, t_location *l = NULL) //if no l, l = null
@@ -90,4 +103,6 @@ void	parser(t_data *d, t_parser *p, t_lexer *lx, t_arena *mem)
 		}
 	}
 }
+
+//TODO pass memory everywhere
 

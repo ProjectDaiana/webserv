@@ -1,3 +1,8 @@
+#include "webserv.hpp"
+#include <string.h>           // for strcmp()
+#include <stdlib.h>           // for atoi()
+
+
 int count_servers(t_lexer *lx)
 {
     int count = 0;
@@ -121,7 +126,7 @@ void    init_parser(t_data *d, t_parser *p, t_lexer *lx, t_arena *mem)
         d->s = (t_server **)arena_alloc(mem, max_servers * sizeof(t_server));
 }
 
-t_server* create_server(t_data *d, t_parser *p)
+t_server* create_server(t_data *d, t_parser *p, t_arena *mem)
 {
 	t_server* s = (t_server *)arena_alloc(d->mem, sizeof(t_server));
     s->name = "PumpkinServer"; //default name, do we wanna name them in the config file?
@@ -138,14 +143,13 @@ t_server* create_server(t_data *d, t_parser *p)
     return s;
 }
 
-t_location* create_location(t_parser *p)
+t_location* create_location(t_parser *p, t_arena *mem)
 {
 	t_location *l = (t_location *)arena_alloc(mem, sizeof(t_location));
 	l->path = NULL;
 	l->method_count = 0;
 	l->accepted_methods = (const char **)arena_alloc(mem, count_allowed_methods(p) * sizeof(const char *));
 	l->redirect = NULL;
-	l->root = NULL;
 	l->autoindex = 0;
 	l->default_file = NULL;
 	l->upload_enabled = 0;

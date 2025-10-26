@@ -12,16 +12,16 @@
 
 #include "webserv.hpp"
 
-void    init_servers(t_data *data)
+void    init_servers(t_data *d)
 {
     int i;
 
     i = 0;
-    d->servers = (Server **)arena_alloc(mem, d->server_count * sizeof(Server));
-    while(i < data->server_count)
+    d->servers = (Server **)arena_alloc(d->perm_memory, d->server_count * sizeof(Server));
+    while(i < d->server_count)
     {
-	d->servers[i] = (Server *)arena_alloc(mem, sizeof(Server));
-        new (data->servers[i]) Server(data->s[i]);
+	d->servers[i] = (Server *)arena_alloc(d->perm_memory, sizeof(Server));
+        new (d->servers[i]) Server(d->s[i]);
         i++;
     }
 }
