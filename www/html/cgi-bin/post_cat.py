@@ -3,9 +3,6 @@ import os
 import sys
 from urllib.parse import parse_qs
 
-print("Content-Type: text/html")
-print()
-
 method = os.environ.get('REQUEST_METHOD', 'GET')
 cat_name = None
 print("""

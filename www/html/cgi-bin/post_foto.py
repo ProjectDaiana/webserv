@@ -4,19 +4,10 @@ import sys
 import cgi
 import base64
 
-# minimal headers
-print("Content-Type: text/html")
-print()
 
-# Diagnostics: expose env values (hidden by default)
 method = os.environ.get('REQUEST_METHOD', 'GET')
 cl = os.environ.get('CONTENT_LENGTH', '')
 ct = os.environ.get('CONTENT_TYPE', '')
-print("<pre style='display:none'>")
-print(f"REQUEST_METHOD: {method}")
-print(f"CONTENT_LENGTH: {cl}")
-print(f"CONTENT_TYPE: {ct}")
-print("</pre>")
 
 # Parse form
 # fieldstorage reads from sys.stdin by default using CONTENT_LENGTH/CONTENT_TYPE
@@ -25,7 +16,6 @@ form = cgi.FieldStorage()
 # Visible debug: parsed keys
 keys = list(form.keys()) if hasattr(form, 'keys') else []
 print("<div style='font-family:monospace; font-size:12px; margin:8px;'>")
-print("<strong>Parsed form keys:</strong> " + ", ".join(keys))
 print("</div>")
 
 print("""
