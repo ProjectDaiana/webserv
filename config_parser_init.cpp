@@ -12,9 +12,7 @@ int count_servers(t_lexer *lx)
     {
         if (lx->tokens[i].type == TOK_STRING &&
             strcmp(lx->tokens[i].value, "server") == 0)
-        {
-            count++;
-        }
+        	    count++;
         i++;
     }
 
@@ -76,11 +74,11 @@ int count_locations(t_parser *p)
     int saved_pos = p->pos;
     int count = 0;
 
-    while (!match_token(p, TOK_RBRACE)) {
-        if (match_token(p, TOK_STRING) && strcmp(peek_token(p)->value, "location") == 0) {
-            count++;
-        }
-        advance(p);
+    while (!parser_match(p, TOK_RBRACE)) 
+	{
+        if (parser_match(p, TOK_STRING) && strcmp(parser_current(p)->value, "location") == 0) 
+   	        count++;
+        parser_advance(p);
     }
 
     p->pos = saved_pos;
@@ -117,22 +115,28 @@ int count_allowed_methods(t_parser *p)
 
 void    init_parser(t_data *d, t_parser *p, t_lexer *lx, t_arena *mem)
 {
+		printf("\n\n____TESTING PARSER____:\n");
         int max_servers;
         p->lx = lx;
         p->pos = 0;
         p->mem = mem;
         d->server_count = 0;
         max_servers = count_servers(lx);
-        d->s = (t_server **)arena_alloc(mem, max_servers * sizeof(t_server));
+        d->s = (t_server **)arena_alloc(mem, max_servers * sizeof(t_server *));
 }
 
-t_server* create_server(t_data *d, t_parser *p, t_arena *mem)
+t_listen_binding *create_listen_binding(t_arena *mem)
 {
-	t_server* s = (t_server *)arena_alloc(d->mem, sizeof(t_server));
+	t_listen_binding *lb = (t_listen_binding *)arena_alloc(mem, sizeof(t_listen_binding));
+    lb->port = 0;
+	lb->host = NULL;
+	return lb;
+}
+
+t_server* create_server(t_parser *p, t_arena *mem)
+{
+	t_server* s = (t_server *)arena_alloc(mem, sizeof(t_server));
     s->name = "PumpkinServer"; //default name, do we wanna name them in the config file?
-	s->lb = (t_listen_binding *)arena_alloc(mem, sizeof(t_listen_binding));
-	s->lb->host = NULL;
-	s->lb->port = 0;
 	s->error_page_count = 0;
 	s->error_pages = (const char **)arena_alloc(mem, count_error_pages(p) * sizeof(const char *));
 	s->error_code_count = 0;
@@ -156,6 +160,7 @@ t_location* create_location(t_parser *p, t_arena *mem)
 	l->upload_store = NULL;
 	l->upload_count = 0; //only variable thats not parsed
 	l->cgi_count = 0;
-	l->cgi_extensions = (const char **)arena_alloc(mem, cgi_count_extensions(p) * sizeof (const char *));
+	l->cgi_extensions = (const char **)arena_alloc(mem, count_cgi_extensions(p) * sizeof (const char *));
 	l->cgi_path = NULL;
+	return l;
 }

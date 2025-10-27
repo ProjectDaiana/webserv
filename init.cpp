@@ -6,7 +6,7 @@
 /*   By: ltreser <ltreser@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/24 16:34:29 by ltreser           #+#    #+#             */
-/*   Updated: 2025/10/24 20:10:46 by ltreser          ###   ########.fr       */
+/*   Updated: 2025/10/26 23:14:53 by ltreser          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,6 @@ t_data *init_data(void)
 	mem = alloc_perm_memory();
 	d = (t_data *)arena_alloc(mem, sizeof(t_data));
 	d->perm_memory = mem;
-	init_config(d, d->perm_memory);
-	//init rest here
 	return (d);
 }
 

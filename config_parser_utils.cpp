@@ -1,3 +1,5 @@
+#include "webserv.hpp"
+
 const t_token* parser_current(t_parser *p)
 {
     return &p->lx->tokens[p->pos];

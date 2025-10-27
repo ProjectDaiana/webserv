@@ -6,7 +6,7 @@
 /*   By: darotche <darotche@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/23 17:31:14 by ltreser           #+#    #+#             */
-/*   Updated: 2025/09/03 16:35:38 by darotche         ###   ########.fr       */
+/*   Updated: 2025/10/27 01:44:58 by ltreser          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ t_arena *alloc_perm_memory(void)
 	temp_buf = (uint8_t*)malloc(PERM_MEM_SIZE);
 	if (!temp_buf)
 		return (NULL);
+	memset(temp_buf, 0, PERM_MEM_SIZE);
 	mem = (t_arena *)temp_buf;
 	mem->start = temp_buf;
 	mem->size = PERM_MEM_SIZE;
@@ -48,4 +49,15 @@ t_arena *alloc_perm_memory(void)
 	return (mem);
 }
 
+char *arena_str(t_arena *mem, const char *src, size_t len)
+{
+    if (!src)
+        return NULL;
+    if (!len)
+        len = strlen(src);
+    char *dst = (char *)arena_alloc(mem, len + 1); // +1 for null terminator
+    memcpy(dst, src, len);
+    dst[len] = '\0';
+    return dst;
+}
 
