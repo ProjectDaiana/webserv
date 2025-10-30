@@ -6,7 +6,7 @@
 /*   By: darotche <darotche@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/24 16:26:00 by ltreser           #+#    #+#             */
-/*   Updated: 2025/10/27 00:57:52 by ltreser          ###   ########.fr       */
+/*   Updated: 2025/10/30 19:55:36 by ltreser          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ static void print_error_pages(const t_server *s)
         printf("    [%d] => %s\n", s->error_codes[i], s->error_pages[i]);
 }
 
+
 static void print_locations(const t_server *s)
 {
     printf("  Locations (%d):\n", s->location_count);
@@ -38,14 +39,28 @@ static void print_locations(const t_server *s)
     {
         const t_location *l = s->locations[i];
         printf("    %s\n", l->path ? l->path : "(unnamed)");
-        printf("      Methods:");
-        for (int j = 0; j < l->method_count; ++j)
-            printf(" %s", l->accepted_methods[j]);
-        printf("\n");
-        printf("      Autoindex: %s\n", l->autoindex ? "on" : "off");
+
+        printf("      Root: %s\n", l->root ? l->root : "(none)");
         printf("      Default file: %s\n", l->default_file ? l->default_file : "(none)");
-        if (l->upload_enabled)
+        printf("      Autoindex: %s\n", l->autoindex ? "on" : "off");
+
+        if (l->method_count > 0)
+        {
+            printf("      Allowed methods:");
+            for (int j = 0; j < l->method_count; ++j)
+                printf(" %s", l->accepted_methods[j]);
+            printf("\n");
+        }
+        else
+            printf("      Allowed methods: (none)\n");
+
+        // Always print upload info if present, even if upload_enabled is off
+        if (l->upload_store || l->upload_enabled)
+        {
             printf("      Upload store: %s\n", l->upload_store ? l->upload_store : "(none)");
+            printf("      Upload enabled: %s\n", l->upload_enabled ? "on" : "off");
+        }
+
         if (l->cgi_count > 0)
         {
             printf("      CGI extensions:");
@@ -59,7 +74,7 @@ static void print_locations(const t_server *s)
 
 static void print_server(const t_server *s, int index)
 {
-    printf("Server [%d]: %s\n", index, s->name);
+    printf("Server [%d]: %s\n", index, s->name ? s->name : "(unnamed)");
     if (s->lb)
         print_listen_binding(s->lb);
     printf("  Max body size: %zu\n", s->max_bdy_size);

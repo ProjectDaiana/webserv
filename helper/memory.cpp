@@ -6,7 +6,7 @@
 /*   By: darotche <darotche@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/23 17:31:14 by ltreser           #+#    #+#             */
-/*   Updated: 2025/10/27 01:44:58 by ltreser          ###   ########.fr       */
+/*   Updated: 2025/10/30 19:59:03 by ltreser          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@
 //function to allocate memory within an areana
 void *arena_alloc(t_arena *mem, size_t size)
 {
+	if (!size)
+		printf(">>>>>>>>ERROR!! MEMORY CORRUPTION");
 	void *result;
 	if (!mem || ((mem->used + size) > mem->size))
 	{

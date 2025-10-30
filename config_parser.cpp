@@ -38,7 +38,7 @@ void parse_directive(t_parser *p, t_server *s, t_arena *mem, t_location *l) //if
 		;
 	const char *value = parser_current(p)->value;
 	parser_advance(p);
-	if (!parser_match(p, TOK_SEMICOLON))
+	if (strcmp(name, "allowed_methods") && !parser_match(p, TOK_SEMICOLON) )
 		//ft_error("Parser Error: expected ';' after directive!\n");
 		;
 	if (l)
@@ -51,7 +51,15 @@ void parse_directive(t_parser *p, t_server *s, t_arena *mem, t_location *l) //if
 		else if (!strcmp(name, "upload_enabled")) l->upload_enabled = (!strcmp(value, "on"));
 		else if (!strcmp(name, "cgi_path")) l->cgi_path = arena_str(mem, value);
 		else if (!strcmp(name, "path")) l->path = arena_str(mem, value);
-		//else if (!strcmp(name, "allowed_methods")) l->accepted_methods = arena_str(mem, value); //TODO can i somehow get them all at once here?
+		else if (!strcmp(name, "allowed_methods")) 
+		{
+			while (strcmp(value, ";"))
+			{
+				l->accepted_methods[l->method_count++] = arena_str(mem, value);
+				value = parser_current(p)->value;
+				parser_advance(p);
+			}
+		}		
 		else
 			//ft_error("Parser Error: unknown location directive!\n");
 			;
@@ -119,7 +127,11 @@ void	parser(t_data *d, t_parser *p, t_lexer *lx, t_arena *mem)
 		if (!strcmp(parser_current(p)->value, "server"))
 		{
 			d->s[d->server_count++] = parse_server(p, mem);
-			printf("[DEBUG] stored lb addr: %p, host ptr: %p, port: %d\n",
+			 printf("[DEBUG] stored lb addr server 0: %p, host ptr: %p, port: %d\n",
+             d->s[0]->lb,
+              d->s[0]->lb->host,
+            d->s[0]->lb->port);
+			printf("[DEBUG] stored lb addr current server: %p, host ptr: %p, port: %d\n",
       		 d->s[d->server_count-1]->lb,
      		  d->s[d->server_count-1]->lb->host,
        		d->s[d->server_count-1]->lb->port);
