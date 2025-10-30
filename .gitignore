@@ -1,2 +1,7 @@
 # Ignore all object files
 *.o
+www/html/uploads/*
+www/html/uploads_cgi/*
+settings.json
+# Ignore the webserv executable/
+/webserv

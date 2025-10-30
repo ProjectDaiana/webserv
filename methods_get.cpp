@@ -184,8 +184,8 @@ std::string handle_get(Client &client, const t_server &config, t_location *l)
 	printf("GET WAS CALLED\n");
 	(void)config; //TODO remove from ft if not needed
 	struct stat st; //struct that stat fills with information about a file path
-	printf("root is: '%s'\n", l->root);
-	printf("uri is: '%s'\n", client.get_path().c_str());
+	//printf("root is: '%s'\n", l->root);
+	//printf("uri is: '%s'\n", client.get_path().c_str());
 	if (client.get_path() == "/name_pumpkin.html")
 		return name_pumpkin(client, l);
 	std::string path = std::string(l->root) + client.get_path();
