@@ -6,7 +6,7 @@
 /*   By: ltreser <ltreser@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 20:20:41 by ltreser           #+#    #+#             */
-/*   Updated: 2025/10/08 20:20:49 by ltreser          ###   ########.fr       */
+/*   Updated: 2025/10/27 01:45:20 by ltreser          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 #ifndef WEBSERV_HPP
 # define WEBSERV_HPP
 
-# define PERM_MEM_SIZE 5000 // TODO always update
+# define PERM_MEM_SIZE 50000000 // TODO always update
 # define push_struct(type, arena) (type *)arena_alloc(arena, sizeof(type));
 
 # include <stddef.h>
@@ -33,6 +33,9 @@ typedef struct s_server			t_server;
 typedef struct s_location		t_location;
 typedef struct s_request		t_request;
 typedef struct s_response		t_response;
+typedef struct s_token			t_token;
+typedef struct s_lexer			t_lexer;
+typedef struct s_parser 		t_parser;
 class Client;
 class Server;
 
@@ -69,6 +72,40 @@ typedef enum e_error
  	ERR_UNKNOWN = 499 /* Unknown error */
  } t_error;
 
+enum TokenType
+{
+	TOK_EOF,
+	TOK_STRING,
+	TOK_LBRACE,
+	TOK_RBRACE,
+	TOK_SEMICOLON,
+};
+
+struct 							s_token
+{
+	TokenType type;
+	const char * value;
+	int line;
+	int col;
+};
+
+struct s_lexer
+{
+    const char *input;
+    size_t pos;
+    int line;
+    int col;
+    t_token *tokens; //TODO change to container
+    int token_count;
+    int capacity;
+};
+
+struct s_parser
+{
+	t_lexer *lx;
+	int	pos;
+	t_arena *mem;
+};
 
 struct							s_arena
 {
@@ -119,6 +156,8 @@ struct s_response
 void							free_arena(t_arena *mem);
 t_arena							*alloc_perm_memory(void);
 void							*arena_alloc(t_arena *mem, size_t size);
+char *arena_str(t_arena *mem, const char *src, size_t len = 0);
+
 
 // init
 t_data							*init_data(void);
@@ -126,6 +165,28 @@ void							init_config(t_data *d, t_arena *mem);
 void							init_servers(t_data *data);
 
 // parser
+void lexer(t_lexer *lx, const std::string &config_content, t_arena *mem);
+void lexer_pretty_print(const t_lexer *lx); //DEL
+s_token lexer_next_token(t_lexer *lx, t_arena *mem);
+void    parser(t_data *d, t_parser *p, t_lexer *lx, t_arena *mem);
+t_server* parse_server(t_parser *p, t_arena *mem);
+t_location* parse_location(t_parser *p, t_arena *mem);
+void parse_directive(t_parser *p, t_server *s, t_arena *mem, t_location *l = NULL); //if no l, l = null
+t_listen_binding  *parse_listen_binding(t_parser *p);
+t_location* create_location(t_parser *p, t_arena *mem);
+t_server* create_server(t_parser *p, t_arena *mem);
+t_listen_binding *create_listen_binding(t_arena *mem);
+void    init_parser(t_data *d, t_parser *p, t_lexer *lx, t_arena *mem);
+int count_allowed_methods(t_parser *p);
+int count_locations(t_parser *p);
+int count_cgi_extensions(t_parser *p);
+int count_error_pages(t_parser *p);
+int count_servers(t_lexer *lx);
+bool parser_match(t_parser *p, int type);
+bool parser_advance(t_parser *p);
+const t_token* parser_current(t_parser *p);
+std::string read_config(const char *path);
+std::string read_config(const char *path);
 
 //helper
 int							ft_atoi(const char *nptr);

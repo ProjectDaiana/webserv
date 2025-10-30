@@ -6,20 +6,22 @@
 /*   By: ltreser <ltreser@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/24 16:34:29 by ltreser           #+#    #+#             */
-/*   Updated: 2025/09/27 02:00:25 by ltreser          ###   ########.fr       */
+/*   Updated: 2025/10/26 23:14:53 by ltreser          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserv.hpp"
 
-void    init_servers(t_data *data)
+void    init_servers(t_data *d)
 {
     int i;
 
     i = 0;
-    while(i < data->server_count)
+    d->servers = (Server **)arena_alloc(d->perm_memory, d->server_count * sizeof(Server));
+    while(i < d->server_count)
     {
-        new (data->servers[i]) Server(data->s[i]);
+	d->servers[i] = (Server *)arena_alloc(d->perm_memory, sizeof(Server));
+        new (d->servers[i]) Server(d->s[i]);
         i++;
     }
 }
@@ -32,15 +34,14 @@ t_data *init_data(void)
 	mem = alloc_perm_memory();
 	d = (t_data *)arena_alloc(mem, sizeof(t_data));
 	d->perm_memory = mem;
-	init_config(d, d->perm_memory);
-	//init rest here
 	return (d);
 }
+
 
 //allocating and hardcoding config for listen_binding, server, location
 //OJO only string literals, cant be changed later, but dont have to be
 //chunky monkey, make smaller once hardcoding is deleted
-void	init_config(t_data *d, t_arena *mem)
+/*void	init_config(t_data *d, t_arena *mem)
 {
 	d->server_count = 1;
 	d->s = (t_server **)arena_alloc(mem, d->server_count * sizeof(t_server));
@@ -67,8 +68,8 @@ void	init_config(t_data *d, t_arena *mem)
 	d->s[0]->locations[0]->accepted_methods[0] = "GET";
 	d->s[0]->locations[0]->accepted_methods[1] = "POST";
 	d->s[0]->locations[0]->accepted_methods[2] = "DELETE";
-	d->s[0]->locations[0]->redirect = NULL;
-	//d->s[0]->locations[0]->redirect = "https://cataas.com/cat";
+		d->s[0]->locations[0]->redirect = NULL;
+	d->s[0]->locations[0]->redirect = "https://cataas.com/cat";
 	d->s[0]->locations[0]->root = "www/html";
 	d->s[0]->locations[0]->autoindex = 0; //OJO disabled
 	d->s[0]->locations[0]->default_file = "index.html";
@@ -77,6 +78,6 @@ void	init_config(t_data *d, t_arena *mem)
 	d->s[0]->locations[0]->upload_count = 0;
 	d->s[0]->locations[0]->cgi_count = 1;
 	d->s[0]->locations[0]->cgi_extensions = (const char **)arena_alloc(mem, d->s[0]->locations[0]->cgi_count * sizeof (const char *));
-	d->s[0]->locations[0]->cgi_extensions[0] = ".py";
-	d->s[0]->locations[0]->cgi_path = "/usr/bin/python3";
-}
+	d->s[0]->locations[0]->cgi_extensions[0] = ".py"; //TODO put this
+	d->s[0]->locations[0]->cgi_path = "/usr/bin/python3"; //TODO put this
+}*/
