@@ -133,7 +133,10 @@ void    init_parser(t_data *d, t_parser *p, t_lexer *lx, t_arena *mem)
         p->mem = mem;
         d->server_count = 0;
         max_servers = count_servers(lx);
-        d->s = (t_server **)arena_alloc(mem, max_servers * sizeof(t_server *));
+		if (count_servers(lx))
+        	d->s = (t_server **)arena_alloc(mem, max_servers * sizeof(t_server *));
+		//else
+			//TODO throw error
 }
 
 t_listen_binding *create_listen_binding(t_arena *mem)

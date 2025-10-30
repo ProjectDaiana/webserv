@@ -6,7 +6,7 @@
 /*   By: darotche <darotche@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/24 16:26:00 by ltreser           #+#    #+#             */
-/*   Updated: 2025/10/30 19:55:36 by ltreser          ###   ########.fr       */
+/*   Updated: 2025/10/30 22:37:18 by ltreser          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,6 +100,7 @@ int	main(void)
 	else
 		printf("WTF WHY IS HOST NULL\n");
 	printf("\n\nDEBUG: this is lb: '%p', '%d'\n", data->s[0]->lb->host, data->s[0]->lb->port);
+	exit(0);
 	init_servers(data);
 	run_server(data->servers, data->server_count);	
 	free_arena(data->perm_memory);
