@@ -1,3 +1,18 @@
+<<<<<<< Updated upstream
+=======
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   init.cpp                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: darotche <darotche@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/08/24 16:34:29 by ltreser           #+#    #+#             */
+/*   Updated: 2025/10/30 21:17:23 by darotche         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+>>>>>>> Stashed changes
 #include "webserv.hpp"
 
 void    init_servers(t_data *d)
@@ -29,7 +44,7 @@ t_data *init_data(void)
 //allocating and hardcoding config for listen_binding, server, location
 //OJO only string literals, cant be changed later, but dont have to be
 //chunky monkey, make smaller once hardcoding is deleted
-/*void	init_config(t_data *d, t_arena *mem)
+void	init_config(t_data *d, t_arena *mem)
 {
 	d->server_count = 1;
 	d->s = (t_server **)arena_alloc(mem, d->server_count * sizeof(t_server));
@@ -56,7 +71,7 @@ t_data *init_data(void)
 	d->s[0]->locations[0]->accepted_methods[0] = "GET";
 	d->s[0]->locations[0]->accepted_methods[1] = "POST";
 	d->s[0]->locations[0]->accepted_methods[2] = "DELETE";
-		d->s[0]->locations[0]->redirect = NULL;
+	// d->s[0]->locations[0]->redirect = NULL;
 	d->s[0]->locations[0]->redirect = "https://cataas.com/cat";
 	d->s[0]->locations[0]->root = "www/html";
 	d->s[0]->locations[0]->autoindex = 0; //OJO disabled
@@ -68,4 +83,4 @@ t_data *init_data(void)
 	d->s[0]->locations[0]->cgi_extensions = (const char **)arena_alloc(mem, d->s[0]->locations[0]->cgi_count * sizeof (const char *));
 	d->s[0]->locations[0]->cgi_extensions[0] = ".py"; //TODO put this
 	d->s[0]->locations[0]->cgi_path = "/usr/bin/python3"; //TODO put this
-}*/
+}

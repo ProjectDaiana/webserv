@@ -41,16 +41,16 @@ std::string read_config(const char *path)
 	return (content);
 }
 
-void	init_config(t_data *d, t_arena *mem)
-{
-	t_lexer		*lx;
-	t_parser	*ps;
+// void	init_config(t_data *d, t_arena *mem)
+// {
+// 	t_lexer		*lx;
+// 	t_parser	*ps;
 
-	(void)d;
-	lx = (t_lexer *)arena_alloc(mem, sizeof(t_lexer));
-	ps = (t_parser *)arena_alloc(mem, sizeof(t_parser));
-	std::string config_content = read_config("config/webserv.conf");
-	lexer(lx, config_content, mem);
-	parser(d, ps, lx, mem);
-	//autosettings(d); //TODO give all the rest of the server/location variables values if they dont have that
-}
+// 	(void)d;
+// 	lx = (t_lexer *)arena_alloc(mem, sizeof(t_lexer));
+// 	ps = (t_parser *)arena_alloc(mem, sizeof(t_parser));
+// 	std::string config_content = read_config("config/webserv.conf");
+// 	lexer(lx, config_content, mem);
+// 	parser(d, ps, lx, mem);
+// 	//autosettings(d); //TODO give all the rest of the server/location variables values if they dont have that
+// }
