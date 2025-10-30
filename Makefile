@@ -11,7 +11,8 @@ SRC         := helper/atoi.cpp main.cpp pollHandler.cpp \
                Client.cpp init.cpp Request.cpp CGI.cpp \
                helper/memory.cpp Server.cpp helper/server_utils.cpp \
 			   methods_post.cpp response.cpp response_utils.cpp \
-			   methods_delete.cpp http_errors.cpp methods_get.cpp	
+			   methods_delete.cpp http_errors.cpp methods_get.cpp \
+			   helper/multipart_utils.cpp
 
 # Object files
 OBJ         := $(SRC:.cpp=.o)

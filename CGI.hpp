@@ -24,7 +24,8 @@ private:
     std::string _script_name;     // URI
     std::string _document_root;   // root used to build script
     std::string _interpreter;
-    
+    std::string _uploaded_file_path;
+
 public:
 	CGI() : _pid(-1), _running(false), _output(""), _start_time(0), _stdout_fd(-1), _stdin_fd(-1), _written(0) {}
     ~CGI();
@@ -82,5 +83,10 @@ public:
 	bool is_running() const { return _running; }
 	bool is_writing() const { return _writing; }
 
+    // Extract and save uploaded file from multipart/form-data body
+    // Returns true on success, false on failure
+    bool extract_and_save_uploaded_file(const std::string& body, const std::string& boundary, const std::string& out_filename);
+    void set_uploaded_file_path(const std::string& path) { _uploaded_file_path = path; }
+    const std::string& get_uploaded_file_path() const { return _uploaded_file_path; }
 };
 #endif

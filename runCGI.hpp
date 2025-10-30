@@ -86,8 +86,10 @@ bool run_cgi(Client& client, std::vector<struct pollfd>& pfds)
     client.set_cgi_pid(pid);
 
 	if (client.get_method() == "POST" && !client.get_body().empty()) {
-		printf("=== POST request with %zu bytes body =====================\n", client.get_body().length());
-	//	cgi_pipes[pipefd_in[1]] = &client;
+		//printf("=== POST request with %zu bytes body =====================\n", client.get_body().length());
+
+		//printf("\033[33mrunCGI: cgi boddy %s\033[0m\n", client.get_body().c_str());
+		//	printf("\033[33m POST Content Type %s =====================\n", client.get_header("Content-Type").c_str());
 	    client.set_cgi_writing(1);
 		client.set_cgi_stdin_fd(pipefd_in[1]);
         pfds.push_back(Server::create_pollfd(pipefd_in[1], POLLOUT, 0));
@@ -106,12 +108,39 @@ bool cgi_eof(int pipe_fd, Client &client, std::vector<struct pollfd>& pfds)
 {
 	printf("=== CGI pipe closed (EOF), writing response =====================\n");
 
+		printf("\033[33mDEBUG BEFORE EOF: client_fd=%d, cgi_stdin_fd=%d, cgi_written=%d, body_len=%zu, content-length='%s'\033[0m\n",
+		client.get_fd(),
+		client.get_cgi_stdin_fd(),
+		client.get_cgi_written(),
+		client.get_body().size(),
+		client.get_header("Content-Length").c_str());
+		printf("\033[33m POST Content Type %s =====================\n", client.get_header("Content-Type").c_str());
+		printf("\033[33mrunCGI: cgi boddy %s\033[0m\n", client.get_body().c_str());
+        
         // Save PID before resetting it!
         pid_t cgi_pid = client.get_cgi_pid();
 		client.set_cgi_running(0);
-        //client.set_cgi_pipe_fd(-1)
-        //client.set_cgi_stdout_fd(-1);
-        client.set_cgi_pid(-1);
+		client.set_cgi_pid(-1);
+
+    // Test: Try to extract and save uploaded file if multipart/form-data
+    const std::string& content_type = client.get_header("Content-Type");
+    if (content_type.find("multipart/form-data") != std::string::npos) {
+        std::string boundary_key = "boundary=";
+        size_t bpos = content_type.find(boundary_key);
+        if (bpos != std::string::npos) {
+            std::string boundary = content_type.substr(bpos + boundary_key.length());
+            size_t end = boundary.find_first_of(" ;\r\n");
+            if (end != std::string::npos)
+                boundary = boundary.substr(0, end);
+            std::string out_filename = "www/cgi-bin/uploads/upload";
+            CGI& cgi = client.get_cgi();
+            if (cgi.extract_and_save_uploaded_file(client.get_body(), boundary, out_filename)) {
+                printf("[cgi_eof] Multipart file extracted and saved: %s\n", out_filename.c_str());
+            } else {
+				printf("\033[31m[cgi_eof] Failed to extract multipart file.\033[0m\n");
+            }
+        }
+    }
 
         // Close pipe and wait for child
         close(pipe_fd);
@@ -127,7 +156,8 @@ bool cgi_eof(int pipe_fd, Client &client, std::vector<struct pollfd>& pfds)
 
 		waitpid(cgi_pid, NULL, WNOHANG);  // Use saved PID, not -1!
         // printf("=== CGI complete output: pid %d,  %s END=====================\n", ret_pid, client.cgi_output.c_str());
-        return true;  // CGI finished
+    
+		return true;  // CGI finished
 }
 
 bool handle_cgi_read_from_pipe(int pipe_fd, Client &client,  std::vector<struct pollfd>& pfds) {
@@ -143,16 +173,9 @@ bool handle_cgi_read_from_pipe(int pipe_fd, Client &client,  std::vector<struct 
         return false;  // Keep reading
     }
 
-    if (n == 0) {
-        // debug: show state when EOF observed
-		printf("\033[33mDEBUG BEFORE EOF: client_fd=%d, cgi_stdin_fd=%d, cgi_written=%d, body_len=%zu, content-length='%s'\033[0m\n",
-		client.get_fd(),
-		client.get_cgi_stdin_fd(),
-		client.get_cgi_written(),
-		client.get_body().size(),
-		client.get_header("Content-Length").c_str());
-        return cgi_eof(pipe_fd, client, pfds);  // CGI finished
-		}
+    if (n == 0)
+		return cgi_eof(pipe_fd, client, pfds);  // CGI finished
+
     if (n < 0) {
         // Error occurred
 		printf("\033[31m=== CGI read error: %s =====================\033[0m\n", strerror(errno));
@@ -168,7 +191,6 @@ bool handle_cgi_read_from_pipe(int pipe_fd, Client &client,  std::vector<struct 
         waitpid(cgi_pid, NULL, WNOHANG);  // Use saved PID
         return true;
     }
-    
     return false;
 }
 

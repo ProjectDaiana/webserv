@@ -1,3 +1,5 @@
+#include "helper/multipart_utils.hpp"
+
 #include "CGI.hpp"
 #include "Client.hpp"
 #include "Server.hpp"
@@ -38,4 +40,21 @@ char** CGI::build_envp(const std::string& method,
     }
     _env_ptrs.push_back(NULL); // execve expects c strings
     return &_env_ptrs[0];
+}
+
+
+// Extract and save uploaded file from multipart/form-data body
+bool CGI::extract_and_save_uploaded_file(const std::string& body, const std::string& boundary, const std::string& out_filename) {
+    fprintf(stderr, "[CGI] extract_and_save_uploaded_file called: body_size=%zu, boundary='%s', out='%s'\n",
+            body.size(), boundary.c_str(), out_filename.c_str());
+    size_t show = std::min<size_t>(body.size(), 200);
+    fprintf(stderr, "[CGI] body snippet:\n%.*s\n", (int)show, body.c_str());
+    bool ok = extract_and_save_multipart_file(body, boundary, out_filename);
+    if (ok) {
+        set_uploaded_file_path(out_filename);
+        fprintf(stderr, "[CGI] extraction succeeded, saved to '%s'\n", out_filename.c_str());
+    } else {
+        fprintf(stderr, "[CGI] extraction failed\n");
+    }
+    return ok;
 }

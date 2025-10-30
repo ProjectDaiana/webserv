@@ -475,6 +475,7 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 	else if (pfd.revents & POLLOUT && client.is_read_complete())
 	{
 		printf("\033[35mPOLLOUT: Before handle_client_write - method='%s', uri='%s'\033[0m\n", client.get_method().c_str(), client.get_uri().c_str());
+	//	printf("\033[33mPOLLOUT: cgi boddy %s\033[0m\n", client.cgi_output.c_str());
 		printf("POLLOUT: fd for stdin %d\n",client.get_cgi_stdin_fd());
 		printf("POLLOUT: cgi is writing %d\n",client.is_cgi_writing());
 		if (pfd.fd == client.get_cgi_stdin_fd() && client.is_cgi_writing()) {
@@ -501,7 +502,6 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 	}
 	return connection_alive;
 }
-
 
 void    run_server(Server** servers, int server_count)
 {
