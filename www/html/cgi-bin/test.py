@@ -8,9 +8,10 @@ print("<head><title>Cat CGI</title></head>")
 print("<body style='font-family: sans-serif; text-align: center;'>")
 print("<h1>Here's a random cat for you :)")
 
-while True:
-    pass
-time.sleep(8)
+# Simulate a long processing time
+# while True:
+#     pass
+# time.sleep(8)
 
 # Use thecatapi (free random cat images)
 try:
