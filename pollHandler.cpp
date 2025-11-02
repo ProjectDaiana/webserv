@@ -1,6 +1,5 @@
 #include "pollHandler.hpp"
 #include "CGI.hpp"
-#include "runCGI.hpp"
 #include <cstdlib>
 #include <ctime>
 #include <sys/stat.h>
