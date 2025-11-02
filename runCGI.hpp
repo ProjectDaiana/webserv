@@ -106,58 +106,39 @@ bool run_cgi(Client& client, std::vector<struct pollfd>& pfds)
 
 bool cgi_eof(int pipe_fd, Client &client, std::vector<struct pollfd>& pfds)
 {
-	printf("=== CGI pipe closed (EOF), writing response =====================\n");
-
-		printf("\033[33mDEBUG BEFORE EOF: client_fd=%d, cgi_stdin_fd=%d, cgi_written=%d, body_len=%zu, content-length='%s'\033[0m\n",
-		client.get_fd(),
-		client.get_cgi_stdin_fd(),
-		client.get_cgi_written(),
-		client.get_body().size(),
-		client.get_header("Content-Length").c_str());
-		printf("\033[33m POST Content Type %s =====================\n", client.get_header("Content-Type").c_str());
-		printf("\033[33mrunCGI: cgi boddy %s\033[0m\n", client.get_body().c_str());
+	// printf("=== CGI pipe closed (EOF), writing response =====================\n");
+	// printf("\033[33mDEBUG BEFORE EOF: client_fd=%d, cgi_stdin_fd=%d, cgi_written=%d, body_len=%zu, content-length='%s'\033[0m\n",
+	// client.get_fd(),
+	// client.get_cgi_stdin_fd(),
+	// client.get_cgi_written(),
+	// client.get_body().size(),
+	// client.get_header("Content-Length").c_str());
+	// printf("\033[33m POST Content Type %s =====================\n", client.get_header("Content-Type").c_str());
+	// printf("\033[33mrunCGI: cgi body %s\033[0m\n", client.get_body().c_str());
         
-        // Save PID before resetting it!
-        pid_t cgi_pid = client.get_cgi_pid();
-		client.set_cgi_running(0);
-		client.set_cgi_pid(-1);
+	// Save PID before resetting it!
+	pid_t cgi_pid = client.get_cgi_pid();
+	client.set_cgi_running(0);
+	client.set_cgi_pid(-1);
 
-    // Test: Try to extract and save uploaded file if multipart/form-data
-    const std::string& content_type = client.get_header("Content-Type");
-    if (content_type.find("multipart/form-data") != std::string::npos) {
-        std::string boundary_key = "boundary=";
-        size_t bpos = content_type.find(boundary_key);
-        if (bpos != std::string::npos) {
-            std::string boundary = content_type.substr(bpos + boundary_key.length());
-            size_t end = boundary.find_first_of(" ;\r\n");
-            if (end != std::string::npos)
-                boundary = boundary.substr(0, end);
-            std::string out_filename = "www/cgi-bin/uploads/upload";
-            CGI& cgi = client.get_cgi();
-            if (cgi.extract_and_save_uploaded_file(client.get_body(), boundary, out_filename)) {
-                printf("[cgi_eof] Multipart file extracted and saved: %s\n", out_filename.c_str());
-            } else {
-				printf("\033[31m[cgi_eof] Failed to extract multipart file.\033[0m\n");
-            }
-        }
-    }
+	if(client.get_method() == "POST")
+    	client.get_cgi().parse_multipart(client);
+	close(pipe_fd);
+	std::cout << "closed fd "<< pipe_fd << std::endl;
 
-        // Close pipe and wait for child
-        close(pipe_fd);
-		std::cout << "closed fd "<< pipe_fd << std::endl;
-		// IMPORTANT: Remove fd from pfds vector
-		for (size_t i = 0; i < pfds.size(); i++) {
-			if (pfds[i].fd == pipe_fd) {
-				printf("Removing pipe fd %d from pfds\n", pipe_fd);
-				pfds.erase(pfds.begin() + i);
-				break;
-			}
+	// IMPORTANT: Remove fd from pfds vector
+	for (size_t i = 0; i < pfds.size(); i++) {
+		if (pfds[i].fd == pipe_fd) {
+			printf("Removing pipe fd %d from pfds\n", pipe_fd);
+			pfds.erase(pfds.begin() + i);
+			break;
 		}
+	}
 
-		waitpid(cgi_pid, NULL, WNOHANG);  // Use saved PID, not -1!
-        // printf("=== CGI complete output: pid %d,  %s END=====================\n", ret_pid, client.cgi_output.c_str());
-    
-		return true;  // CGI finished
+	waitpid(cgi_pid, NULL, WNOHANG);  // Use saved PID, not -1!
+	// printf("=== CGI complete output: pid %d,  %s END=====================\n", ret_pid, client.cgi_output.c_str());
+
+	return true;  // CGI finished
 }
 
 bool handle_cgi_read_from_pipe(int pipe_fd, Client &client,  std::vector<struct pollfd>& pfds) {
@@ -202,11 +183,11 @@ bool check_cgi_timeout(Client& client, int timeout) {
     time_t elapsed = now - client.get_cgi_start_time();
 
     if (elapsed > timeout) {
-		std::cout << "XXXXXXXXXX CGI Timeout" << std::endl;
-		printf("time elapsed: '%lld'\n", (long long)elapsed);
-		printf("cgi start time: '%lld'\n", (long long)client.get_cgi_start_time());
-		printf("timeout: '%d'\n", timeout);
-		printf("client fd is: '%d'\n", client.get_fd());
+		// std::cout << "XXXXXXXXXX CGI Timeout" << std::endl;
+		// printf("time elapsed: '%lld'\n", (long long)elapsed);
+		// printf("cgi start time: '%lld'\n", (long long)client.get_cgi_start_time());
+		// printf("timeout: '%d'\n", timeout);
+		// printf("client fd is: '%d'\n", client.get_fd());
         pid_t cgi_pid = client.get_cgi_pid();
         if (cgi_pid > 0) {
             kill(cgi_pid, SIGTERM);
@@ -227,7 +208,6 @@ bool check_cgi_timeout(Client& client, int timeout) {
             }
             waitpid(cgi_pid, NULL, WNOHANG);
         }
-        //cleanup_cgi_process(client, pipe_fd, true);  // Sets 504 response
         return true;
     }
 //    return true; // Trigger timeout
@@ -252,18 +232,18 @@ bool handle_cgi_timeout(Client& client) {
 
 
 bool handle_cgi_write_to_pipe(int pipe_fd, Client &client,  std::vector<struct pollfd>& pfds) {
-    printf("=== handle_cgi_write_to_pipe called for pipe fd %d =====================\n", pipe_fd);
+//    printf("=== handle_cgi_write_to_pipe called for pipe fd %d =====================\n", pipe_fd);
     const std::string body = client.get_body();
     ssize_t body_len = static_cast<ssize_t>(body.length());
     ssize_t written = static_cast<ssize_t>(client.get_cgi_written());
     ssize_t remaining = (written < body_len) ? body_len - written : 0;
 
-    printf("DEBUG: Content-Length header? %s, body_len=%zd, written=%zd, remaining=%zd\n",
-           client.get_header("Content-Length").c_str(), body_len, written, remaining);
+//    printf("DEBUG: Content-Length header? %s, body_len=%zd, written=%zd, remaining=%zd\n",
+//           client.get_header("Content-Length").c_str(), body_len, written, remaining);
 
     if (remaining == 0) {
         // nothing to write — cleanup this pipe
-        printf("=== CGI pipe in closed (done writing), cleaning up fd %d =====================\n", pipe_fd);
+    //    printf("=== CGI pipe in closed (done writing), cleaning up fd %d =====================\n", pipe_fd);
         for (size_t i = 0; i < pfds.size(); i++) {
             if (pfds[i].fd == pipe_fd) { pfds.erase(pfds.begin() + i); break; }
         }
@@ -281,11 +261,11 @@ bool handle_cgi_write_to_pipe(int pipe_fd, Client &client,  std::vector<struct p
     if (n > 0) {
         written += n;
         client.set_cgi_written(static_cast<int>(written));
-        printf("=== Wrote %zd bytes to CGI stdin (%zd/%zd total) =====================\n", n, written, body_len);
+    //    printf("=== Wrote %zd bytes to CGI stdin (%zd/%zd total) =====================\n", n, written, body_len);
 
         if (written == body_len) {
             // all bytes written -> cleanup
-			printf("\033[32m=== All POST body written (%zd/%zd), pipe %d =====================\033[0m\n", written, body_len, pipe_fd);
+	//		printf("\033[32m=== All POST body written (%zd/%zd), pipe %d =====================\033[0m\n", written, body_len, pipe_fd);
             for (size_t i = 0; i < pfds.size(); i++) {
                 if (pfds[i].fd == pipe_fd) { pfds.erase(pfds.begin() + i); break; }
             }

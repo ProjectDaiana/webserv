@@ -14,6 +14,7 @@ int validate_and_resolve_path(const t_server& config, Client& client) {
         client.set_error_code(404);
         return 404;
     }
+	client.get_cgi().set_location(location); //will be used later for upload store
     
     size_t dot_pos = request_path.find_last_of(".");
     if (dot_pos == std::string::npos) {
@@ -456,7 +457,7 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 		if (client.is_cgi() && !client.is_cgi_running() && !handle_cgi_timeout(client)) //TODO we can priobably remove  the check for timeout here since the client is set to POLLOUT on timeout before reaching here
 		{
 			if (validate_and_resolve_path(server_config, client) != 200) {
-				set_client_pollout(pfds, client); //cgi not running yet, not in poll
+				set_client_pollout(pfds, client);
 				return connection_alive;
 			}
 			run_cgi(client, pfds);
@@ -475,7 +476,7 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 	else if (pfd.revents & POLLOUT && client.is_read_complete())
 	{
 		printf("\033[35mPOLLOUT: Before handle_client_write - method='%s', uri='%s'\033[0m\n", client.get_method().c_str(), client.get_uri().c_str());
-	//	printf("\033[33mPOLLOUT: cgi boddy %s\033[0m\n", client.cgi_output.c_str());
+	//	printf("\033[33mPOLLOUT: cgi body %s\033[0m\n", client.cgi_output.c_str());
 		printf("POLLOUT: fd for stdin %d\n",client.get_cgi_stdin_fd());
 		printf("POLLOUT: cgi is writing %d\n",client.is_cgi_writing());
 		if (pfd.fd == client.get_cgi_stdin_fd() && client.is_cgi_writing()) {
