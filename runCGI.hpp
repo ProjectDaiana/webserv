@@ -126,6 +126,9 @@ bool cgi_eof(int pipe_fd, Client &client, std::vector<struct pollfd>& pfds)
 		}
 
 		waitpid(cgi_pid, NULL, WNOHANG);  // Use saved PID, not -1!
+        client.set_cgi_stdout_fd(-1);
+        client.set_cgi_stdin_fd(-1);
+        client.get_cgi().reset();
         // printf("=== CGI complete output: pid %d,  %s END=====================\n", ret_pid, client.cgi_output.c_str());
         return true;  // CGI finished
 }
