@@ -274,7 +274,7 @@ int ft_poll(std::vector<struct pollfd>& pfds, int timeout_ms, std::map<int, Clie
 		while (j != clients.end()) {
 			Client &c = j->second;
 			if (c.is_cgi_running()) {
-				if (handle_cgi_timeout(c)) {				
+				   if (c.get_cgi().handle_cgi_timeout(c)) {   
 					//printf("\033[31mCGI cleanup_client called TIMEOUT in ft_poll\033[0m\n");
 					// Ensure the client socket is set to POLLOUT so the error response is sent
 					int client_fd = j->first;
@@ -401,7 +401,7 @@ void set_client_pollout(std::vector<pollfd> &pfds, Client &client)
 
 void cleanup_cgi(std::vector<pollfd> &pfds, pollfd &pfd, Client &client)
 {
-	cgi_eof(pfd.fd, client, pfds);
+	client.get_cgi().cgi_eof(pfd.fd, client, pfds);
 	//printf("\033[33mClosing here!!\033[0m");
         size_t i = 0;
         while (i < pfds.size())
@@ -439,7 +439,7 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 	if (pfd.revents & POLLIN)
 	{
 		printf("\033[35mPOLLIN\033[0m\n");
-		if (handle_cgi_timeout(client))
+		if (client.get_cgi().handle_cgi_timeout(client))
 	    {
 			if (client.is_write_complete()) {
 				printf("\033[31mCGI cleanup_client called, TIMEOUT in POLLIN\033[0m\n");
@@ -456,17 +456,17 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 			connection_alive = 0;
 			return connection_alive;
         }
-		if (client.is_cgi() && !client.is_cgi_running() && !handle_cgi_timeout(client)) //TODO we can priobably remove  the check for timeout here since the client is set to POLLOUT on timeout before reaching here
+		if (client.is_cgi() && !client.is_cgi_running() && !client.get_cgi().handle_cgi_timeout(client)) //TODO we can priobably remove  the check for timeout here since the client is set to POLLOUT on timeout before reaching here
 		{
 			if (validate_and_resolve_path(server_config, client) != 200) {
 				set_client_pollout(pfds, client); //cgi not running yet, not in poll
 				return connection_alive;
 			}
-			run_cgi(client, pfds);
+			client.get_cgi().run(client, pfds);
 			return connection_alive;
 		}
 
-		if (client.is_cgi_running() && handle_cgi_read_from_pipe(client.get_cgi_stdout_fd() , client,  pfds))
+		if (client.is_cgi_running() && client.get_cgi().handle_cgi_read_from_pipe(client.get_cgi_stdout_fd() , client,  pfds))
 			{
 				set_client_pollout(pfds, client);
 				std::cout << "handle_write ok pid:"<<  client.get_cgi_pid() <<  std::endl; //needed?
@@ -477,7 +477,7 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 	else if (pfd.revents & POLLOUT && client.is_read_complete())
 	{
 		printf("\033[35mPOLLOUT: Before handle_client_write - method='%s', uri='%s'\033[0m\n", client.get_method().c_str(), client.get_uri().c_str());
-		if (handle_cgi_timeout(client)) {
+		if (client.get_cgi().handle_cgi_timeout(client)) {
 			printf("\033[31mCGI timeout detected in POLLOUT branch\033[0m\n");
 			pfd.events = POLLOUT;
 			return connection_alive;
@@ -485,7 +485,7 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 		printf("POLLOUT: fd for stdin %d\n",client.get_cgi_stdin_fd());
 		printf("POLLOUT: cgi is writing %d\n",client.is_cgi_writing());
 		if (pfd.fd == client.get_cgi_stdin_fd() && client.is_cgi_writing()) {
-			handle_cgi_write_to_pipe(pfd.fd, client, pfds);
+			   client.get_cgi().handle_cgi_write_to_pipe(pfd.fd, client, pfds);
 			return connection_alive;
 		}
 		handle_client_write(client, server_config);

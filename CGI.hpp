@@ -18,15 +18,14 @@ private:
 	int _stdin_fd;
     std::vector<std::string> _env_storage;
     std::vector<char*> _env_ptrs;
-	int _written;
-
-	std::string _script_filename; // full FS path
+    int _written;
+    std::string _script_filename; // full FS path
     std::string _script_name;     // URI
     std::string _document_root;   // root used to build script
     std::string _interpreter;
     
 public:
-	CGI() : _pid(-1), _running(false), _output(""), _start_time(0), _stdout_fd(-1), _stdin_fd(-1), _written(0) {}
+    CGI() : _pid(-1), _running(false), _writing(false), _output(""), _start_time(0), _stdout_fd(-1), _stdin_fd(-1), _written(0) {}
     ~CGI();
     
     void reset() {
@@ -49,12 +48,18 @@ public:
         _document_root = document_root;
         _interpreter = interpreter;
     }
-	
-	char** build_envp(const std::string& method,
-                      const std::string& http_version,
-					  const std::string& content_length,
-					  const std::string& content_type);
 
+    char** build_envp(const std::string& method,
+                      const std::string& http_version,
+                      const std::string& content_length,
+                      const std::string& content_type);
+
+    bool run(Client& client, std::vector<struct pollfd>& pfds);
+    bool cgi_eof(int pipe_fd, Client& client, std::vector<struct pollfd>& pfds);
+    bool handle_cgi_read_from_pipe(int pipe_fd, Client& client, std::vector<struct pollfd>& pfds);
+    bool handle_cgi_write_to_pipe(int pipe_fd, Client& client, std::vector<struct pollfd>& pfds);
+    bool check_cgi_timeout(Client& client, int timeout);
+    bool handle_cgi_timeout(Client& client);
 
 	// getters for run_cgi 
 	char** get_envp();
@@ -69,18 +74,19 @@ public:
     const std::string& get_output() const { return _output; }
     pid_t get_pid() const { return _pid; }
     time_t get_start_time() const { return _start_time; }
-	int  get_written() const {return _written; }
+    int  get_written() const {return _written; }
 
 	void set_stdout(int fd) { _stdout_fd = fd; }
 	void set_stdin(int fd) { _stdin_fd = fd; }
     void set_output(const std::string& output) { _output = output; }
     void set_pid(pid_t pid) { _pid = pid; }
-    void set_start_time() { _start_time = std::time(NULL); }
+    void set_start_time() { _start_time = time(NULL); }
     void set_running(bool running) { _running = running; }
-	void set_writing(bool writing) { _writing = writing; }
+    void set_writing(bool writing) { _writing = writing; }
     void set_written(int n) { _written = n; }
 	bool is_running() const { return _running; }
 	bool is_writing() const { return _writing; }
 
 };
+
 #endif
