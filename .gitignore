@@ -1,6 +1,6 @@
 # Ignore all object files
 *.o
-*/uploads/*
+./uploads/*
 www/html/uploads/*
 www/html/uploads_cgi/*
 settings.json
