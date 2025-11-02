@@ -460,7 +460,6 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 				return connection_alive;
 			}
 			run_cgi(client, pfds);
-        	client.set_cgi_running(1);
 			return connection_alive;
 		}
 

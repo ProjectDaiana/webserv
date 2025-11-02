@@ -213,8 +213,8 @@ bool check_cgi_timeout(Client& client, int timeout) {
 }
 
 bool handle_cgi_timeout(Client& client) {
-    if (!client.is_cgi_running()) {
-        std::cout << "XXXXX No cgi running" << std::endl;
+    if (!client.is_cgi_running() || !client.is_cgi()) {
+        std::cout << "XXXXX No cgi running or client is not cgi" << std::endl;
         return false;
     }
 
