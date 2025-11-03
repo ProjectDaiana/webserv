@@ -9,9 +9,9 @@ print("<body style='font-family: sans-serif; text-align: center;'>")
 print("<h1>Here's a random cat for you :)")
 
 # Simulate a long processing time
-# while True:
-#     pass
-# time.sleep(8)
+while True: 
+ #pass
+ time.sleep(8)
 
 # Use thecatapi (free random cat images)
 try:
