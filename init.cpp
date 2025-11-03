@@ -27,7 +27,7 @@ t_data *init_data(void)
 	return (d);
 }
 
-
+/*
 //allocating and hardcoding config for listen_binding, server, location
 //OJO only string literals, cant be changed later, but dont have to be
 //chunky monkey, make smaller once hardcoding is deleted
@@ -71,4 +71,4 @@ void	init_config(t_data *d, t_arena *mem)
 	d->s[0]->locations[0]->cgi_extensions[0] = ".py";
 	d->s[0]->locations[0]->cgi_path = "/usr/bin/python3";
 	d->s[0]->locations[0]->cgi_upload_store = "www/cgi-bin/uploads";
-}
+}*/

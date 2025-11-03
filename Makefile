@@ -7,14 +7,17 @@ CXX         := c++
 CXXFLAGS    := -Wall -Wextra -Werror -std=c++98 -I. -g3 -Ihelper
 
 # Source files
-SRC         := helper/atoi.cpp main.cpp pollHandler.cpp \
+SRC         := helper/ft_atoi.cpp main.cpp pollHandler.cpp \
                Client.cpp init.cpp Request.cpp CGI.cpp \
                helper/memory.cpp Server.cpp helper/server_utils.cpp \
 			   methods_post.cpp response.cpp response_utils.cpp \
 			   methods_delete.cpp http_errors.cpp methods_get.cpp \
-	       config.cpp config_lexer.cpp config_parser_init.cpp \
-	       config_parser_utils.cpp config_parser.cpp \
-         helper/multipart_utils.cpp
+	           config.cpp config_lexer.cpp config_parser_init.cpp \
+	           config_parser_utils.cpp config_parser.cpp \
+               helper/multipart_utils.cpp helper/ft_memcpy.cpp \
+			   helper/ft_isspace.cpp helper/ft_strcmp.cpp helper/ft_strchr.cpp \
+			   helper/ft_strlen.cpp
+		
 
 
 # Object files
