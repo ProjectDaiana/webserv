@@ -48,13 +48,13 @@ if method == 'POST':
         cat_name = params.get('name', [''])[0]
         
         print("<div class='result'>")
-        print(f"<h1>🐱 Hello, {cat_name}!</h1>")
+        print(f"<h1>Hello, {cat_name}!</h1>")
         print(f"<p>Your cat's name has been received via POST!</p>")
         print(f"<p><small>POST data: {post_data}</small></p>")
         print("</div>")
 else:
     # GET - first visit
-    print("<h1>Welcome! 🐱</h1>")
+    print("<h1>Welcome!</h1>")
     print("<p>Enter your cat's name below:</p>")
 
 # Always show the form

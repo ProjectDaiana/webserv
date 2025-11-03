@@ -41,7 +41,7 @@ if method == 'POST':
         data = fileitem.file.read()
         # show size and image inline
         print(f"<div class='result'>")
-        print(f"<h1>🐱 Hello, {cat_name}!</h1>")
+        print(f"<h1>Hello, {cat_name}!</h1>")
         print(f"<p>Photo '{fileitem.filename}' uploaded successfully!</p>")
         mime = getattr(fileitem, 'type', 'application/octet-stream') or 'application/octet-stream'
         b64 = base64.b64encode(data).decode('ascii')
@@ -50,7 +50,7 @@ if method == 'POST':
     else:
         print("<div class='result'><p>No photo uploaded or 'photo' field missing.</p></div>")
 else:
-    print("<h1>Welcome! 🐱</h1>")
+    print("<h1>Welcome!</h1>")
     print("<p>Upload a photo of your cat below:</p>")
 
 print("""

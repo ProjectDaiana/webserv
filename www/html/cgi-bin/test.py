@@ -22,9 +22,9 @@ try:
             cat_url = data[0]["url"]
             print(f"<img src='{cat_url}' alt='Random Cat' style='max-width:600px; border-radius:12px; box-shadow:0 0 10px #888;'>")
         else:
-            print("<p>Couldn’t fetch a cat 😿</p>")
+            print("<p>Couldn’t fetch a cat</p>")
     else:
-        print("<p>Error fetching cat API 😿</p>")
+        print("<p>Error fetching cat API</p>")
 except Exception as e:
     print(f"<p>Exception: {e}</p>")
 # while True:
