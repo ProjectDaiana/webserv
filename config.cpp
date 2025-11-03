@@ -56,6 +56,8 @@ void	autosettings(t_data *d)
 		if (!d->s[i]->lb)
 			//ft_error("Error: server has no listen binding\n", 1);
 			;
+		if (!ft_strcmp(d->s[i]->lb->host, "localhost"))
+			d->s[i]->lb->host = "127.0.0.1";
 		if (!d->s[i]->max_bdy_size)
 			 d->s[i]->max_bdy_size = 10 * 1024 * 1024;
 		if (!d->s[i]->location_count)

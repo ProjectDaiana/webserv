@@ -31,7 +31,7 @@ t_data *init_data(void)
 //allocating and hardcoding config for listen_binding, server, location
 //OJO only string literals, cant be changed later, but dont have to be
 //chunky monkey, make smaller once hardcoding is deleted
-/*void	init_config(t_data *d, t_arena *mem)
+void	init_config(t_data *d, t_arena *mem)
 {
 	d->server_count = 1;
 	d->s = (t_server **)arena_alloc(mem, d->server_count * sizeof(t_server));
