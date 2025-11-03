@@ -48,7 +48,7 @@ void Request::reset_struct() {
 
 
 // Parser
-bool Request::parse(const std::string& raw_request) {
+bool Request::parse(const std::string& raw_request) { //maybe uptade this to take a string and not a reference to raw_request
 	std::cout << "DEBUG: parse() called with " << raw_request.length() << " characters" << std::endl;
 	if (raw_request.empty()) {
         return false;

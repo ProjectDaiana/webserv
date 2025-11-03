@@ -1,21 +1,11 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   webserv.hpp                                        :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: ltreser <ltreser@student.42berlin.de>      +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/10/08 20:20:41 by ltreser           #+#    #+#             */
-/*   Updated: 2025/11/03 18:31:37 by ltreser          ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
-
 #ifndef WEBSERV_HPP
 # define WEBSERV_HPP
 
 # define PERM_MEM_SIZE 50000000 // TODO always update
 # define push_struct(type, arena) (type *)arena_alloc(arena, sizeof(type));
+
+#define CGI_TIMEOUT 5
+#define CLIENT_INACTIVITY_TIMEOUT 120
 
 # include <stddef.h>
 # include <stdint.h>
@@ -207,7 +197,7 @@ int find_pfd(int fd, std::vector<pollfd> &pfds);
 Client& find_client(int fd, std::map<int, Client> &clients);
 void cleanup_cgi(std::vector<pollfd> &pfds, pollfd &pfd, Client &client);
 void cleanup_client(int fd, std::vector<pollfd> &pfds, std::map<int, Client> &clients);
-int ft_poll(std::vector<struct pollfd>& pfds, int timeout_ms, std::map<int, Client> clients);
+int ft_poll(std::vector<struct pollfd>& pfds, int timeout_ms, std::map<int, Client> &clients);
 Server* is_server(int fd, Server** servers, int server_count);
 void close_servers(Server **servers, int server_count);
 int find_client_for_cgi(int cgi_fd, const std::map<int, Client> &clients);

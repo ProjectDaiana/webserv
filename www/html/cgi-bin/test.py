@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 
 import requests
-
-print("Content-Type: text/html\n")
+import time 
 
 print("<html>")
 print("<head><title>Cat CGI</title></head>")
 print("<body style='font-family: sans-serif; text-align: center;'>")
 print("<h1>Here's a random cat for you :)")
+
+# Simulate a long processing time
+# while True:
+#     pass
+# time.sleep(8)
 
 # Use thecatapi (free random cat images)
 try:
@@ -23,7 +27,8 @@ try:
         print("<p>Error fetching cat API 😿</p>")
 except Exception as e:
     print(f"<p>Exception: {e}</p>")
-
+# while True:
+#     pass
 print("</body>")
 print("</html>")
 
