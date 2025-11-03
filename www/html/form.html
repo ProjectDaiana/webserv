@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Test CGI POST</title>
+    <link rel="icon" href="data:,">
+</head>
+
+<body>
+    <h1>Send POST to CGI</h1>
+    <form action="/cgi-bin/test_cgi_form.py" method="post">
+        <label>Name: <input type="text" name="name"></label><br>
+        <label>Age: <input type="text" name="age"></label><br>
+        <input type="submit" value="Send">
+    </form>
+</body>
+
+</html>

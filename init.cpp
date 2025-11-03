@@ -66,6 +66,7 @@ void	init_config(t_data *d, t_arena *mem)
 	d->s[0]->locations[0]->upload_count = 0;
 	d->s[0]->locations[0]->cgi_count = 1;
 	d->s[0]->locations[0]->cgi_extensions = (const char **)arena_alloc(mem, d->s[0]->locations[0]->cgi_count * sizeof (const char *));
-	d->s[0]->locations[0]->cgi_extensions[0] = ".py"; //TODO put this
-	d->s[0]->locations[0]->cgi_path = "/usr/bin/python3"; //TODO put this
+	d->s[0]->locations[0]->cgi_extensions[0] = ".py";
+	d->s[0]->locations[0]->cgi_path = "/usr/bin/python3";
+	d->s[0]->locations[0]->cgi_upload_store = "www/cgi-bin/uploads";
 }

@@ -39,6 +39,7 @@ struct                          s_location
     //  we only need to handle one file extension (e.g. only .py or only .php) so we can also just have a const string here in theory
     int cgi_count; // number of extensions in the array
     const char                  *cgi_path;
+	const char					*cgi_upload_store;
     // the binary (interpreter) of the .php/.phtml files/whatever file extension we will choose
 };
 

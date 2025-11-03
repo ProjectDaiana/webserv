@@ -14,6 +14,7 @@ int validate_and_resolve_path(const t_server& config, Client& client) {
         client.set_error_code(404);
         return 404;
     }
+	client.get_cgi().set_location(location); //will be used later for upload store
     
     size_t dot_pos = request_path.find_last_of(".");
     if (dot_pos == std::string::npos) {
@@ -459,7 +460,7 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 		if (client.is_cgi() && !client.is_cgi_running() && !handle_cgi_timeout(client)) //TODO we can priobably remove  the check for timeout here since the client is set to POLLOUT on timeout before reaching here
 		{
 			if (validate_and_resolve_path(server_config, client) != 200) {
-				set_client_pollout(pfds, client); //cgi not running yet, not in poll
+				set_client_pollout(pfds, client);
 				return connection_alive;
 			}
 			run_cgi(client, pfds);
@@ -508,7 +509,6 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 	}
 	return connection_alive;
 }
-
 
 void    run_server(Server** servers, int server_count)
 {
