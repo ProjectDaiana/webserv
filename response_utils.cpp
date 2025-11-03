@@ -63,9 +63,9 @@ std::string get_content_type(Client &client)
 
 t_location *find_location(std::string uri, const t_server &config)
 {
-	printf("__find location__\n");
-	printf("uri is: '%s'\n", uri.c_str());
-	printf("this is location count '%d'\n", config.location_count);
+	// printf("__find location__\n");
+	// printf("uri is: '%s'\n", uri.c_str());
+	// printf("this is location count '%d'\n", config.location_count);
 	t_location	*best_match;
 	int		best_len;
 	int 		i;
@@ -73,27 +73,27 @@ t_location *find_location(std::string uri, const t_server &config)
 	best_match = NULL;
 	best_len = 0;
 	i = 0;
-	write(1, "1\n", 2);
+	//write(1, "1\n", 2);
 	while (i < config.location_count)
 	{
-		write(1, "2\n", 2);
+		//write(1, "2\n", 2);
 		t_location *l = config.locations[i];
-		write(1, "3\n", 2);
+		//write(1, "3\n", 2);
 		if (l && l->path)
 		{
-			write(1, "4\n", 2);
+			//write(1, "4\n", 2);
 			std::string path(l->path);
-			write(1, "5\n", 2);
+			//write(1, "5\n", 2);
 			if (uri.rfind(path, 0) == 0)
 			{
-				write(1, "6\n", 2);
+				//write(1, "6\n", 2);
 				if ((int)path.length() > best_len)
 				{
-					write(1, "7\n", 2);
+					//write(1, "7\n", 2);
 					best_len = path.length();
-					write(1, "8\n", 2);
+					//write(1, "8\n", 2);
 					best_match = l;
-					write(1, "9\n", 2);
+					//write(1, "9\n", 2);
 				}
 			}
 		}
@@ -122,8 +122,8 @@ t_location *handle_location(Client &client, const t_server &config)
 	t_location *location;
 
         location = find_location(client.get_request().uri, config);
-	if (location)
-                printf("location passed!\n");
+	// if (location)
+    //             printf("location passed!\n");
         if (!location)
         {
                 client.set_error_code(404);

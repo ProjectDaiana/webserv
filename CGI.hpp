@@ -6,50 +6,96 @@
 #include <ctime>
 
 class Client;
+typedef struct s_location t_location;
 
 class CGI {
 private:
 	pid_t _pid;
 	bool _running;
+	bool _writing;
     std::string _output;
     time_t _start_time;
-	int _pipe_fd;
+	int _stdout_fd;
+	int _stdin_fd;
     std::vector<std::string> _env_storage;
     std::vector<char*> _env_ptrs;
-    
-public:
-	CGI() : _pid(-1), _running(false), _output(""), _start_time(0), _pipe_fd(-1) {}
+	int _written;
+
+	std::string _script_filename; // full FS path
+    std::string _script_name;     // URI
+    std::string _document_root;   // root used to build script
+    std::string _interpreter;
+    // std::string _uploaded_file_path;
+    // std::string _uploaded_file_ext;
+	t_location* _location;
+	
+	public:
+	CGI() : _pid(-1), _running(false), _output(""), _start_time(0), _stdout_fd(-1), _stdin_fd(-1), _written(0) {}
     ~CGI();
     
     void reset() {
-        _pid = -1;
+		_pid = -1;
         _running = false;
         _output.clear();
         _start_time = 0;
-        _pipe_fd = -1;
+        _stdout_fd = -1;
+		_stdin_fd = -1;
         _env_storage.clear();
         _env_ptrs.clear();
     }
     
-    // Getters Setters
+    void prepare_paths(const std::string& script_filename,
+		const std::string& script_name,
+		const std::string& document_root,
+		const std::string& interpreter) {
+        _script_filename = script_filename;
+        _script_name = script_name;
+        _document_root = document_root;
+        _interpreter = interpreter;
+    }
+	
+	char** build_envp(const std::string& method,
+                      const std::string& http_version,
+					  const std::string& content_length,
+					  const std::string& content_type);
+					  
+	bool parse_multipart(Client& client);
+
+	// getters for run_cgi 
+	char** get_envp();
+	const std::string& get_script_filename() const { return _script_filename; }
+    const std::string& get_script_name()     const { return _script_name; }
+    const std::string& get_document_root()   const { return _document_root; }
+    const std::string& get_interpreter()     const { return _interpreter; }
+	int get_stdout() const { return _stdout_fd; }
+	int get_stdin() const { return _stdin_fd; }
+	
+    // Getters
     const std::string& get_output() const { return _output; }
     pid_t get_pid() const { return _pid; }
-    int get_pipe_fd() const { return _pipe_fd; }
     time_t get_start_time() const { return _start_time; }
-
+	int  get_written() const {return _written; }
+	//const std::string& get_uploaded_file_ext() const { return _uploaded_file_ext; }
+    std::string get_cgi_upload_store() const;
+	
+	//Setters
+	void set_stdout(int fd) { _stdout_fd = fd; }
+	void set_stdin(int fd) { _stdin_fd = fd; }
     void set_output(const std::string& output) { _output = output; }
-    void set_pipe_fd(int fd) { _pipe_fd = fd; }
     void set_pid(pid_t pid) { _pid = pid; }
     void set_start_time() { _start_time = std::time(NULL); }
     void set_running(bool running) { _running = running; }
-    bool is_running() const { return _running; }
-    
-	char** build_envp(const std::string& script_path, 
-						const std::string& method,
-						const std::string& http_version);
+	void set_writing(bool writing) { _writing = writing; }
+    void set_written(int n) { _written = n; }
+	bool is_running() const { return _running; }
+	bool is_writing() const { return _writing; }
+//	void set_uploaded_file_ext(const std::string& ext) { _uploaded_file_ext = ext; }
+	void set_location(t_location* loc) { _location = loc; }
 
-    //static int validate_path(const std::string& request_path, const t_server& config,
-    //                       std::string& built_path, std::string& cgi_path);
-    
+    // Extract and save uploaded file from multipart/form-data body
+    // Returns true on success, false on failure
+    bool extract_and_save_uploaded_file(const std::string& body, const std::string& boundary, const std::string& out_filename);
+    //void set_uploaded_file_path(const std::string& path) { _uploaded_file_path = path; }
+//    const std::string& get_uploaded_file_path() const { return _uploaded_file_path; }
 };
 #endif

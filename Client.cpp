@@ -7,9 +7,7 @@ Client::Client(int fd, Server &server) :
 							_keep_alive(0), _content_len(0),
 							_headers_end_pos(0),
 							_error_code(200),
-							_server(&server),
-							cgi_running(0),
-							cgi_start_time(0)
+							_server(&server)
 							{}
 
 Client::Client() : _fd(-1), _is_parsed(false), _server(NULL) {};
@@ -65,11 +63,11 @@ void Client::add_to_request(char *data, int len) {
 };
 
 bool Client::parse_request() {
-	std::cout << "DEBUG: Client::parse_request called" << std::endl;
-    std::cout << "DEBUG: _is_parsed = " << _is_parsed << std::endl;
-    std::cout << "DEBUG: _headers_complete = " << _headers_complete << std::endl;
-    std::cout << "DEBUG: _read_complete = " << _read_complete << std::endl;
-    std::cout << "DEBUG: Raw request length = " << _raw_request.length() << std::endl;
+	// std::cout << "DEBUG: Client::parse_request called" << std::endl;
+    // std::cout << "DEBUG: _is_parsed = " << _is_parsed << std::endl;
+    // std::cout << "DEBUG: _headers_complete = " << _headers_complete << std::endl;
+    // std::cout << "DEBUG: _read_complete = " << _read_complete << std::endl;
+    // std::cout << "DEBUG: Raw request length = " << _raw_request.length() << std::endl;
 
 	if (!_is_parsed && _read_complete) {
 		_is_parsed = _request.parse(_raw_request);
