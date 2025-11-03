@@ -187,6 +187,13 @@ std::string read_config(const char *path);
 //helper
 int							ft_atoi(const char *nptr);
 uint32_t						iptoi(const char *ip_str);
+bool 							ft_isspace(char c);
+void    *ft_memcpy(void *dest, const void *src, size_t n);
+char *ft_strchr(const char *s, int c);
+int ft_strcmp(const char *s1, const char *s2);
+int ft_strlen(char *str);
+
+
 
 //polling
 void handle_server_fd(pollfd &pfd, Server &server, std::vector<pollfd> &pfds, std::map<int, Client> &clients);

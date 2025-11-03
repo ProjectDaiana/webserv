@@ -27,7 +27,7 @@ t_data *init_data(void)
 	return (d);
 }
 
-
+/*
 //allocating and hardcoding config for listen_binding, server, location
 //OJO only string literals, cant be changed later, but dont have to be
 //chunky monkey, make smaller once hardcoding is deleted
