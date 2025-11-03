@@ -6,7 +6,7 @@
 /*   By: darotche <darotche@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/24 16:26:00 by ltreser           #+#    #+#             */
-/*   Updated: 2025/10/30 21:25:03 by darotche         ###   ########.fr       */
+/*   Updated: 2025/11/03 22:04:00 by ltreser          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,7 +157,6 @@ int	main(void)
 	//global = data;
 	init_config(data, data->perm_memory);
 	print_data(data);
-	exit(0);
 	init_servers(data);
 	run_server(data->servers, data->server_count);	
 	free_arena(data->perm_memory);

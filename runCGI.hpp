@@ -58,7 +58,7 @@ bool run_cgi(Client& client, std::vector<struct pollfd>& pfds)
         perror("execve");
         _exit(127);
     }
-	printf("=== CGI After execvefd '%d' is being added to poll\n \n\n", pipefd_out[0]);
+	//printf("=== CGI After execvefd '%d' is being added to poll\n \n\n", pipefd_out[0]);
     close(pipefd_out[1]);
 	// Parent doesn't need the read end of the CGI stdin pipe
 	close(pipefd_in[0]);
@@ -87,7 +87,6 @@ bool run_cgi(Client& client, std::vector<struct pollfd>& pfds)
 
 bool cgi_eof(int pipe_fd, Client &client, std::vector<struct pollfd>& pfds)
 {
-	// printf("=== CGI pipe closed (EOF), writing response =====================\n");
 	// printf("\033[33mDEBUG BEFORE EOF: client_fd=%d, cgi_stdin_fd=%d, cgi_written=%d, body_len=%zu, content-length='%s'\033[0m\n",
 	// client.get_fd(),
 	// client.get_cgi_stdin_fd(),
@@ -105,18 +104,23 @@ bool cgi_eof(int pipe_fd, Client &client, std::vector<struct pollfd>& pfds)
 	if(client.get_method() == "POST")
     	client.get_cgi().parse_multipart(client);
 	close(pipe_fd);
-	std::cout << "closed fd "<< pipe_fd << std::endl;
+//	std::cout << "closed fd "<< pipe_fd << std::endl;
 
 	// IMPORTANT: Remove fd from pfds vector
 	for (size_t i = 0; i < pfds.size(); i++) {
 		if (pfds[i].fd == pipe_fd) {
-			printf("Removing pipe fd %d from pfds\n", pipe_fd);
+	//		printf("Removing pipe fd %d from pfds\n", pipe_fd);
 			pfds.erase(pfds.begin() + i);
 			break;
 		}
 	}
 
-	waitpid(cgi_pid, NULL, WNOHANG);  // Use saved PID, not -1!
+	if (cgi_pid > 0) {
+		pid_t result = waitpid(cgi_pid, NULL, WNOHANG); //OJO if zombie setting WNOHANG to 0 will blcok for a few microseconds but no zombies
+		if (result == -1) {
+			perror("waitpid in cgi_eof");
+		}
+	}
 	// printf("=== CGI complete output: pid %d,  %s END=====================\n", ret_pid, client.cgi_output.c_str());
   client.set_cgi_stdout_fd(-1);
   client.set_cgi_stdin_fd(-1);
@@ -143,7 +147,7 @@ bool handle_cgi_read_from_pipe(int pipe_fd, Client &client,  std::vector<struct 
 
     if (n < 0) {
         // Error occurred
-		printf("\033[31m=== CGI read error: %s =====================\033[0m\n", strerror(errno));
+	//	printf("\033[31m=== CGI read error: %s =====================\033[0m\n", strerror(errno));
         
         // Save PID before resetting
         pid_t cgi_pid = client.get_cgi_pid();
@@ -194,7 +198,7 @@ bool check_cgi_timeout(Client& client, int timeout) {
         }
         return true;
     }
-//    return true; // Trigger timeout
+    //return true; // Trigger timeout
     return false;
 }
 

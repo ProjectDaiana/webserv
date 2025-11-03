@@ -86,6 +86,7 @@ void	handle_client_write(Client &client, const t_server &config)
 	sstr << response.version << " "
 		<< response.status_code << " "
 		<< response.reason_phrase << "\r\n";
+	sstr << "Host: " << client.get_header("Host") << "\r\n";
 	if (!response.location.empty())
 		sstr << "Location: " << response.location << "\r\n";
 	sstr << "Content-Type: " << response.content_type << "\r\n"
