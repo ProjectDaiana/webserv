@@ -6,7 +6,7 @@
 /*   By: ltreser <ltreser@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/24 16:34:29 by ltreser           #+#    #+#             */
-/*   Updated: 2025/10/26 23:14:53 by ltreser          ###   ########.fr       */
+/*   Updated: 2025/11/03 19:23:53 by ltreser          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,8 @@ t_data *init_data(void)
 	mem = alloc_perm_memory();
 	d = (t_data *)arena_alloc(mem, sizeof(t_data));
 	d->perm_memory = mem;
+	d->server_count = 0;
+	d->n = 0;
 	return (d);
 }
 
@@ -69,7 +71,7 @@ t_data *init_data(void)
 	d->s[0]->locations[0]->accepted_methods[1] = "POST";
 	d->s[0]->locations[0]->accepted_methods[2] = "DELETE";
 		d->s[0]->locations[0]->redirect = NULL;
-	d->s[0]->locations[0]->redirect = "https://cataas.com/cat";
+	d->s[0]->locations[0]->redirect = "https://cataas.com/cat"; //TODO set to NULL
 	d->s[0]->locations[0]->root = "www/html";
 	d->s[0]->locations[0]->autoindex = 0; //OJO disabled
 	d->s[0]->locations[0]->default_file = "index.html";

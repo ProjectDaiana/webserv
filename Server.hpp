@@ -40,6 +40,7 @@ struct                          s_location
     int cgi_count; // number of extensions in the array
     const char                  *cgi_path;
     // the binary (interpreter) of the .php/.phtml files/whatever file extension we will choose
+	const char					*cgi_upload_store;
 };
 
 struct                          s_listen_binding

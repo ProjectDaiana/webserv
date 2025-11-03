@@ -6,7 +6,7 @@
 /*   By: ltreser <ltreser@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 20:20:41 by ltreser           #+#    #+#             */
-/*   Updated: 2025/10/27 01:45:20 by ltreser          ###   ########.fr       */
+/*   Updated: 2025/11/03 18:31:37 by ltreser          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,8 @@ typedef struct s_lexer			t_lexer;
 typedef struct s_parser 		t_parser;
 class Client;
 class Server;
+
+//extern t_data *global;
 
 typedef enum e_error
 {
@@ -119,6 +121,7 @@ struct s_data
 	t_arena *perm_memory;
 	t_server **s; //NOTE mb rename as config
 	int server_count;
+	int n;
 	Server **servers;
 };
 
@@ -152,6 +155,10 @@ struct s_response
 	std::string body; //content of the http response
 };
 
+//debug
+void debug_compare_servers();
+void lexer_pretty_print(const t_lexer *lx); //DEL
+
 // memory
 void							free_arena(t_arena *mem);
 t_arena							*alloc_perm_memory(void);
@@ -166,7 +173,6 @@ void							init_servers(t_data *data);
 
 // parser
 void lexer(t_lexer *lx, const std::string &config_content, t_arena *mem);
-void lexer_pretty_print(const t_lexer *lx); //DEL
 s_token lexer_next_token(t_lexer *lx, t_arena *mem);
 void    parser(t_data *d, t_parser *p, t_lexer *lx, t_arena *mem);
 t_server* parse_server(t_parser *p, t_arena *mem);
