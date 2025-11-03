@@ -1,9 +1,8 @@
-http://localhost:8080/cgi
-http://localhost:8080/about
-http://localhost:8080/contact
-http://localhost:8080/products
-http://localhost:8080/products/widget-1
-http://localhost:8080/products/widget-2
-http://localhost:8080/blog
-http://localhost:8080/blog/post-1
-http://localhost:8080/blog/post-2
+http://localhost:8080/
+http://localhost:8080/noexisting
+http://localhost:8080/index.html
+http://localhost:8080/cgi-bin/test.py
+http://localhost:8080/cgi-bin/post_cat.py
+http://localhost:8080/cgi-bin/post_foto.py
+http://localhost:8080/cgi-bin/noexisting.
+http://localhost:8080/cgi-bin/test.php

@@ -16,7 +16,7 @@ bool CGI::run(Client& client, std::vector<struct pollfd>& pfds) {
     pipe(pipefd_out);
     pipe(pipefd_in);
 
-    printf("=== CGI will run for Client %d ===================== \n\n", client.get_fd());
+    //printf("=== CGI will run for Client %d ===================== \n\n", client.get_fd());
     pid_t pid = fork();
 
     this->set_start_time();
@@ -62,7 +62,7 @@ bool CGI::run(Client& client, std::vector<struct pollfd>& pfds) {
         perror("execve");
         _exit(127);
     }
-    printf("=== CGI After execvefd '%d' is being added to poll\n \n\n", pipefd_out[0]);
+    //printf("=== CGI After execvefd '%d' is being added to poll\n \n\n", pipefd_out[0]);
     close(pipefd_out[1]);
     close(pipefd_in[0]);
     pfds.push_back(Server::create_pollfd(pipefd_out[0], POLLIN, 0));
@@ -71,12 +71,12 @@ bool CGI::run(Client& client, std::vector<struct pollfd>& pfds) {
     this->set_pid(pid);
 
     if (client.get_method() == "POST" && !client.get_body().empty()) {
-        printf("=== POST request with %zu bytes body =====================\n", client.get_body().length());
+    //    printf("=== POST request with %zu bytes body =====================\n", client.get_body().length());
         this->set_writing(true);
         this->set_stdin(pipefd_in[1]);
         pfds.push_back(Server::create_pollfd(pipefd_in[1], POLLOUT, 0));
     } else {
-        printf("NO PIPE STDIN\n");
+    //    printf("NO PIPE STDIN\n");
         close(pipefd_in[1]);
         this->set_stdin(-1);
         this->set_writing(false);
@@ -119,11 +119,9 @@ char** CGI::build_envp(const std::string& method,
     return &_env_ptrs[0];
 }
 
-
-// --- Begin migrated CGI member functions ---
 bool CGI::cgi_eof(int pipe_fd, Client &client, std::vector<struct pollfd>& pfds)
 {
-    printf("=== CGI pipe closed (EOF), writing response =====================\n");
+//    printf("=== CGI pipe closed (EOF), writing response =====================\n");
 
     // Save PID before resetting it!
     pid_t cgi_pid = client.get_cgi_pid();
@@ -158,16 +156,16 @@ bool CGI::handle_cgi_read_from_pipe(int pipe_fd, Client &client, std::vector<str
         return false;  // Keep reading
     }
     if (n == 0) {
-        printf("\033[33mDEBUG BEFORE EOF: client_fd=%d, cgi_stdin_fd=%d, cgi_written=%d, body_len=%zu, content-length='%s'\033[0m\n",
+    //    printf("\033[33mDEBUG BEFORE EOF: client_fd=%d, cgi_stdin_fd=%d, cgi_written=%d, body_len=%zu, content-length='%s'\033[0m\n",
         client.get_fd(),
         client.get_cgi_stdin_fd(),
         client.get_cgi_written(),
         client.get_body().size(),
-        client.get_header("Content-Length").c_str());
+        client.get_header("Content-Length").c_str();
         return cgi_eof(pipe_fd, client, pfds);  // CGI finished
     }
     if (n < 0) {
-        printf("\033[31m=== CGI read error: %s =====================\033[0m\n", strerror(errno));
+    //    printf("\033[31m=== CGI read error: %s =====================\033[0m\n", strerror(errno));
         pid_t cgi_pid = client.get_cgi_pid();
         client.set_cgi_running(0);
         client.set_cgi_pid(-1);
@@ -179,17 +177,17 @@ bool CGI::handle_cgi_read_from_pipe(int pipe_fd, Client &client, std::vector<str
 }
 
 bool CGI::handle_cgi_write_to_pipe(int pipe_fd, Client &client, std::vector<struct pollfd>& pfds) {
-    printf("=== handle_cgi_write_to_pipe called for pipe fd %d =====================\n", pipe_fd);
+//    printf("=== handle_cgi_write_to_pipe called for pipe fd %d =====================\n", pipe_fd);
     const std::string body = client.get_body();
     ssize_t body_len = static_cast<ssize_t>(body.length());
     ssize_t written = static_cast<ssize_t>(client.get_cgi_written());
     ssize_t remaining = (written < body_len) ? body_len - written : 0;
 
-    printf("DEBUG: Content-Length header? %s, body_len=%zd, written=%zd, remaining=%zd\n",
-           client.get_header("Content-Length").c_str(), body_len, written, remaining);
+//    printf("DEBUG: Content-Length header? %s, body_len=%zd, written=%zd, remaining=%zd\n",
+//           client.get_header("Content-Length").c_str(), body_len, written, remaining);
 
     if (remaining == 0) {
-        printf("=== CGI pipe in closed (done writing), cleaning up fd %d =====================\n", pipe_fd);
+    //    printf("=== CGI pipe in closed (done writing), cleaning up fd %d =====================\n", pipe_fd);
         for (size_t i = 0; i < pfds.size(); i++) {
             if (pfds[i].fd == pipe_fd) { pfds.erase(pfds.begin() + i); break; }
         }
@@ -206,9 +204,9 @@ bool CGI::handle_cgi_write_to_pipe(int pipe_fd, Client &client, std::vector<stru
     if (n > 0) {
         written += n;
         client.set_cgi_written(static_cast<int>(written));
-        printf("=== Wrote %zd bytes to CGI stdin (%zd/%zd total) =====================\n", n, written, body_len);
+    //    printf("=== Wrote %zd bytes to CGI stdin (%zd/%zd total) =====================\n", n, written, body_len);
         if (written == body_len) {
-            printf("\033[32m=== All POST body written (%zd/%zd), pipe %d =====================\033[0m\n", written, body_len, pipe_fd);
+        //    printf("\033[32m=== All POST body written (%zd/%zd), pipe %d =====================\033[0m\n", written, body_len, pipe_fd);
             for (size_t i = 0; i < pfds.size(); i++) {
                 if (pfds[i].fd == pipe_fd) { pfds.erase(pfds.begin() + i); break; }
             }
@@ -233,11 +231,11 @@ bool CGI::check_cgi_timeout(Client& client, int timeout) {
     time_t now = time(NULL);
     time_t elapsed = now - client.get_cgi_start_time();
     if (elapsed > timeout) {
-        std::cout << "XXXXXXXXXX CGI Timeout" << std::endl;
-        printf("time elapsed: '%lld'\n", (long long)elapsed);
-        printf("cgi start time: '%lld'\n", (long long)client.get_cgi_start_time());
-        printf("timeout: '%d'\n", timeout);
-        printf("client fd is: '%d'\n", client.get_fd());
+        // std::cout << "XXXXXXXXXX CGI Timeout" << std::endl;
+        // printf("time elapsed: '%lld'\n", (long long)elapsed);
+        // printf("cgi start time: '%lld'\n", (long long)client.get_cgi_start_time());
+        // printf("timeout: '%d'\n", timeout);
+        // printf("client fd is: '%d'\n", client.get_fd());
         pid_t cgi_pid = client.get_cgi_pid();
         if (cgi_pid > 0) {
             kill(cgi_pid, SIGTERM);
@@ -261,7 +259,7 @@ bool CGI::check_cgi_timeout(Client& client, int timeout) {
 
 bool CGI::handle_cgi_timeout(Client& client) {
     if (!client.is_cgi_running() || !client.is_cgi()) {
-        std::cout << "XXXXX No cgi running or client is not cgi" << std::endl;
+        //std::cout << "XXXXX No cgi running or client is not cgi" << std::endl;
         return false;
     }
     if (check_cgi_timeout(client, CGI_TIMEOUT)) {
@@ -273,4 +271,3 @@ bool CGI::handle_cgi_timeout(Client& client) {
     }
     return false;  // No timeout
 }
-// --- End migrated CGI member functions ---

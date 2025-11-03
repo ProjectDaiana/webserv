@@ -81,6 +81,12 @@ Arena implementation.
 - `curl http://localhost:8080`
 - `curl -v -H "Connection: close" http://localhost:8080` -H to write in Connection Header
 - `siege -c50 -t1M -b 'http://localhost:8080/cgi-bin/test.py'` 50 connections 1 minute 
+- `siege -c10 -t30S --content-type "application/x-www-form-urlencoded" 'http://localhost:8080/cgi-bin/post_foto.py POST name=cat&color=orange'`
+
+
+## Useful commands
+- `ps aux | grep webserv`
+- `kill -9 <PID>`
 
 ## NGINX commands
 - `sudo systemctl start nginx`
