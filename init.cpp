@@ -22,6 +22,8 @@ t_data *init_data(void)
 	mem = alloc_perm_memory();
 	d = (t_data *)arena_alloc(mem, sizeof(t_data));
 	d->perm_memory = mem;
+	d->server_count = 0;
+	d->n = 0;
 	return (d);
 }
 

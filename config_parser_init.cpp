@@ -34,7 +34,6 @@ int count_error_pages(t_parser *p)
             count++;
         i++;
     }
-    printf("> error pages return: '%d'\n", count);
     return count;
 }
 
@@ -66,31 +65,36 @@ int count_cgi_extensions(t_parser *p)
         }
         i++;
     }
-    printf("> cgi extensions return: '%d'\n", count);
-
     return count;
 }
 
-int count_locations(t_parser *p) 
+int count_locations(t_parser *p)
 {
     int saved_pos = p->pos;
     int count = 0;
+    int brace_depth = 0;
 
-    while (!parser_match(p, TOK_RBRACE))
-	{
-        if ((parser_current(p)->type ==  TOK_STRING) && strcmp(parser_current(p)->value, "location") == 0) 
-   	        count++;
-        parser_advance(p);
-    }
-        while (!parser_match(p, TOK_RBRACE) && p->pos < p->lx->token_count)
-        {
-        if ((parser_current(p)->type ==  TOK_STRING) && strcmp(parser_current(p)->value, "location") == 0)
-                count++;
+    while (p->pos < p->lx->token_count)
+    {
+        int type = parser_current(p)->type;
+        const char *value = parser_current(p)->value;
+
+
+        if (type == TOK_LBRACE)
+            brace_depth++;
+        else if (type == TOK_RBRACE) {
+            brace_depth--;
+            if (brace_depth == 0)
+                break;  // End of server block
+        }
+        else if (type == TOK_STRING && brace_depth == 1 &&
+                 strcmp(value, "location") == 0) {
+            count++;
+        }
         parser_advance(p);
     }
 
     p->pos = saved_pos;
-    printf("locations return: '%d'\n", count);
     return count;
 }
 
@@ -119,21 +123,22 @@ int count_allowed_methods(t_parser *p)
         }
         i++;
     }
-    printf("count allowed methods return: '%d'\n", count);
     return count;
 }
 
 
 void    init_parser(t_data *d, t_parser *p, t_lexer *lx, t_arena *mem)
 {
-		printf("\n\n____TESTING PARSER____:\n");
         int max_servers;
         p->lx = lx;
         p->pos = 0;
         p->mem = mem;
         d->server_count = 0;
         max_servers = count_servers(lx);
-        d->s = (t_server **)arena_alloc(mem, max_servers * sizeof(t_server *));
+		if (count_servers(lx))
+        	d->s = (t_server **)arena_alloc(mem, max_servers * sizeof(t_server *));
+		//else
+			//TODO throw error
 }
 
 t_listen_binding *create_listen_binding(t_arena *mem)
@@ -171,7 +176,6 @@ t_server* create_server(t_parser *p, t_arena *mem)
 
 t_location* create_location(t_parser *p, t_arena *mem)
 {
-	printf("CREATE LOCATION IS BEING CALLED\n");
 	t_location *l = (t_location *)arena_alloc(mem, sizeof(t_location));
 	l->path = NULL;
 	l->method_count = 0;

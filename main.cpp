@@ -16,6 +16,8 @@
 #include "Client.hpp"
 
 #include <stdio.h>
+#include <iostream>
+
 
 static void print_listen_binding(const t_listen_binding *lb)
 {
@@ -90,16 +92,72 @@ void print_data(const t_data *d)
         print_server(d->s[i], i);
 }
 
+
+struct ListenSnapshot {
+    const void *lb_ptr;
+    const void *host_ptr;
+    int port;
+    bool valid;
+};
+/*
+void debug_compare_servers()
+{
+    static ListenSnapshot prev[128] = {};
+    static int prev_count = 0;
+
+    if (!global) 
+	{
+        std::cerr << "[DEBUG] global is null\n";
+        return;
+    }
+    int count = global->server_count;
+    std::cerr << "\n=== DEBUG LISTEN BINDINGS ===\n";
+	if (!count && global->n)
+		 printf("HI");
+    for (int i = 0; i < count; ++i) {
+        t_server *srv = global->s[i];
+        if (!srv || !srv->lb) {
+            std::cerr << "[DEBUG] server " << i << " has no lb\n";
+            continue;
+        }
+
+        const void *lb_ptr   = srv->lb;
+        const void *host_ptr = srv->lb->host;
+        int port             = srv->lb->port;
+
+        std::cerr << "Server[" << i << "]\n";
+        std::cerr << "  current: lb=" << lb_ptr
+                  << ", host=" << host_ptr
+                  << ", port=" << port << "\n";
+
+        if (prev[i].valid) {
+            std::cerr << "  previous: lb=" << prev[i].lb_ptr
+                      << ", host=" << prev[i].host_ptr
+                      << ", port=" << prev[i].port << "\n";
+        } else {
+            std::cerr << "  previous: (none)\n";
+        }
+
+        std::cerr << "----------------------------------------\n";
+
+        // store snapshot
+        prev[i].lb_ptr   = lb_ptr;
+        prev[i].host_ptr = host_ptr;
+        prev[i].port     = port;
+        prev[i].valid    = true;
+    }
+
+    prev_count = count;
+    std::cerr << "========================================\n\n";
+}*/
+
 int	main(void)
 {
 	t_data *data = init_data();
+	//global = data;
 	init_config(data, data->perm_memory);
 	print_data(data);
-	if (data->s[0]->lb->host)
-		printf("HOST IS NOT NULL\n");
-	else
-		printf("WTF WHY IS HOST NULL\n");
-	printf("\n\nDEBUG: this is lb: '%p', '%d'\n", data->s[0]->lb->host, data->s[0]->lb->port);
+	exit(0);
 	init_servers(data);
 	run_server(data->servers, data->server_count);	
 	free_arena(data->perm_memory);
