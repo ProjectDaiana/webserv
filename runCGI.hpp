@@ -13,24 +13,10 @@ bool run_cgi(Client& client, std::vector<struct pollfd>& pfds)
     int pipefd_in[2]; // From Client
     pipe(pipefd_out);
     pipe(pipefd_in);
-
-    // make server-side ends non-blocking:
-    // pipefd_out[0] -> server reads CGI stdout
-    // pipefd_in[1]  -> server writes to CGI stdin
-    // int flags = fcntl(pipefd_out[0], F_GETFL, 0);
-    // if (flags != -1) fcntl(pipefd_out[0], F_SETFL, flags | O_NONBLOCK);
-    // flags = fcntl(pipefd_in[1], F_GETFL, 0);
-    // if (flags != -1) fcntl(pipefd_in[1], F_SETFL, flags | O_NONBLOCK);
-
-	// printf("[CGI DEBUG] pipefd_out[0] (read end, server reads): %d\n", pipefd_out[0]);
-	// printf("[CGI DEBUG] pipefd_out[1] (write end, CGI writes): %d\n", pipefd_out[1]);
-	// printf("[CGI DEBUG] pipefd_in[0] (read end, CGI reads): %d\n", pipefd_in[0]);
-	// printf("[CGI DEBUG] pipefd_in[1] (write end, server writes): %d\n", pipefd_in[1]);
-    printf("=== CGI will run for Client %d ===================== \n\n", client.get_fd());
-    pid_t pid = fork();
-
+	pid_t pid = fork();
     client.set_cgi_start_time();
 	client.set_cgi_running(1);
+
     if (pid == 0) {
         dup2(pipefd_out[1], STDOUT_FILENO);
 		dup2(pipefd_in[0], STDIN_FILENO);
@@ -39,9 +25,8 @@ bool run_cgi(Client& client, std::vector<struct pollfd>& pfds)
         close(pipefd_in[0]);
         close(pipefd_in[1]);
 
-        std::string abs_script = client.get_cgi().get_script_filename();   // already resolved by validate_and_resolve_path
+        std::string abs_script = client.get_cgi().get_script_filename(); // already resolved by validate_and_resolve_path
         std::string docroot    = client.get_cgi().get_document_root();
-
 		size_t slash = abs_script.find_last_of('/');
 		std::string script_dir = ".";
 		std::string script_base = abs_script;
@@ -61,8 +46,6 @@ bool run_cgi(Client& client, std::vector<struct pollfd>& pfds)
             client.get_header("Content-Type")
         );
     
-
-		// build argv: interpreter then script path
         const std::string& interp = client.get_cgi().get_interpreter();
         char* const argv[] = {
             const_cast<char*>(interp.c_str()),
@@ -80,7 +63,6 @@ bool run_cgi(Client& client, std::vector<struct pollfd>& pfds)
 	// Parent doesn't need the read end of the CGI stdin pipe
 	close(pipefd_in[0]);
 	pfds.push_back(Server::create_pollfd(pipefd_out[0], POLLIN, 0)); //POLLIN
-//    cgi_pipes[pipefd_out[0]] = &client;
 	client.set_cgi_stdout_fd(pipefd_out[0]);
 	client.set_cgi_written(0);
     client.set_cgi_pid(pid);
@@ -94,8 +76,7 @@ bool run_cgi(Client& client, std::vector<struct pollfd>& pfds)
 		client.set_cgi_stdin_fd(pipefd_in[1]);
         pfds.push_back(Server::create_pollfd(pipefd_in[1], POLLOUT, 0));
     } else {
-        // No body to send, close stdin immediately
-		printf("NO PIPE STDIN\n");
+		//printf("NO PIPE STDIN No body to send, close stdin immediately\n");
         close(pipefd_in[1]);
         client.set_cgi_stdin_fd(-1);
 		client.set_cgi_writing(0);
@@ -232,17 +213,16 @@ bool handle_cgi_timeout(Client& client) {
 
 
 bool handle_cgi_write_to_pipe(int pipe_fd, Client &client,  std::vector<struct pollfd>& pfds) {
-//    printf("=== handle_cgi_write_to_pipe called for pipe fd %d =====================\n", pipe_fd);
+//  printf("=== handle_cgi_write_to_pipe called for pipe fd %d =====================\n", pipe_fd);
     const std::string body = client.get_body();
     ssize_t body_len = static_cast<ssize_t>(body.length());
     ssize_t written = static_cast<ssize_t>(client.get_cgi_written());
     ssize_t remaining = (written < body_len) ? body_len - written : 0;
 
-//    printf("DEBUG: Content-Length header? %s, body_len=%zd, written=%zd, remaining=%zd\n",
-//           client.get_header("Content-Length").c_str(), body_len, written, remaining);
+	//    printf("DEBUG: Content-Length header? %s, body_len=%zd, written=%zd, remaining=%zd\n",
+	//           client.get_header("Content-Length").c_str(), body_len, written, remaining);
 
     if (remaining == 0) {
-        // nothing to write — cleanup this pipe
     //    printf("=== CGI pipe in closed (done writing), cleaning up fd %d =====================\n", pipe_fd);
         for (size_t i = 0; i < pfds.size(); i++) {
             if (pfds[i].fd == pipe_fd) { pfds.erase(pfds.begin() + i); break; }
@@ -281,6 +261,5 @@ bool handle_cgi_write_to_pipe(int pipe_fd, Client &client,  std::vector<struct p
 			pfds[pfd_idx].events |= POLLOUT;
         return false;
     }
-
     return false;
 }

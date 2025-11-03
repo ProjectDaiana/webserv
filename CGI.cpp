@@ -46,49 +46,40 @@ char** CGI::build_envp(const std::string& method,
 bool CGI::parse_multipart(Client& client)
 {
     const std::string& content_type = client.get_header("Content-Type");
+	std::string body = client.get_body();
+	std::string filename;
+	size_t disp_pos = body.find("Content-Disposition: form-data;");
+
     if (content_type.find("multipart/form-data") == std::string::npos)
 		return false;
 
+	while (disp_pos != std::string::npos) {
+		size_t header_end = body.find("\r\n\r\n", disp_pos);
+		if (header_end == std::string::npos)
+		header_end = body.find("\n\n", disp_pos);
+		if (header_end == std::string::npos)
+		header_end = body.size();
+		std::string disp_block = body.substr(disp_pos, header_end - disp_pos);
+		
+		if (disp_block.find("filename=\"") != std::string::npos) {
+			filename = extract_filename_from_disposition(disp_block);
+			// fprintf(stderr, "[DEBUG] filename=%s\n", filename.c_str());
+			break;
+		}
+		disp_pos = body.find("Content-Disposition: form-data;", header_end);
+	}
+	
+	if (filename.empty()) {
+		//fprintf(stderr, "[ERROR] No filename found in multipart headers!\n");
+		return false;
+	}
+		
 	std::string boundary = extract_boundary_from_disposition(content_type);
-    std::string upload_dir = get_cgi_upload_store();
-    std::string body = client.get_body();
-    std::string filename;
-    size_t disp_pos = body.find("Content-Disposition: form-data;");
-    while (disp_pos != std::string::npos) {
-        size_t header_end = body.find("\r\n\r\n", disp_pos);
-        if (header_end == std::string::npos)
-            header_end = body.find("\n\n", disp_pos);
-        if (header_end == std::string::npos)
-            header_end = body.size();
-        std::string disp_block = body.substr(disp_pos, header_end - disp_pos);
-
-        if (disp_block.find("filename=\"") != std::string::npos) {
-            filename = extract_filename_from_disposition(disp_block);
-            // fprintf(stderr, "[DEBUG] filename=%s\n", filename.c_str());
-            break;
-        }
-        disp_pos = body.find("Content-Disposition: form-data;", header_end);
-    }
-
-    if (filename.empty()) {
-        //fprintf(stderr, "[ERROR] No filename found in multipart headers!\n");
-        return false;
-    }
-
+	std::string upload_dir = get_cgi_upload_store();
 	std::string unique_filename = make_unique_filename(filename);
     std::string out_filename = upload_dir + "/" + unique_filename;
-    //set_uploaded_file_path(out_filename);
-
-    if (extract_and_save_multipart_file(body, boundary, out_filename)) {
-        //set_uploaded_file_path(out_filename);
+    if (extract_and_save_multipart_file(body, boundary, out_filename))
         return true;
-     } else {
-    //     set_uploaded_file_ext("");
-         return false;
-    }
+	else
+        return false;
 }
-
-
-// std::string CGI::get_cgi_upload_store() const {
-//     return _location ? _location->cgi_upload_store : "";
-// }

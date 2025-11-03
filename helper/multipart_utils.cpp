@@ -10,10 +10,8 @@ std::string extract_filename_from_disposition(const std::string& header)
         return "";
 	}
     start += key.length();
-    // Search for the next quote, even if it's on another line
     size_t end = header.find('"', start);
     if (end == std::string::npos) {
-        // Try to find the quote in the next 200 chars (in case of split lines)
         size_t max_search = std::min(header.size(), start + 200);
         for (size_t i = start; i < max_search; ++i) {
             if (header[i] == '"') {
@@ -58,7 +56,7 @@ bool extract_and_save_multipart_file(const std::string& body, const std::string&
     size_t fn_end = body.find('"', fn_pos);
     if (fn_end == std::string::npos)
 		return false;
-//
+
     // Find start of file data
     size_t content_type = body.find("Content-Type:", fn_end);
     if (content_type == std::string::npos)
