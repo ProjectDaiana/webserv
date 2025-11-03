@@ -1,13 +1,15 @@
 #include "webserv.hpp"
 
-void    init_servers(t_data *data)
+void    init_servers(t_data *d)
 {
     int i;
 
     i = 0;
-    while(i < data->server_count)
+    d->servers = (Server **)arena_alloc(d->perm_memory, d->server_count * sizeof(Server));
+    while(i < d->server_count)
     {
-        new (data->servers[i]) Server(data->s[i]);
+	d->servers[i] = (Server *)arena_alloc(d->perm_memory, sizeof(Server));
+        new (d->servers[i]) Server(d->s[i]);
         i++;
     }
 }
@@ -20,10 +22,9 @@ t_data *init_data(void)
 	mem = alloc_perm_memory();
 	d = (t_data *)arena_alloc(mem, sizeof(t_data));
 	d->perm_memory = mem;
-	init_config(d, d->perm_memory);
-	//init rest here
 	return (d);
 }
+
 
 //allocating and hardcoding config for listen_binding, server, location
 //OJO only string literals, cant be changed later, but dont have to be
@@ -55,8 +56,8 @@ void	init_config(t_data *d, t_arena *mem)
 	d->s[0]->locations[0]->accepted_methods[0] = "GET";
 	d->s[0]->locations[0]->accepted_methods[1] = "POST";
 	d->s[0]->locations[0]->accepted_methods[2] = "DELETE";
-	d->s[0]->locations[0]->redirect = NULL;
-	//d->s[0]->locations[0]->redirect = "https://cataas.com/cat";
+	// d->s[0]->locations[0]->redirect = NULL;
+	d->s[0]->locations[0]->redirect = "https://cataas.com/cat";
 	d->s[0]->locations[0]->root = "www/html";
 	d->s[0]->locations[0]->autoindex = 0; //OJO disabled
 	d->s[0]->locations[0]->default_file = "index.html";

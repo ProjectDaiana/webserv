@@ -118,8 +118,11 @@ bool cgi_eof(int pipe_fd, Client &client, std::vector<struct pollfd>& pfds)
 
 	waitpid(cgi_pid, NULL, WNOHANG);  // Use saved PID, not -1!
 	// printf("=== CGI complete output: pid %d,  %s END=====================\n", ret_pid, client.cgi_output.c_str());
-
-	return true;  // CGI finished
+  client.set_cgi_stdout_fd(-1);
+  client.set_cgi_stdin_fd(-1);
+  client.get_cgi().reset();
+  // printf("=== CGI complete output: pid %d,  %s END=====================\n", ret_pid, client.cgi_output.c_str());
+  return true;  // CGI finished
 }
 
 bool handle_cgi_read_from_pipe(int pipe_fd, Client &client,  std::vector<struct pollfd>& pfds) {
@@ -196,8 +199,8 @@ bool check_cgi_timeout(Client& client, int timeout) {
 }
 
 bool handle_cgi_timeout(Client& client) {
-    if (!client.is_cgi_running()) {
-        std::cout << "XXXXX No cgi running" << std::endl;
+    if (!client.is_cgi_running() || !client.is_cgi()) {
+        std::cout << "XXXXX No cgi running or client is not cgi" << std::endl;
         return false;
     }
 

@@ -1,0 +1,8 @@
+Config          ::= { ServerBlock } EOF ;
+
+ServerBlock     ::= "server" "{" { Directive | LocationBlock } "}" ;
+
+Directive       ::= STRING STRING ";" ;
+
+LocationBlock   ::= "location" STRING "{" { Directive } "}" ;
+
