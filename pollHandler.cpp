@@ -10,7 +10,7 @@ int validate_and_resolve_path(const t_server& config, Client& client) {
 
     t_location* location = find_location(request_path, config);
     if (!location) {
-        printf("No matching location for path: %s\n", request_path.c_str());
+        //printf("No matching location for path: %s\n", request_path.c_str());
         client.set_error_code(404);
         return 404;
     }
@@ -18,7 +18,7 @@ int validate_and_resolve_path(const t_server& config, Client& client) {
     
     size_t dot_pos = request_path.find_last_of(".");
     if (dot_pos == std::string::npos) {
-        printf("No file extension in path: %s\n", request_path.c_str());
+    //    printf("No file extension in path: %s\n", request_path.c_str());
         client.set_error_code(400);
         return 400;
     }
@@ -33,7 +33,7 @@ int validate_and_resolve_path(const t_server& config, Client& client) {
     }
     
     if (!is_cgi_extension) {
-        printf("Unsupported CGI extension: %s\n", file_ext.c_str());
+    //    printf("Unsupported CGI extension: %s\n", file_ext.c_str());
         client.set_error_code(400);
         return 400;
     }
@@ -57,13 +57,13 @@ int validate_and_resolve_path(const t_server& config, Client& client) {
 	// Check if file exists
     struct stat file_stat;
     if (stat(built_path.c_str(), &file_stat) != 0) {
-        printf("Script file not found: %s\n", built_path.c_str());
+    //    printf("Script file not found: %s\n", built_path.c_str());
         client.set_error_code(404);
         return 404;
     }
 
     if (!location->cgi_path) {
-        printf("No interpreter defined for extension: %s\n", file_ext.c_str());
+    //    printf("No interpreter defined for extension: %s\n", file_ext.c_str());
         client.set_error_code(500);
         return 500;
     }
@@ -117,13 +117,13 @@ bool	handle_client_read(int fd, pollfd &pfd, Client &client)
 	bytes_read = read(fd, buffer, sizeof(buffer));
 	if (bytes_read <= 0)
 	{
-		printf("Client %d disconnected\n", fd);
+//		printf("Client %d disconnected\n", fd);
 		if (!client.get_raw_request().empty())
 		{
-			std::cout << "Attempting to parse incomplete request..." << std::endl;
+//			std::cout << "Attempting to parse incomplete request..." << std::endl;
 			if (!client.parse_request())
 			{
-				std::cout << "Parse error on disconnect: " << client.get_parse_error().code << "- " << client.get_parse_error().msg << "Parse error passed to client: " << client.get_error_code() << std::endl;
+//				std::cout << "Parse error on disconnect: " << client.get_parse_error().code << "- " << client.get_parse_error().msg << "Parse error passed to client: " << client.get_error_code() << std::endl;
 				// Could send error response here if connection still writable
 			}
 		}
@@ -135,9 +135,9 @@ bool	handle_client_read(int fd, pollfd &pfd, Client &client)
 		client.get_method().c_str(), client.get_uri().c_str();
 		if (!client.parse_request())
 		{ // Calling parser, will also set_error
-			std::cout << "Parse error: " << client.get_parse_error().code << std::endl;
-			std::cout << "Parse error: " << client.get_parse_error().msg << std::endl;
-			std::cout << "Parse error passed to client: " << client.get_error_code() << std::endl;
+	//		std::cout << "Parse error: " << client.get_parse_error().code << std::endl;
+	//		std::cout << "Parse error: " << client.get_parse_error().msg << std::endl;
+	//		std::cout << "Parse error passed to client: " << client.get_error_code() << std::endl;
 			return (false);
 		}
 		//debug_request(client);
@@ -199,8 +199,7 @@ void cleanup_client(int fd, std::vector<pollfd> &pfds, std::map<int, Client> &cl
     Client &client = find_client(fd, clients);
     int client_fd = client.get_fd();
 
-    printf("Client '%d' is being cleaned up (resolved client fd=%d)\n", fd, client_fd);
-
+//    printf("Client '%d' is being cleaned up (resolved client fd=%d)\n", fd, client_fd);
     // If client has CGI fds, remove/cleanup them first
     int stdout_fd = client.get_cgi_stdout_fd();
     int stdin_fd  = client.get_cgi_stdin_fd();
@@ -221,7 +220,7 @@ void cleanup_client(int fd, std::vector<pollfd> &pfds, std::map<int, Client> &cl
         int pfd_index = find_pfd(stdin_fd, pfds);
         if (pfd_index != -1)
         {
-			printf("\033[31mClosing stdin pipe fd %d here pollhandler line 197\033[0m\n", pfds[pfd_index].fd);
+			//printf("\033[31mClosing stdin pipe fd %d here pollhandler line 197\033[0m\n", pfds[pfd_index].fd);
 			close(pfds[pfd_index].fd);
             pfds.erase(pfds.begin() + pfd_index);
         } else {
@@ -235,7 +234,7 @@ void cleanup_client(int fd, std::vector<pollfd> &pfds, std::map<int, Client> &cl
     }
 
     // Close the client socket and erase the client entry by client fd
-	printf("\033[31mClosing stdin pipe fd %d here pollhandler line 207\033[0m\n", client_fd);
+	//printf("\033[31mClosing stdin pipe fd %d here pollhandler line 207\033[0m\n", client_fd);
     close(client_fd);
     clients.erase(client_fd);
 
@@ -258,7 +257,7 @@ int ft_poll(std::vector<struct pollfd>& pfds, int timeout_ms, std::map<int, Clie
 		{
 			if (now - i->second.get_last_activity() > CLIENT_INACTIVITY_TIMEOUT)
 			{
-				printf("XXXXXXXXXXXXXXXXX Last activity > %d\n", CLIENT_INACTIVITY_TIMEOUT);
+		//		printf("XXXXXXXXXXXXXXXXX Last activity > %d\n", CLIENT_INACTIVITY_TIMEOUT);
 				int fd = i->first;
 				i++;
 				cleanup_client(fd, pfds, clients);
@@ -377,7 +376,7 @@ int timeout_check(Client &client, int fd, std::vector<pollfd> &pfds, std::map<in
 	const int TIMEOUT = 30; // seconds
 	if (now - client.get_last_activity() > TIMEOUT)
 	{
-		printf("Client %d timed out\n", fd);
+	//	printf("Client %d timed out\n", fd);
 		cleanup_client(fd, pfds, clients);
 		return 0;
 	}
@@ -392,7 +391,7 @@ void set_client_pollout(std::vector<pollfd> &pfds, Client &client)
          {
 			if (pfds[i].fd == client_fd)
 			{
-				printf("\033[32mSet client %d to POLLOUT\033[0m\n", client_fd);
+		//		printf("\033[32mSet client %d to POLLOUT\033[0m\n", client_fd);
 				pfds[i].events = POLLOUT;
 				break;
 			}
@@ -402,6 +401,8 @@ void set_client_pollout(std::vector<pollfd> &pfds, Client &client)
 
 void cleanup_cgi(std::vector<pollfd> &pfds, pollfd &pfd, Client &client)
 {
+	// cgi_eof already handles waitpid properly, so we just call it
+	// Don't call waitpid here to avoid double-waiting
 	cgi_eof(pfd.fd, client, pfds);
 	//printf("\033[33mClosing here!!\033[0m");
         size_t i = 0;
@@ -430,7 +431,7 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 	//HANDE CGI EOF
 	if (pfd.revents & POLLHUP)
 	{ 
-		std::cout << "POLLHUP" << std::endl;
+	//	std::cout << "POLLHUP" << std::endl;
 		cleanup_cgi(pfds, pfd, client);
 		connection_alive = 0;
 		return connection_alive;
@@ -439,11 +440,11 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 	// READ
 	if (pfd.revents & POLLIN)
 	{
-		printf("\033[35mPOLLIN\033[0m\n");
+	//	printf("\033[35mPOLLIN\033[0m\n");
 		if (handle_cgi_timeout(client))
 	    {
 			if (client.is_write_complete()) {
-				printf("\033[31mCGI cleanup_client called, TIMEOUT in POLLIN\033[0m\n");
+		//		printf("\033[31mCGI cleanup_client called, TIMEOUT in POLLIN\033[0m\n");
 				cleanup_cgi(pfds, pfd, client);
 				connection_alive = 0;
 			}
@@ -452,7 +453,7 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
    		}
 		if (clients.find(pfd.fd) != clients.end() && !client.is_cgi_running() && !is_cgi_fd(pfd.fd, clients) && !handle_client_read(pfd.fd, pfd, client)) //if we dont wanna continue reading, cleanup client
 		{
-			printf("\033[33mCGI cleanup_client called, cgi not running\033[0m\n");
+		//	printf("\033[33mCGI cleanup_client called, cgi not running\033[0m\n");
 			cleanup_client(pfd.fd, pfds, clients);
 			connection_alive = 0;
 			return connection_alive;
@@ -470,27 +471,27 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 		if (client.is_cgi_running() && handle_cgi_read_from_pipe(client.get_cgi_stdout_fd() , client,  pfds))
 			{
 				set_client_pollout(pfds, client);
-				std::cout << "handle_write ok pid:"<<  client.get_cgi_pid() <<  std::endl; //needed?
-				std::cout << "handle_write client fd:"<<  client.get_fd() <<  std::endl; //"	
+			//	std::cout << "handle_write ok pid:"<<  client.get_cgi_pid() <<  std::endl; //needed?
+			//	std::cout << "handle_write client fd:"<<  client.get_fd() <<  std::endl; //"	
 			}
 	}
 	// WRITE
 	else if (pfd.revents & POLLOUT && client.is_read_complete())
 	{
-		printf("\033[35mPOLLOUT: Before handle_client_write - method='%s', uri='%s'\033[0m\n", client.get_method().c_str(), client.get_uri().c_str());
+		//printf("\033[35mPOLLOUT: Before handle_client_write - method='%s', uri='%s'\033[0m\n", client.get_method().c_str(), client.get_uri().c_str());
 		if (handle_cgi_timeout(client)) {
-			printf("\033[31mCGI timeout detected in POLLOUT branch\033[0m\n");
+		//	printf("\033[31mCGI timeout detected in POLLOUT branch\033[0m\n");
 			pfd.events = POLLOUT;
 			return connection_alive;
 		}
-		printf("POLLOUT: fd for stdin %d\n",client.get_cgi_stdin_fd());
-		printf("POLLOUT: cgi is writing %d\n",client.is_cgi_writing());
+	//	printf("POLLOUT: fd for stdin %d\n",client.get_cgi_stdin_fd());
+		//printf("POLLOUT: cgi is writing %d\n",client.is_cgi_writing());
 		if (pfd.fd == client.get_cgi_stdin_fd() && client.is_cgi_writing()) {
 			handle_cgi_write_to_pipe(pfd.fd, client, pfds);
 			return connection_alive;
 		}
 		handle_client_write(client, server_config);
-		printf("\033[35mPOLLOUT: after client_write %d\033[0m\n", client.is_cgi_writing());
+		//printf("\033[35mPOLLOUT: after client_write %d\033[0m\n", client.is_cgi_writing());
 		if (client.is_write_complete())
 		{
 			if (client.get_keep_alive())
@@ -500,7 +501,7 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 			}
 			else
 			{
-				printf("\033[33mCGI cleanup_client called write is complete\033[0m\n");
+			//	printf("\033[33mCGI cleanup_client called write is complete\033[0m\n");
 				cleanup_client(pfd.fd, pfds, clients);
 		    		connection_alive = 0;
 				return connection_alive;
