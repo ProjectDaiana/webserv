@@ -34,7 +34,8 @@ void parse_directive(t_parser *p, t_server *s, t_arena *mem, t_location *l) //if
 	const char *value = parser_current(p)->value;
 	parser_advance(p);
 	printf("name: '%s', value: '%s'\n", name, value);
-	if (strcmp(name, "allowed_methods") && !parser_match(p, TOK_SEMICOLON) )
+	//TODO for all things that have array
+	if (strcmp(name, "allowed_methods") && strcmp(name, "cgi_extensions") && !parser_match(p, TOK_SEMICOLON) )
 		//ft_error("Parser Error: expected ';' after directive!\n");
 		;
 	if (l)
@@ -60,6 +61,7 @@ void parse_directive(t_parser *p, t_server *s, t_arena *mem, t_location *l) //if
 		}		
 		else if (!strcmp(name, "cgi_extensions"))
         {
+			l->cgi_path = "/usr/bin/python3";
             while (strcmp(value, ";"))
             {
                 l->cgi_extensions[l->cgi_count++] = arena_str(mem, value);
