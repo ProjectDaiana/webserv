@@ -5,7 +5,7 @@
 
 t_listen_binding  *parse_listen_binding(const char *str, t_arena *mem)
 {
-	printf("\033[31mLISTEN BINDING PARSER CALLED\033[0m\n");
+//	printf("\033[31mLISTEN BINDING PARSER CALLED\033[0m\n");
 
 	t_listen_binding *lb = create_listen_binding(mem);
 	const char *colon = ft_strchr(str, ':');
@@ -24,7 +24,7 @@ t_listen_binding  *parse_listen_binding(const char *str, t_arena *mem)
 
 void parse_directive(t_parser *p, t_server *s, t_arena *mem, t_location *l) //if no l, l = null
 {
-	printf("\033[31mDIRECTIVE PARSER CALLED\033[0m\n");
+//	printf("\033[31mDIRECTIVE PARSER CALLED\033[0m\n");
 	const char *name = parser_current(p)->value;
 	parser_advance(p);
 	if (parser_current(p)->type != TOK_STRING)
@@ -32,7 +32,7 @@ void parse_directive(t_parser *p, t_server *s, t_arena *mem, t_location *l) //if
 		;
 	const char *value = parser_current(p)->value;
 	parser_advance(p);
-	printf("name: '%s', value: '%s'\n", name, value);
+//	printf("name: '%s', value: '%s'\n", name, value);
 	//TODO for all things that have array
 	if (strcmp(name, "allowed_methods") && strcmp(name, "cgi_extensions") && !parser_match(p, TOK_SEMICOLON) )
 		//ft_error("Parser Error: expected ';' after directive!\n");
@@ -90,7 +90,7 @@ void parse_directive(t_parser *p, t_server *s, t_arena *mem, t_location *l) //if
 
 t_location* parse_location(t_parser *p, t_arena *mem)
 {
-	printf("\033[31mLOCATION PARSER CALLED\033[0m\n");
+//	printf("\033[31mLOCATION PARSER CALLED\033[0m\n");
 	parser_advance(p); //skip 'location' token
 	t_location *l = create_location(p, mem);
 	if (parser_current(p)->type == TOK_STRING)
@@ -109,7 +109,7 @@ t_location* parse_location(t_parser *p, t_arena *mem)
 
 t_server* parse_server(t_parser *p, t_arena *mem)
 {
-	printf("\033[31mSERVER PARSER CALLED\033[0m\n");
+//	printf("\033[31mSERVER PARSER CALLED\033[0m\n");
 	t_server *s = create_server(p, mem);
 	parser_advance(p); //skip 'server' token
 	if (!parser_match(p, TOK_LBRACE))

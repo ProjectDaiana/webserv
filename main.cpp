@@ -6,7 +6,7 @@
 /*   By: darotche <darotche@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/24 16:26:00 by ltreser           #+#    #+#             */
-/*   Updated: 2025/11/03 22:04:00 by ltreser          ###   ########.fr       */
+/*   Updated: 2025/11/04 21:13:15 by ltreser          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -151,10 +151,12 @@ void debug_compare_servers()
     std::cerr << "========================================\n\n";
 }*/
 
-int	main(void)
+int	main(int ac, char **av)
 {
-	t_data *data = init_data();
-	//global = data;
+	if (2 != ac)
+		//ft_error("Error: call program with ~'./webserv [config_path]'~\n", 1);
+		;
+	t_data *data = init_data(av[1]);
 	init_config(data, data->perm_memory);
 	print_data(data);
 	init_servers(data);

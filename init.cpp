@@ -14,7 +14,7 @@ void    init_servers(t_data *d)
     }
 }
 
-t_data *init_data(void)
+t_data *init_data(const char *config_path)
 {
 	t_arena *mem;
 	t_data	*d;
@@ -22,6 +22,7 @@ t_data *init_data(void)
 	mem = alloc_perm_memory();
 	d = (t_data *)arena_alloc(mem, sizeof(t_data));
 	d->perm_memory = mem;
+	d->config_path = config_path;
 	d->server_count = 0;
 	d->n = 0;
 	return (d);

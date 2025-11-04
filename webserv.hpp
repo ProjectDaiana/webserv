@@ -110,6 +110,7 @@ struct s_data
 {
 	t_arena *perm_memory;
 	t_server **s; //NOTE mb rename as config
+	const char *config_path;
 	int server_count;
 	int n;
 	Server **servers;
@@ -157,7 +158,7 @@ char *arena_str(t_arena *mem, const char *src, size_t len = 0);
 
 
 // init
-t_data							*init_data(void);
+t_data							*init_data(const char *config_path);
 void							init_config(t_data *d, t_arena *mem);
 void							init_servers(t_data *data);
 

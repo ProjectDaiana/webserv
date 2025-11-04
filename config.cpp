@@ -88,7 +88,7 @@ void	init_config(t_data *d, t_arena *mem)
 	(void)d;
 	lx = (t_lexer *)arena_alloc(mem, sizeof(t_lexer));
 	ps = (t_parser *)arena_alloc(mem, sizeof(t_parser));
-	std::string config_content = read_config("config/webserv.conf");
+	std::string config_content = read_config(d->config_path);
 	lexer(lx, config_content, mem);
 	parser(d, ps, lx, mem);
 	autosettings(d); //TODO give all the rest of the server/location variables values if they dont have that
