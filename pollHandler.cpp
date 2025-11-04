@@ -41,7 +41,7 @@ int validate_and_resolve_path(const t_server& config, Client& client) {
     std::string root(location->root);         // e.g. "www/html"
     std::string loc_path(location->path);     // e.g. "/cgi-bin" or "/"
     std::string document_root = root;
-	std::string built_path = root + request_path; // e.g. "www/html/test.py" or "www/html/cgi-bin/test.py"
+	std::string built_path = "www" + request_path; // e.g. "www/html/test.py" or "www/html/cgi-bin/test.py"
 
     // Remove location path prefix from request_path
     if (request_path.find(loc_path) == 0)
