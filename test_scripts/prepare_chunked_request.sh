@@ -39,7 +39,7 @@ print(f"Created {len(chunks)-1} chunks")
 
 # Build request
 request = (
-    b"GET /cgi-bin/show_image.py HTTP/1.1\\r\\n"
+    b"POST /cgi-bin/show_image.py HTTP/1.1\\r\\n"
     b"Host: localhost\\r\\n"
     b"Transfer-Encoding: chunked\\r\\n"
     b"Content-Type: image/jpeg\\r\\n"
