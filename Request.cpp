@@ -250,18 +250,49 @@ bool Request::parse_headers(const std::string &headers) {
     return true;
 }
 
+std::string unchunk_body(const std::string &chunked)
+{   
+	std::string result;
+    size_t pos = 0;
+
+	while (pos < chunked.size())
+	{
+		size_t line_break_pos = chunked.find("\r\n", pos);
+        if (line_break_pos == std::string::npos)
+			break;
+		
+		std::string chunk_size_hex = chunked.substr(pos, (line_break_pos - pos));
+	
+		int chunk_size = 0;
+		std::stringstream ss(chunk_size_hex);
+		ss >> std::hex >> chunk_size;
+        
+        if (chunk_size == 0)
+			break;
+    
+        pos = line_break_pos + 2; // Skip \r\n
+		
+		// Extract chunk data
+        result.append(chunked.substr(pos, chunk_size));
+        pos += chunk_size + 2;
+    }
+    
+	return result;
+}
+
 
 // Parse Body
-bool Request::parse_body(const std::string &body_section) {
-    // // Check for Transfer-Encoding first
-    // std::map<std::string, std::string>::iterator te_it = _parsed_request.headers.find("Transfer-Encoding");
-    // if (te_it != _parsed_request.headers.end()) {
-    //     if (te_it->second.find("chunked") != std::string::npos) {
-    //         // TODO: Parse chunked encoding
-    //         _parsed_request.body = body_section; // Temporary
-    //         return true;
-    //     }
-    // }
+bool Request::parse_body(const std::string &body_section)
+{
+    std::map<std::string, std::string>::iterator te_it = _parsed_request.headers.find("Transfer-Encoding");
+    if (te_it != _parsed_request.headers.end()) {
+        if (te_it->second.find("chunked") != std::string::npos) {
+            std::cout << "DEBUG: Raw chunked body: [" << body_section << "]" << std::endl;
+			_parsed_request.body = unchunk_body(body_section); 
+            std::cout << "DEBUG: Un-chunked body: [" << _parsed_request.body << "]" << std::endl;
+            return true;
+        }
+    }
     
     // Check for Content-Length
     std::map<std::string, std::string>::iterator cl_it = _parsed_request.headers.find("Content-Length");
