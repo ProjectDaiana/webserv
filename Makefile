@@ -16,7 +16,7 @@ SRC         := helper/ft_atoi.cpp main.cpp pollHandler.cpp \
 	           config_parser_utils.cpp config_parser.cpp \
                helper/multipart_utils.cpp helper/ft_memcpy.cpp \
 			   helper/ft_isspace.cpp helper/ft_strcmp.cpp helper/ft_strchr.cpp \
-			   helper/ft_strlen.cpp
+			   helper/ft_strlen.cpp server_errors.cpp
 		
 
 

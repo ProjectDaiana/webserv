@@ -6,7 +6,7 @@
 /*   By: darotche <darotche@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/23 17:31:14 by ltreser           #+#    #+#             */
-/*   Updated: 2025/10/30 19:59:03 by ltreser          ###   ########.fr       */
+/*   Updated: 2025/11/04 23:30:33 by ltreser          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,11 +16,11 @@
 void *arena_alloc(t_arena *mem, size_t size)
 {
 	if (!size)
-		printf(">>>>>>>>ERROR!! MEMORY CORRUPTION");
+		ft_error(mem, MEMORY_CORRUPTION, 0);
 	void *result;
 	if (!mem || ((mem->used + size) > mem->size))
 	{
-		printf("ERROR: allocation fail\n");
+		ft_error(mem, MALLOC_FAIL, 1);
 		return (NULL);
 	}
 	result = mem->start + mem->used;

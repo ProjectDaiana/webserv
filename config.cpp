@@ -10,7 +10,7 @@
 #include <sys/types.h> // ssize_t
 #include <unistd.h>    // read(), close()
 
-std::string read_config(const char *path)
+std::string read_config(t_arena *mem, const char *path)
 {
 	int			fd;
 	struct stat	st;
@@ -18,15 +18,11 @@ std::string read_config(const char *path)
 
 	fd = open(path, O_RDONLY);
 	if (fd < 0)
-	{
-		exit(0); // OJO delete all the exits
-		// ft_error("Error: Config file can't be opened!\n");
-	}
+		ft_error(mem, CONFIG_OPEN_FAILED, 1);
 	if (fstat(fd, &st) < 0)
 	{
 		close(fd);
-		exit(0);
-		// ft_error("Error: Cannot stat config file!\n");
+		ft_error(mem, CONFIG_STAT_FAILED, 1);
 	}
 	std::string content;
 	content.resize(st.st_size);
@@ -34,8 +30,7 @@ std::string read_config(const char *path)
 	if (bytes_read < 0)
 	{
 		close(fd);
-		exit(0);
-		// ft_error("Error: failed to read config file!\n");
+		ft_error(mem, CONFIG_READ_FAILED, 1);
 	}
 	close(fd);
 	return (content);
@@ -48,14 +43,12 @@ void	autosettings(t_data *d)
 
 	i = 0;
 	if (!d->server_count)
-		//ft_error("Error: no servers have been configured\n", 1);
-		;
+		ft_error(d->perm_memory, NO_SERVERS, 1);
 	while (i < d->server_count)
 	{
 		j = 0;
 		if (!d->s[i]->lb)
-			//ft_error("Error: server has no listen binding\n", 1);
-			;
+			ft_error(d->perm_memory, "Error: server has no listen binding\n", 1);
 		if (!ft_strcmp(d->s[i]->lb->host, "localhost"))
 			d->s[i]->lb->host = "127.0.0.1";
 		if (!d->s[i]->max_bdy_size)
@@ -88,8 +81,8 @@ void	init_config(t_data *d, t_arena *mem)
 	(void)d;
 	lx = (t_lexer *)arena_alloc(mem, sizeof(t_lexer));
 	ps = (t_parser *)arena_alloc(mem, sizeof(t_parser));
-	std::string config_content = read_config(d->config_path);
+	std::string config_content = read_config(d->perm_memory, d->config_path);
 	lexer(lx, config_content, mem);
 	parser(d, ps, lx, mem);
-	autosettings(d); //TODO give all the rest of the server/location variables values if they dont have that
+	autosettings(d);
 }

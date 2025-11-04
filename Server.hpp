@@ -19,6 +19,7 @@
 typedef struct s_server         t_server;
 typedef struct s_location       t_location;
 typedef struct s_listen_binding t_listen_binding;
+typedef struct s_data 			t_data;
 
 struct                          s_location
 {
@@ -81,7 +82,7 @@ class Server {
 		t_server _config;
 	public:
 		Server() {};
-		Server(t_server *config);
+		Server(t_data *d, t_server *config);
 		~Server();
 		// handle_finish_and_exit to avoid closing an fd before finishing writting
 		int closeServer();
