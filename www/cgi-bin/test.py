@@ -8,14 +8,9 @@ print("<head><title>Cat CGI</title></head>")
 print("<body style='font-family: sans-serif; text-align: center;'>")
 print("<h1>Here's a random cat for you :)")
 
-# Simulate a long processing time
-while True: 
- #pass
- time.sleep(8)
-
 # Use thecatapi (free random cat images)
 try:
-    resp = requests.get("https://api.thecatapi.com/v1/images/search", timeout=5)
+    resp = requests.get("https://api.thecatapi.com/v1/images/search")
     if resp.status_code == 200:
         data = resp.json()
         if data and "url" in data[0]:
