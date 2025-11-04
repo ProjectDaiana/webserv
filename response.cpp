@@ -33,14 +33,7 @@ t_response	build_response(Client &client, const t_server &config)
 		res.location = check_redirect(location, client);
 	res.version = client.get_request().http_version;
 	if (client.is_cgi() && !client.cgi_output.empty())
-	{
-		//printf("\033[32m%s\033[0m\n", client.cgi_output.c_str());
 		res.body = client.cgi_output;
-	}
-	if (client.is_cgi() && client.cgi_output.empty()) {
-	//	printf("\033[32m%s\033[0m\n", client.cgi_output.c_str());
-		res.body = "<html><body><h1><h1>504 Gateway Timeout set in the built_response</h1></h1></body></html>";
-	}
 	else if (!client.is_cgi())
 		res.body = handle_method(client, config, location); 
 	//TODO integrate this into redirect logic when everything is working
@@ -53,7 +46,7 @@ t_response	build_response(Client &client, const t_server &config)
 	}
 	else if(!client.is_cgi())
 	{ 
-		//client.set_error_code(303); //TODO test if content type still works
+		client.set_error_code(303); //TODO test if content type still works
 		res.location = reload_page(client);
 	}
 	// if (res.content_type.empty())
@@ -62,15 +55,9 @@ t_response	build_response(Client &client, const t_server &config)
 	// printf("_______________________\nthis is uri: '%s'\n", client.get_path().c_str());
 	res.connection = connection_type(client); //TODO change function name
 	if (res.connection == "keep-alive")
-	{
-		// printf("KEEP-ALIVE\n");
 		client.set_keep_alive(true);
-	}
 	else
-	{
-		printf("KILLED CONNECTION\n");
 		client.set_keep_alive(false);
-	}
 	res.content_length = res.body.size();
 	res.status_code = client.get_error_code();
 	return (res);

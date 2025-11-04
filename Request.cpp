@@ -49,7 +49,7 @@ void Request::reset_struct() {
 
 // Parser
 bool Request::parse(const std::string& raw_request) { //maybe uptade this to take a string and not a reference to raw_request
-	std::cout << "DEBUG: parse() called with " << raw_request.length() << " characters" << std::endl;
+//	std::cout << "DEBUG: parse() called with " << raw_request.length() << " characters" << std::endl;
 	if (raw_request.empty()) {
         return false;
     }
@@ -70,9 +70,9 @@ bool Request::parse(const std::string& raw_request) { //maybe uptade this to tak
         return false;
     }
     
-	std::cout << "DEBUG - Parsed method: '" << _parsed_request.method << "'" << std::endl;
-    std::cout << "DEBUG - Parsed URI: '" << _parsed_request.uri << "'" << std::endl;
-    std::cout << "DEBUG - Headers count: " << _parsed_request.headers.size() << std::endl;
+	//std::cout << "DEBUG - Parsed method: '" << _parsed_request.method << "'" << std::endl;
+    //std::cout << "DEBUG - Parsed URI: '" << _parsed_request.uri << "'" << std::endl;
+    //std::cout << "DEBUG - Headers count: " << _parsed_request.headers.size() << std::endl;
     return true;
 }
 
