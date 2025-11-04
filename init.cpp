@@ -14,7 +14,7 @@ void    init_servers(t_data *d)
     }
 }
 
-t_data *init_data(void)
+t_data *init_data(const char *config_path)
 {
 	t_arena *mem;
 	t_data	*d;
@@ -22,12 +22,13 @@ t_data *init_data(void)
 	mem = alloc_perm_memory();
 	d = (t_data *)arena_alloc(mem, sizeof(t_data));
 	d->perm_memory = mem;
+	d->config_path = config_path;
 	d->server_count = 0;
 	d->n = 0;
 	return (d);
 }
 
-
+/*
 //allocating and hardcoding config for listen_binding, server, location
 //OJO only string literals, cant be changed later, but dont have to be
 //chunky monkey, make smaller once hardcoding is deleted
@@ -58,8 +59,8 @@ void	init_config(t_data *d, t_arena *mem)
 	d->s[0]->locations[0]->accepted_methods[0] = "GET";
 	d->s[0]->locations[0]->accepted_methods[1] = "POST";
 	d->s[0]->locations[0]->accepted_methods[2] = "DELETE";
-	// d->s[0]->locations[0]->redirect = NULL;
-	d->s[0]->locations[0]->redirect = "https://cataas.com/cat";
+	d->s[0]->locations[0]->redirect = NULL;
+	//d->s[0]->locations[0]->redirect = "https://cataas.com/cat";
 	d->s[0]->locations[0]->root = "www/html";
 	d->s[0]->locations[0]->autoindex = 0; //OJO disabled
 	d->s[0]->locations[0]->default_file = "index.html";
@@ -71,4 +72,4 @@ void	init_config(t_data *d, t_arena *mem)
 	d->s[0]->locations[0]->cgi_extensions[0] = ".py";
 	d->s[0]->locations[0]->cgi_path = "/usr/bin/python3";
 	d->s[0]->locations[0]->cgi_upload_store = "www/cgi-bin/uploads";
-}
+}*/

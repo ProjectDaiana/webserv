@@ -11,11 +11,10 @@ int count_servers(t_lexer *lx)
     while (i < lx->token_count)
     {
         if (lx->tokens[i].type == TOK_STRING &&
-            strcmp(lx->tokens[i].value, "server") == 0)
+            ft_strcmp(lx->tokens[i].value, "server") == 0)
         	    count++;
         i++;
     }
-
     return count;
 }
 
@@ -26,11 +25,11 @@ int count_error_pages(t_parser *p)
     while (i < p->lx->token_count)
     {
         t_token *t = &p->lx->tokens[i];
-        if (t->type == TOK_STRING && strcmp(t->value, "server") == 0)
+        if (t->type == TOK_STRING && ft_strcmp(t->value, "server") == 0)
             break; // stop at next server
         if (t->type == TOK_RBRACE)
             break; // end of this server block
-        if (t->type == TOK_STRING && strcmp(t->value, "error_page") == 0)
+        if (t->type == TOK_STRING && ft_strcmp(t->value, "error_page") == 0)
             count++;
         i++;
     }
@@ -46,12 +45,12 @@ int count_cgi_extensions(t_parser *p)
     {
         t_token *t = &p->lx->tokens[i];
 
-        if (t->type == TOK_STRING && strcmp(t->value, "location") == 0)
+        if (t->type == TOK_STRING && ft_strcmp(t->value, "location") == 0)
             break; // stop at next location
         if (t->type == TOK_RBRACE)
             break; // end of this location block
 
-        if (t->type == TOK_STRING && strcmp(t->value, "cgi_extensions") == 0)
+        if (t->type == TOK_STRING && ft_strcmp(t->value, "cgi_extensions") == 0)
         {
             // count extensions until the next semicolon
             i++;
@@ -65,6 +64,7 @@ int count_cgi_extensions(t_parser *p)
         }
         i++;
     }
+	printf(">count cgi extensions: %d\n", count);
     return count;
 }
 
@@ -88,13 +88,14 @@ int count_locations(t_parser *p)
                 break;  // End of server block
         }
         else if (type == TOK_STRING && brace_depth == 1 &&
-                 strcmp(value, "location") == 0) {
+                 ft_strcmp(value, "location") == 0) {
             count++;
         }
         parser_advance(p);
     }
 
     p->pos = saved_pos;
+	printf(">location count is: %d\n", count);
     return count;
 }
 
@@ -105,11 +106,11 @@ int count_allowed_methods(t_parser *p)
     while (i < p->lx->token_count)
     {
         t_token *t = &p->lx->tokens[i];
-        if (t->type == TOK_STRING && strcmp(t->value, "location") == 0)
+        if (t->type == TOK_STRING && ft_strcmp(t->value, "location") == 0)
             break; // stop at next location
         if (t->type == TOK_RBRACE)
             break; // end of this location block
-        if (t->type == TOK_STRING && strcmp(t->value, "allowed_methods") == 0)
+        if (t->type == TOK_STRING && ft_strcmp(t->value, "allowed_methods") == 0)
         {
             // Count how many method tokens follow, until we hit a semicolon
             i++;

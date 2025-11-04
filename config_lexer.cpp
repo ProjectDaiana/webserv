@@ -66,14 +66,14 @@ s_token lexer_next_token(t_lexer *lx, t_arena *mem)
     if (c == '}') { lexer_advance(lx); tok.value = "}"; tok.type = TOK_RBRACE; return tok; }
     if (c == ';') { lexer_advance(lx); tok.value = ";"; tok.type = TOK_SEMICOLON; return tok; }
     std::string val;
-    while (c && !isspace(c) && c != '{' && c != '}' && c != ';')
+    while (c && !ft_isspace(c) && c != '{' && c != '}' && c != ';')
     {
         val += lexer_advance(lx);
         c = lexer_peek(lx);
     }
     tok.type = TOK_STRING;
     tok.value = (char *)arena_alloc(mem, val.size() + 1);
-    memcpy((void *)tok.value, val.c_str(), val.size());
+    ft_memcpy((void *)tok.value, val.c_str(), val.size());
     return tok;
 }
 

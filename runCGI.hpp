@@ -198,7 +198,7 @@ bool check_cgi_timeout(Client& client, int timeout) {
         }
         return true;
     }
-//    return true; // Trigger timeout
+    //return true; // Trigger timeout
     return false;
 }
 

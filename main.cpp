@@ -1,3 +1,4 @@
+
 #include "webserv.hpp"
 #include "pollHandler.hpp"
 #include "Server.hpp"
@@ -139,10 +140,12 @@ void debug_compare_servers()
     std::cerr << "========================================\n\n";
 }*/
 
-int	main(void)
+int	main(int ac, char **av)
 {
-	t_data *data = init_data();
-	//global = data;
+	if (2 != ac)
+		//ft_error("Error: call program with ~'./webserv [config_path]'~\n", 1);
+		;
+	t_data *data = init_data(av[1]);
 	init_config(data, data->perm_memory);
 	print_data(data);
 	//exit(0);

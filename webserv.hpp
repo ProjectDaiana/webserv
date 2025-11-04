@@ -110,6 +110,7 @@ struct s_data
 {
 	t_arena *perm_memory;
 	t_server **s; //NOTE mb rename as config
+	const char *config_path;
 	int server_count;
 	int n;
 	Server **servers;
@@ -157,7 +158,7 @@ char *arena_str(t_arena *mem, const char *src, size_t len = 0);
 
 
 // init
-t_data							*init_data(void);
+t_data							*init_data(const char *config_path);
 void							init_config(t_data *d, t_arena *mem);
 void							init_servers(t_data *data);
 
@@ -187,6 +188,13 @@ std::string read_config(const char *path);
 //helper
 int							ft_atoi(const char *nptr);
 uint32_t						iptoi(const char *ip_str);
+bool 							ft_isspace(char c);
+void    *ft_memcpy(void *dest, const void *src, size_t n);
+char *ft_strchr(const char *s, int c);
+int ft_strcmp(const char *s1, const char *s2);
+int ft_strlen(char *str);
+
+
 
 //polling
 void handle_server_fd(pollfd &pfd, Server &server, std::vector<pollfd> &pfds, std::map<int, Client> &clients);
