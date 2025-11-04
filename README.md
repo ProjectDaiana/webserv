@@ -84,6 +84,28 @@ Arena implementation.
 - `siege -c10 -t30S --content-type "application/x-www-form-urlencoded" 'http://localhost:8080/cgi-bin/post_foto.py POST name=cat&color=orange'`
 - `siege -c 50 -r 10 'http://localhost:8080/cgi-bin/test.py'` This will run until all 50 users have each made 10 requests (total 500 requests)
 
+# Telnet
+```
+$ telnet localhost 8080
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is '^]'.
+POST /cgi-bin/echo_post.py HTTP/1.1
+Host: localhost
+Transfer-Encoding: chunked
+Content-Type: text/plain
+<press Enter again for blank line>
+5
+Hello
+6
+ World
+0
+<press Enter again for final blank line>
+```
+
+# Test Transfer encoding
+` ./prepare_chunked_request.sh kitty.jpg`
+
 
 ## Useful commands
 - `ps aux | grep webserv`
