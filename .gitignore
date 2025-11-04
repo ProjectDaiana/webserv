@@ -1,8 +1,8 @@
-# Ignore all object files
 *.o
+*.bin
+/webserv
+**/uploads/*
 ./uploads/*
 www/html/uploads/*
 www/html/uploads_cgi/*
 settings.json
-# Ignore the webserv executable/
-/webserv

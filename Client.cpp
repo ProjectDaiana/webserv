@@ -17,47 +17,43 @@ Client::~Client() {};
 void Client::add_to_request(char *data, int len) {
 	_raw_request.append(data, len); 
 
-	if (!_headers_complete ) {
+	if (!_headers_complete) {
 		size_t pos = _raw_request.find("\r\n\r\n");
 		if (pos != std::string::npos) {
-			// std::cout << "DEBUG: Headers found at position " << pos << std::endl;
 			_headers_complete = true;
-			_headers_end_pos = pos + 4; 
+			_headers_end_pos = pos + 4;
 			
 			size_t cl = _raw_request.find("Content-Length:");
 			if (cl != std::string::npos) {
-				cl += 15; // skip string "Content-Length:"
+				cl += 15; // skip "Content-Length:"
 				while (cl < _raw_request.size() && isspace(_raw_request[cl]))
 					cl++;
 				_content_len = std::atoi(_raw_request.c_str() + cl);
-				// std::cout << "DEBUG: Content-Length found: " << _content_len << std::endl;
 			}
 			else {
 				_content_len = 0;
-				// std::cout << "DEBUG: No Content-Length found, setting to 0" << std::endl;
 			}
-
+		}
+	}
+	
+	if (_headers_complete && !_read_complete) {
+		size_t te = _raw_request.find("Transfer-Encoding:");
+		if (te != std::string::npos && _raw_request.find("chunked", te) != std::string::npos) {
+			//std::cout << "DEBUG: Detected Transfer-Encoding: chunked" << std::endl;
+			if (_raw_request.find("0\r\n\r\n", _headers_end_pos) != std::string::npos) {
+				//std::cout << "DEBUG: Found end of chunked body (0\\r\\n\\r\\n)" << std::endl;
+				_read_complete = true;
+			}
+			// else {
+			// 	//std::cout << "DEBUG: Waiting for more chunked data..." << std::endl;
+			// }
+		}
+		else {
+			// Content-Length based
 			size_t body_size = _raw_request.size() - _headers_end_pos;
-			// std::cout << "DEBUG: Total request size: " << _raw_request.size() << std::endl;
-			// std::cout << "DEBUG: Headers end at: " << _headers_end_pos << std::endl;
-			// std::cout << "DEBUG: Body size so far: " << body_size << std::endl;
-			// std::cout << "DEBUG: Expected content length: " << _content_len << std::endl;
-
 			if (body_size >= _content_len) {
 				_read_complete = true;
-				// std::cout << "DEBUG: READ_COMPLETE set to true immediately" << std::endl;
-				// std::cout << "DEBUG: Content-Length found: " << _content_len << std::endl;
 			}
-		}	
-		std::cout << "Reading request" << std::endl;
-	}
-	else {
-		size_t body_size = _raw_request.size() - _headers_end_pos;
-		// std::cout << "DEBUG: Adding more body data. Current body size: " << body_size 
-			//   << ", expected: " << _content_len << std::endl;
-		if (body_size >= _content_len) {
-		_read_complete = true;
-			// std::cout << "DEBUG: READ_COMPLETE set to true after additional data" << std::endl;
 		}
 	}
 };

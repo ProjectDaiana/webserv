@@ -1,14 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: darotche <darotche@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/08/24 16:26:00 by ltreser           #+#    #+#             */
-/*   Updated: 2025/11/04 21:13:15 by ltreser          ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
 
 #include "webserv.hpp"
 #include "pollHandler.hpp"
@@ -159,6 +148,7 @@ int	main(int ac, char **av)
 	t_data *data = init_data(av[1]);
 	init_config(data, data->perm_memory);
 	print_data(data);
+	//exit(0);
 	init_servers(data);
 	run_server(data->servers, data->server_count);	
 	free_arena(data->perm_memory);
