@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>414 - URI Too Long</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: #0a0a0a;
+            color: #e2e2e2;
+            font-family: "Creepster", cursive, monospace;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 6em;
+            color: #ff69b4; /* spooky magenta */
+            margin: 0;
+            text-shadow: 0 0 15px #ff1493, 0 0 30px #ff69b4;
+        }
+
+        p {
+            font-size: 1.5em;
+            margin: 15px 0;
+            max-width: 700px;
+            line-height: 1.5;
+        }
+
+        .scroll {
+            font-size: 3em;
+            margin-bottom: 30px;
+        }
+
+        .scroll::before {
+            content: "📜";
+            display: block;
+            font-size: 5em;
+            margin-bottom: 15px;
+            animation: roll 2s infinite alternate;
+        }
+
+        @keyframes roll {
+            0% { transform: rotate(0deg); }
+            50% { transform: rotate(10deg); }
+            100% { transform: rotate(-10deg); }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="scroll"></div>
+    <h1>414</h1>
+    <p>URI Too Long</p>
+    <p>The spell scroll you tried to send is too long for the magical gateway to process.</p>
+    <p>Shorten the URI or break it into smaller segments to continue your journey.</p>
+</body>
+</html>
+

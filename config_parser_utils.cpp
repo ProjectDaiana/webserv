@@ -25,3 +25,10 @@ bool parser_match(t_parser *p, int type)
     return false;
 }
 
+bool simple_directive(const char *str)
+{
+	if (ft_strcmp(str, "allowed_methods") && ft_strcmp(str, "cgi_extensions") && ft_strcmp(str, "server_name"))
+		return true;
+	else
+		return false;
+}

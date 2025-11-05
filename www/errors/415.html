@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>415 - Unsupported Media Type</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: #0a0a0a;
+            color: #e2e2e2;
+            font-family: "Creepster", cursive, monospace;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 6em;
+            color: #ff69b4;
+            margin: 0;
+            text-shadow: 0 0 15px #ff1493, 0 0 30px #ff69b4;
+        }
+
+        p {
+            font-size: 1.5em;
+            margin: 15px 0;
+            max-width: 700px;
+            line-height: 1.5;
+        }
+
+        .candle {
+            font-size: 4em;
+            margin-bottom: 30px;
+            animation: flicker 1.5s infinite;
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 1; text-shadow: 0 0 5px #ffdf00, 0 0 10px #ff8c00; }
+            50% { opacity: 0.5; text-shadow: 0 0 10px #ffd700, 0 0 20px #ff4500; }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="candle">🕯️</div>
+    <h1>415</h1>
+    <p>Unsupported Media Type</p>
+    <p>The server refuses to process your request because the media type is not supported.</p>
+    <p>Please check your Content-Type header and send a type that the magical gateway understands.</p>
+</body>
+</html>
+

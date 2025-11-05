@@ -22,6 +22,16 @@ int count_error_pages(t_parser *p)
 {
     int count = 0;
     int i = p->pos;
+	while (i < p->lx->token_count)
+    {
+        t_token *t = &p->lx->tokens[i];
+        if (t->type == TOK_STRING && ft_strcmp(t->value, "server") == 0)
+		{
+			i++;
+            break; // stop at next server
+		}
+		i++;
+    }
     while (i < p->lx->token_count)
     {
         t_token *t = &p->lx->tokens[i];
