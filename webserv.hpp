@@ -234,7 +234,7 @@ int init_counter_from_dir(const std::string &upload_dir);
 int extract_number(const char *name);
 bool    method_allowed(const std::string& method, const t_location *location, Client &client);
 t_location *find_location(std::string uri, const t_server &config);
-std::string get_content_type(Client &client);
+std::string get_content_type(Client &client, t_location *location);
 std::string get_reason_phrase(int code);
 void    handle_client_write(Client &client, const t_server &config);
 t_response      build_response(Client &client, const t_server &config);
