@@ -33,13 +33,13 @@ char** CGI::build_envp(const std::string& method,
     _env_storage.clear();
     _env_ptrs.clear();
     
-    _env_storage.push_back("REQUEST_METHOD=" + method);
-    _env_storage.push_back("SCRIPT_FILENAME=" + get_script_filename());   // full path
-    _env_storage.push_back("SCRIPT_NAME=" + get_script_name());        // URI path
-    _env_storage.push_back("DOCUMENT_ROOT=" + get_document_root());
-    _env_storage.push_back("SERVER_PROTOCOL=" + http_version);
-	_env_storage.push_back("CONTENT_LENGTH=" + content_length);
-	_env_storage.push_back("CONTENT_TYPE=" + content_type);
+    _env_storage.push_back("REQUEST_METHOD=" + method);                   // HTTP method: GET, POST, etc.
+    _env_storage.push_back("SCRIPT_FILENAME=" + get_script_path());       // Absolute filesystem path to the CGI script
+    _env_storage.push_back("SCRIPT_NAME=" + get_script_name());           // URI path as requested by client (e.g., /cgi-bin/test.py)
+    _env_storage.push_back("DOCUMENT_ROOT=" + get_document_root());       // Root directory from which the script is served
+    _env_storage.push_back("SERVER_PROTOCOL=" + http_version);            // HTTP protocol version (e.g., HTTP/1.1)
+	_env_storage.push_back("CONTENT_LENGTH=" + content_length);           // Length of request body in bytes (for POST)
+	_env_storage.push_back("CONTENT_TYPE=" + content_type);               // MIME type of request body (e.g., multipart/form-data)
     
     for (std::vector<std::string>::iterator it = _env_storage.begin();
          it != _env_storage.end(); ++it) {

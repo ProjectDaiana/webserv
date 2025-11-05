@@ -42,13 +42,14 @@ int run_cgi(Client& client, std::vector<struct pollfd>& pfds)
         close(pipefd_err[0]); // Child doesn't read from error pipe
         
         int error_fd = pipefd_err[1]; // Keep this to write error codes
-        std::string abs_script = client.get_cgi().get_script_filename();
-		size_t slash = abs_script.find_last_of('/');
-		std::string script_dir = ".";
+        std::string abs_script = client.get_cgi().get_script_path();
+		size_t slash_pos = abs_script.find_last_of('/');
+
 		std::string script_base = abs_script;
-		if (slash != std::string::npos) {
-			script_dir = abs_script.substr(0, slash);         // "www/html/cgi-bin"
-			script_base = abs_script.substr(slash + 1);       // "test.py"
+		
+		if (slash_pos != std::string::npos) {
+			std::string script_dir = abs_script.substr(0, slash_pos);         // "www/html/cgi-bin"
+			script_base = abs_script.substr(slash_pos + 1);       // "test.py"
 			if (chdir(script_dir.c_str()) != 0) {
 				perror("chdir");
 				int error_code = 500; // Internal Server Error
