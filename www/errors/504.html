@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>504 - Gateway Timeout</title>
+<style>
+  html, body {
+    height: 100%;
+    margin: 0;
+    font-family: "Creepster", cursive, monospace;
+    color: #ff4444;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    overflow: hidden;
+    background: none; /* remove black background */
+  }
+
+  video#bgVideo {
+    position: fixed;
+    top: 0;
+    left: 0;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    z-index: -1;
+    object-fit: cover;
+    filter: brightness(0.3);
+  }
+
+  h1 {
+    font-size: 8em;
+    margin: 0;
+    color: #ff0000;
+    text-shadow: 0 0 20px #ff0000, 0 0 40px #aa0000;
+    animation: flicker 1.8s infinite;
+  }
+
+  p {
+    font-size: 1.8em;
+    margin-top: 20px;
+    color: #ffbbbb;
+    max-width: 700px;
+    line-height: 1.6em;
+    text-shadow: 0 0 15px #ff4444;
+  }
+
+  .grave {
+    font-size: 2em;
+    margin-top: 40px;
+    color: #ff5555;
+    text-shadow: 0 0 20px #aa0000;
+  }
+
+  @keyframes flicker {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <video id="bgVideo" autoplay muted loop>
+    <source src="https://i.imgur.com/qlH7tzg.mp4" type="video/mp4">
+  </video>
+
+  <h1>504</h1>
+  <p>Your time has run out.<br>
+     We have caught you.<br>
+     You could not escape in time...</p>
+  <div class="grave">Escape while you still can next time!</div>
+
+</body>
+</html>
+

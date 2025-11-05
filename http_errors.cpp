@@ -1,4 +1,5 @@
 #include "webserv.hpp"
+#include <fstream>
 
 //list of error codes
 std::string get_reason_phrase(int code) 
@@ -41,4 +42,60 @@ std::string get_reason_phrase(int code)
         default:  return "Unknown";
     }
 }
+
+
+
+bool displays_error(Client &client)
+{
+	int code = client.get_error_code();
+	return (code >= 400 && code < 600);
+}
+
+void load_error_page(Client &client, t_response *res, const t_server &config, t_location *location)
+{
+	printf("load error page has been called!\n");
+	int code = client.get_error_code();
+	int i = 0;
+	std::string path;
+
+	while (i < config.error_code_count)
+	{
+		if (config.error_codes[i] == code)
+		{
+			path = config.error_pages[i];
+			printf("error page has been found!\n");
+			break;
+		}
+		i++;
+	}
+	if (path.empty()) //if no error code available
+	{
+		std::stringstream body;
+		body << "<html><body><h1>" << code << " "
+             << get_reason_phrase(code) << "</h1></body></html>";			
+		res->body = body.str();
+		res->content_type = "text/html";
+		return ;
+	}
+	std::string full_path = location->root + path;
+	printf("this is the path to error page: '%s'\n", full_path.c_str());
+    std::ifstream file(full_path.c_str());
+    if (!file.is_open())
+    {
+		printf("error page not found!");
+        std::stringstream body;
+        body << "<html><body><h1>" << code << " "
+             << get_reason_phrase(code) << "</h1></body></html>";
+        res->body = body.str();
+        res->content_type = "text/html";
+        return;
+    }
+    std::stringstream buf;
+    std::string line;
+    while (std::getline(file, line))
+        buf << line << "\n";
+    file.close();
+    res->body = buf.str();
+    res->content_type = "text/html";
+}	
 

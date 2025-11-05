@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>401 - Unauthorized</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Creepster&family=Unbounded:wght@400;700&display=swap');
+
+    body {
+      margin: 0;
+      height: 100vh;
+      background: radial-gradient(circle at center, #0a0a0a 0%, #000 70%);
+      color: #f2f2f2;
+      font-family: 'Unbounded', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      text-align: center;
+      position: relative;
+    }
+
+    h1 {
+      font-family: 'Creepster', cursive;
+      font-size: 8em;
+      color: #ff1e1e;
+      text-shadow: 0 0 25px #ff0000, 0 0 60px #a10000;
+      margin: 0;
+    }
+
+    p {
+      font-size: 1.5em;
+      letter-spacing: 1px;
+      margin-top: 10px;
+      color: #ccc;
+    }
+
+    .reaper {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to top, rgba(0,0,0,0.9) 20%, transparent 80%);
+      clip-path: polygon(30% 100%, 40% 50%, 60% 50%, 70% 100%);
+      filter: drop-shadow(0 0 20px rgba(255, 0, 0, 0.5));
+      animation: fade 5s ease-in-out infinite alternate;
+    }
+
+    .scythe {
+      position: absolute;
+      top: 25%;
+      left: 50%;
+      transform: translateX(-50%) rotate(-20deg);
+      width: 200px;
+      height: 10px;
+      background: linear-gradient(90deg, #500000, #ff1e1e);
+      box-shadow: 0 0 15px #ff0000;
+    }
+
+    .blade {
+      position: absolute;
+      top: 22%;
+      left: calc(50% + 60px);
+      width: 120px;
+      height: 25px;
+      border-radius: 50% 50% 0 0;
+      background: linear-gradient(90deg, #fff, #aaa);
+      box-shadow: 0 0 20px #ff1e1e;
+      transform: rotate(160deg);
+    }
+
+    @keyframes fade {
+      0% { opacity: 0.5; transform: translateY(10px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .message {
+      margin-top: 40px;
+      color: #999;
+      font-size: 1.1em;
+      font-style: italic;
+    }
+
+    .flames {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 150px;
+      background: radial-gradient(circle at 50% 120%, rgba(255, 69, 0, 0.4), transparent 70%);
+      filter: blur(30px);
+      animation: burn 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes burn {
+      0% { opacity: 0.6; }
+      100% { opacity: 1; }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="reaper"></div>
+  <div class="scythe"></div>
+  <div class="blade"></div>
+  <div class="flames"></div>
+
+  <h1>401</h1>
+  <p>Unauthorized — The Gates of Hell Deny You</p>
+  <div class="message">Your soul lacks permission to enter. Begone, mortal.</div>
+</body>
+</html>
+

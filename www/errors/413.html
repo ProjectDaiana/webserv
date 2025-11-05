@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>413 - Payload Too Large</title>
+    <style>
+        body {
+            background-color: #0a0a0a;
+            color: #e2e2e2;
+            font-family: "Creepster", cursive, monospace;
+            text-align: center;
+            padding-top: 100px;
+        }
+
+        h1 {
+            font-size: 6em;
+            color: #ff4500; /* scary orange-red */
+            margin-bottom: 0;
+            text-shadow: 0 0 15px #ff6347, 0 0 30px #ff8c00;
+        }
+
+        p {
+            font-size: 1.5em;
+            margin-top: 10px;
+        }
+
+        .pumpkin {
+            font-size: 2em;
+            margin-top: 50px;
+        }
+
+        .pumpkin::before {
+            content: "🎃";
+            display: block;
+            font-size: 5em;
+            margin-bottom: 10px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0); }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
+</head>
+<body>
+    <h1>413</h1>
+    <p>Payload Too Large</p>
+    <p>Your request exceeds the maximum size allowed by the server.<br>
+       You must reduce the size of your request to proceed.</p>
+    <div class="pumpkin">A haunted pumpkin warns you to pack lighter!</div>
+</body>
+</html>
+

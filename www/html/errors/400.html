@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>400 - Bad Request</title>
+    <style>
+        body {
+            background-color: #0a0a0a;
+            color: #e2e2e2;
+            font-family: "Creepster", cursive, monospace;
+            text-align: center;
+            padding-top: 100px;
+        }
+
+        h1 {
+            font-size: 6em;
+            color: #ff993b;
+            margin-bottom: 0;
+        }
+
+        p {
+            font-size: 1.5em;
+            margin-top: 10px;
+        }
+
+        .cauldron {
+            font-size: 2em;
+            margin-top: 50px;
+        }
+
+        .cauldron::before {
+            content: "🧙‍♀️";
+            display: block;
+            font-size: 5em;
+            margin-bottom: 10px;
+        }
+
+        .bubble {
+            animation: bubble 1.5s infinite ease-in-out;
+        }
+
+        @keyframes bubble {
+            0% { opacity: 0.5; transform: translateY(0); }
+            50% { opacity: 1; transform: translateY(-10px); }
+            100% { opacity: 0.5; transform: translateY(0); }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
+</head>
+<body>
+    <h1>400</h1>
+    <p>Something wicked brewed in your request...</p>
+    <div class="cauldron bubble">The potion didn’t mix quite right</div>
+</body>
+</html>
+

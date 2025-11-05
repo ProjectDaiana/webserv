@@ -32,9 +32,7 @@ void parse_directive(t_parser *p, t_server *s, t_arena *mem, t_location *l) //if
 		;
 	const char *value = parser_current(p)->value;
 	parser_advance(p);
-//	printf("name: '%s', value: '%s'\n", name, value);
-	//TODO for all things that have array
-	if (strcmp(name, "allowed_methods") && strcmp(name, "cgi_extensions") && !parser_match(p, TOK_SEMICOLON) )
+	if (simple_directive(name) && !parser_match(p, TOK_SEMICOLON)) //expect ';' for simple directive
 		//ft_error("Parser Error: expected ';' after directive!\n");
 		;
 	if (l)
@@ -61,7 +59,7 @@ void parse_directive(t_parser *p, t_server *s, t_arena *mem, t_location *l) //if
 		else if (!ft_strcmp(name, "cgi_extensions"))
         {
 			l->cgi_path = "/usr/bin/python3";
-            while (strcmp(value, ";"))
+            while (ft_strcmp(value, ";"))
             {
                 l->cgi_extensions[l->cgi_count++] = arena_str(mem, value);
                 value = parser_current(p)->value;
@@ -81,7 +79,16 @@ void parse_directive(t_parser *p, t_server *s, t_arena *mem, t_location *l) //if
 		{
 			s->lb = parse_listen_binding(value, mem); 	
 		}
-
+		else if (!ft_strcmp(name, "error_page"))
+		{
+			s->error_codes[s->error_code_count++] = ft_atoi(value);
+			value = parser_current(p)->value;
+			parser_advance(p);
+			s->error_pages[s->error_page_count++] = arena_str(mem, value);
+			if (!parser_match(p, TOK_SEMICOLON))
+				//ft_error(expected semicolon);
+				;
+		}
 	//	else
 			//ft_error("Parser Error: unknown server directive!\n");
 	}

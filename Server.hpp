@@ -57,12 +57,9 @@ struct                          s_server
     // pointer to array of listen bindings NOTE keeping it modular even if theres only one lb per server,
     //bc this way there can be a compare listen binding ft and not too much stuff has to be passed
     const char  * *error_pages; // array of file paths for error codes
-    int error_page_count;       
-        // amount of error pages
-    int *error_codes;                    
-        // array of status codes (eg 404)
-    int error_code_count;       
-        // amount of error codes
+    int error_page_count;       // amount of error pages
+    int *error_codes;           // array of status codes (eg 404)
+    int error_code_count;       // amount of error codes
     size_t max_bdy_size;                            
         // maximum allowed body size of the requests
     t_location **locations;          

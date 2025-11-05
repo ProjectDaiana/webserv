@@ -4,11 +4,11 @@
 #include <unistd.h>
 #include <cstdio>
 
-std::string reload_page(Client &client)
+std::string reload_page(t_location *location, Client &client)
 {
 	std::string referer = client.get_header("Referer");
 	if (referer.empty())
-		return std::string("index.html");
+		return std::string(location->default_file);
 	else
 		return referer;
 }
