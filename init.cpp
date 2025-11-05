@@ -9,7 +9,7 @@ void    init_servers(t_data *d)
     while(i < d->server_count)
     {
 	d->servers[i] = (Server *)arena_alloc(d->perm_memory, sizeof(Server));
-        new (d->servers[i]) Server(d->s[i]);
+        new (d->servers[i]) Server(d, d->s[i]);
         i++;
     }
 }
@@ -30,8 +30,6 @@ t_data *init_data(const char *config_path)
 
 /*
 //allocating and hardcoding config for listen_binding, server, location
-//OJO only string literals, cant be changed later, but dont have to be
-//chunky monkey, make smaller once hardcoding is deleted
 void	init_config(t_data *d, t_arena *mem)
 {
 	d->server_count = 1;

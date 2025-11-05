@@ -15,6 +15,7 @@
 # include <map>
 # include "Client.hpp"
 # include "Server.hpp"
+# include "errors.hpp"
 
 typedef struct s_arena			t_arena;
 typedef struct s_data			t_data;
@@ -156,6 +157,9 @@ t_arena							*alloc_perm_memory(void);
 void							*arena_alloc(t_arena *mem, size_t size);
 char *arena_str(t_arena *mem, const char *src, size_t len = 0);
 
+//errors
+void ft_error(t_arena *mem, const char *msg, int terminate);
+void ft_exit(void);
 
 // init
 t_data							*init_data(const char *config_path);
@@ -182,8 +186,7 @@ int count_servers(t_lexer *lx);
 bool parser_match(t_parser *p, int type);
 bool parser_advance(t_parser *p);
 const t_token* parser_current(t_parser *p);
-std::string read_config(const char *path);
-std::string read_config(const char *path);
+std::string read_config(t_arena *mem, const char *path);
 
 //helper
 int							ft_atoi(const char *nptr);
@@ -192,7 +195,7 @@ bool 							ft_isspace(char c);
 void    *ft_memcpy(void *dest, const void *src, size_t n);
 char *ft_strchr(const char *s, int c);
 int ft_strcmp(const char *s1, const char *s2);
-int ft_strlen(char *str);
+int ft_strlen(const char *str);
 
 
 
