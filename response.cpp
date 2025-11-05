@@ -37,14 +37,15 @@ t_response	build_response(Client &client, const t_server &config)
 	else if (!client.is_cgi())
 		res.body = handle_method(client, config, location); 
 	//TODO integrate this into redirect logic when everything is working
-	if (client.get_method() == "GET"){
+//	if (client.get_method() == "GET"){
 
 		// std::string ct = client.get_header("Content-Type");
-		res.content_type = get_content_type(client); //TODO check content type for del & post
+	res.content_type = get_content_type(client, location); //TODO check content type for del & post
 		//printf("\033[33mcontent type is: '%s'\033[0m\n", res.content_type.c_str());
 
-	}
-	else if(!client.is_cgi())
+//	}
+	//else (down there, so that its else if)	
+	if(!client.is_cgi() && client.get_method() != "GET")
 	{ 
 		client.set_error_code(303); //TODO test if content type still works
 		res.location = reload_page(location, client);
