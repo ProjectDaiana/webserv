@@ -6,7 +6,7 @@
 /*   By: darotche <darotche@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/23 17:31:14 by ltreser           #+#    #+#             */
-/*   Updated: 2025/11/04 23:30:33 by ltreser          ###   ########.fr       */
+/*   Updated: 2025/11/05 21:50:43 by darotche         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,8 @@ void *arena_alloc(t_arena *mem, size_t size)
 
 void	free_arena(t_arena *mem)
 {
-	free(mem->start);
-	mem->start = NULL;
+	if (mem && mem->start)
+		free(mem->start);
 }
 
 //initialization of memory struct for permanent lifespan memory

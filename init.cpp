@@ -6,9 +6,9 @@ void    init_servers(t_data *d)
 
     i = 0;
     d->servers = (Server **)arena_alloc(d->perm_memory, d->server_count * sizeof(Server));
-    while(i < d->server_count)
+	while(i < d->server_count)
     {
-	d->servers[i] = (Server *)arena_alloc(d->perm_memory, sizeof(Server));
+		d->servers[i] = (Server *)arena_alloc(d->perm_memory, sizeof(Server));
         new (d->servers[i]) Server(d, d->s[i]);
         i++;
     }
