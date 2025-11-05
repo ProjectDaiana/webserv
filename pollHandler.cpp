@@ -11,7 +11,7 @@ int validate_and_resolve_path(const t_server& config, Client& client) {
     t_location* location = find_location(request_path, config);
     if (!location) {
         //printf("No matching location for path: %s\n", request_path.c_str());
-        client.set_error_code(404);
+        client.set_error_code(404); // Not found
         return 404;
     }
 	client.get_cgi().set_location(location); //will be used later for upload store
@@ -19,7 +19,7 @@ int validate_and_resolve_path(const t_server& config, Client& client) {
     size_t dot_pos = request_path.find_last_of(".");
     if (dot_pos == std::string::npos) {
     //    printf("No file extension in path: %s\n", request_path.c_str());
-        client.set_error_code(400);
+        client.set_error_code(400); // Bad Request
         return 400;
     }
     
@@ -33,23 +33,15 @@ int validate_and_resolve_path(const t_server& config, Client& client) {
     }
     
     if (!is_cgi_extension) {
-    //    printf("Unsupported CGI extension: %s\n", file_ext.c_str());
-        client.set_error_code(400);
-        return 400;
+        client.set_error_code(403); //Forbidden
+        return 403;
     }
 
     std::string root(location->root);         // e.g. "www/html"
     std::string loc_path(location->path);     // e.g. "/cgi-bin" or "/"
     std::string document_root = root;
 	std::string built_path = root + request_path; // e.g. "www/html/test.py" or "www/html/cgi-bin/test.py"
-
-    // Remove location path prefix from request_path
-    if (request_path.find(loc_path) == 0)
-        request_path = request_path.substr(loc_path.length());
-    if (request_path.empty() || request_path[0] != '/')
-		request_path = "/" + request_path;
-
-		
+	
 	// Remove trailing slash from document_root if present
 	if (!document_root.empty() && document_root[document_root.size() - 1] == '/')
 		document_root.erase(document_root.size() - 1);
@@ -64,7 +56,7 @@ int validate_and_resolve_path(const t_server& config, Client& client) {
 
     if (!location->cgi_path) {
     //    printf("No interpreter defined for extension: %s\n", file_ext.c_str());
-        client.set_error_code(500);
+        client.set_error_code(500); //Internal Server Error
         return 500;
     }
     std::string interpreter = location->cgi_path;

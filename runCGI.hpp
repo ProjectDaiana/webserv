@@ -146,18 +146,14 @@ bool handle_cgi_read_from_pipe(int pipe_fd, Client &client,  std::vector<struct 
 		return cgi_eof(pipe_fd, client, pfds);  // CGI finished
 
     if (n < 0) {
-        // Error occurred
-	//	printf("\033[31m=== CGI read error: %s =====================\033[0m\n", strerror(errno));
-        
-        // Save PID before resetting
         pid_t cgi_pid = client.get_cgi_pid();
-        
+		client.set_error_code(502); 
         client.set_cgi_running(0);
-        //client.set_cgi_stdout_fd(-1);
         client.set_cgi_pid(-1);
+        //client.set_cgi_stdout_fd(-1); //TODO check if we need this
         
         close(pipe_fd);
-        waitpid(cgi_pid, NULL, WNOHANG);  // Use saved PID
+        waitpid(cgi_pid, NULL, WNOHANG);
         return true;
     }
     return false;
@@ -165,7 +161,7 @@ bool handle_cgi_read_from_pipe(int pipe_fd, Client &client,  std::vector<struct 
 
 bool check_cgi_timeout(Client& client, int timeout) {
 	if (!client.is_cgi_running()) {
-		return false;  // Not running CGI
+		return false;
     }
     time_t now = std::time(NULL);
     time_t elapsed = now - client.get_cgi_start_time();
