@@ -456,7 +456,11 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 				set_client_pollout(pfds, client);
 				return connection_alive;
 			}
-			run_cgi(client, pfds);
+			int cgi_error = run_cgi(client, pfds);
+			if (cgi_error != 0) {
+				client.set_error_code(cgi_error);
+				set_client_pollout(pfds, client);
+			}
 			return connection_alive;
 		}
 

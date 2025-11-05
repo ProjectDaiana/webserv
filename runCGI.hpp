@@ -4,29 +4,45 @@
 #include <string>
 #include <errno.h>
 #include <signal.h>
-#include <fcntl.h> ///
 #include "webserv.hpp"
+#include "errors.hpp"
 
-bool run_cgi(Client& client, std::vector<struct pollfd>& pfds)
+int run_cgi(Client& client, std::vector<struct pollfd>& pfds)
 {
-	int pipefd_out[2]; // To Server
-    int pipefd_in[2]; // From Client
-    pipe(pipefd_out);
-    pipe(pipefd_in);
+	int pipefd_out[2];  // CGI stdout -> Server
+    int pipefd_in[2];   // Server -> CGI stdin
+    int pipefd_err[2];  // CGI error codes -> Server
+
+    if (pipe(pipefd_out) == -1 || pipe(pipefd_in) == -1 || pipe(pipefd_err) == -1) {
+        if (pipefd_out[0] >= 0) { close(pipefd_out[0]); close(pipefd_out[1]); }
+        if (pipefd_in[0] >= 0) { close(pipefd_in[0]); close(pipefd_in[1]); }
+        if (pipefd_err[0] >= 0) { close(pipefd_err[0]); close(pipefd_err[1]); }
+        return 500; // Internal Server Error - pipe failed
+    }
+    
 	pid_t pid = fork();
+    if (pid == -1) {
+        close(pipefd_out[0]); close(pipefd_out[1]);
+        close(pipefd_in[0]); close(pipefd_in[1]);
+        close(pipefd_err[0]); close(pipefd_err[1]);
+        return 500; // Internal Server Error - fork failed
+    }
+    
     client.set_cgi_start_time();
 	client.set_cgi_running(1);
 
     if (pid == 0) {
+        // Child process
         dup2(pipefd_out[1], STDOUT_FILENO);
 		dup2(pipefd_in[0], STDIN_FILENO);
         close(pipefd_out[0]);
         close(pipefd_out[1]);
         close(pipefd_in[0]);
         close(pipefd_in[1]);
-
-        std::string abs_script = client.get_cgi().get_script_filename(); // already resolved by validate_and_resolve_path
-        std::string docroot    = client.get_cgi().get_document_root();
+        close(pipefd_err[0]); // Child doesn't read from error pipe
+        
+        int error_fd = pipefd_err[1]; // Keep this to write error codes
+        std::string abs_script = client.get_cgi().get_script_filename();
 		size_t slash = abs_script.find_last_of('/');
 		std::string script_dir = ".";
 		std::string script_base = abs_script;
@@ -35,7 +51,10 @@ bool run_cgi(Client& client, std::vector<struct pollfd>& pfds)
 			script_base = abs_script.substr(slash + 1);       // "test.py"
 			if (chdir(script_dir.c_str()) != 0) {
 				perror("chdir");
-				_exit(127);
+				int error_code = 500; // Internal Server Error
+				write(error_fd, &error_code, sizeof(int));
+				close(error_fd);
+				while (1); // Hang - parent will kill us
 			}
 		}
 
@@ -52,24 +71,28 @@ bool run_cgi(Client& client, std::vector<struct pollfd>& pfds)
             const_cast<char*>(script_base.c_str()),
             NULL
         };
-
-		// fprintf(stderr, "[run_cgi] interpreter='%s', script_filename='%s'\n", interp.c_str(), abs_script.c_str());
         execve(interp.c_str(), argv, envp);
-        perror("execve");
-        _exit(127);
+    
+        // execve failed - write error code to error pipe
+        int error_code = 500; // Internal Server Error - execve failed (bad interpreter)
+        write(error_fd, &error_code, sizeof(int));
+        close(error_fd);
+        while (1); // Hang - parent will kill us
     }
-	//printf("=== CGI After execvefd '%d' is being added to poll\n \n\n", pipefd_out[0]);
+    
+    // Parent process continues here
     close(pipefd_out[1]);
-	// Parent doesn't need the read end of the CGI stdin pipe
 	close(pipefd_in[0]);
+    close(pipefd_err[1]); // Parent doesn't write to error pipe
+    
 	pfds.push_back(Server::create_pollfd(pipefd_out[0], POLLIN, 0)); //POLLIN
 	client.set_cgi_stdout_fd(pipefd_out[0]);
+    client.get_cgi().set_error_fd(pipefd_err[0]); // Store error pipe fd in CGI object
 	client.set_cgi_written(0);
     client.set_cgi_pid(pid);
 
 	if (client.get_method() == "POST" && !client.get_body().empty()) {
 		//printf("=== POST request with %zu bytes body =====================\n", client.get_body().length());
-
 		//printf("\033[33mrunCGI: cgi boddy %s\033[0m\n", client.get_body().c_str());
 		//	printf("\033[33m POST Content Type %s =====================\n", client.get_header("Content-Type").c_str());
 	    client.set_cgi_writing(1);
@@ -82,24 +105,29 @@ bool run_cgi(Client& client, std::vector<struct pollfd>& pfds)
 		client.set_cgi_writing(0);
     }
 
-	return true; 
+	return 0; // Success - no error
 }
 
 bool cgi_eof(int pipe_fd, Client &client, std::vector<struct pollfd>& pfds)
 {
-	// printf("\033[33mDEBUG BEFORE EOF: client_fd=%d, cgi_stdin_fd=%d, cgi_written=%d, body_len=%zu, content-length='%s'\033[0m\n",
-	// client.get_fd(),
-	// client.get_cgi_stdin_fd(),
-	// client.get_cgi_written(),
-	// client.get_body().size(),
-	// client.get_header("Content-Length").c_str());
-	// printf("\033[33m POST Content Type %s =====================\n", client.get_header("Content-Type").c_str());
-	// printf("\033[33mrunCGI: cgi body %s\033[0m\n", client.get_body().c_str());
-        
 	// Save PID before resetting it!
 	pid_t cgi_pid = client.get_cgi_pid();
 	client.set_cgi_running(0);
 	client.set_cgi_pid(-1);
+
+	// Check error pipe for error code from child
+	int error_fd = client.get_cgi().get_error_fd();
+	if (error_fd >= 0) {
+		int error_code = 0;
+		ssize_t n = read(error_fd, &error_code, sizeof(int));
+		if (n == sizeof(int) && error_code != 0) {
+			client.set_error_code(error_code);
+			printf(CLR_RED "ERROR code in cgi_eof %d\n" CLR_RESET, error_code);
+			client.cgi_output.clear(); // Clear any output if there was an error
+		}
+		close(error_fd);
+		client.get_cgi().set_error_fd(-1); // Mark as closed
+	}
 
 	if(client.get_method() == "POST")
     	client.get_cgi().parse_multipart(client);
@@ -116,9 +144,14 @@ bool cgi_eof(int pipe_fd, Client &client, std::vector<struct pollfd>& pfds)
 	}
 
 	if (cgi_pid > 0) {
-		pid_t result = waitpid(cgi_pid, NULL, WNOHANG); //OJO if zombie setting WNOHANG to 0 will blcok for a few microseconds but no zombies
+		int status;
+		pid_t result = waitpid(cgi_pid, &status, WNOHANG);
 		if (result == -1) {
 			perror("waitpid in cgi_eof");
+		} else if (result > 0) {
+			if (WIFSIGNALED(status) && (client.get_error_code() == 0 || client.get_error_code() == 200)) {
+				client.set_error_code(502); // Bad Gateway - CGI script crashed
+			}
 		}
 	}
 	// printf("=== CGI complete output: pid %d,  %s END=====================\n", ret_pid, client.cgi_output.c_str());
@@ -167,46 +200,48 @@ bool check_cgi_timeout(Client& client, int timeout) {
     time_t elapsed = now - client.get_cgi_start_time();
 
     if (elapsed > timeout) {
-		// std::cout << "XXXXXXXXXX CGI Timeout" << std::endl;
 		// printf("time elapsed: '%lld'\n", (long long)elapsed);
 		// printf("cgi start time: '%lld'\n", (long long)client.get_cgi_start_time());
 		// printf("timeout: '%d'\n", timeout);
 		// printf("client fd is: '%d'\n", client.get_fd());
         pid_t cgi_pid = client.get_cgi_pid();
         if (cgi_pid > 0) {
-            kill(cgi_pid, SIGTERM);
-            usleep(100000);
-
-            if (kill(cgi_pid, 0) == 0) {
-                kill(cgi_pid, SIGKILL);   // Force kill
-            }
-        }
-
-		if (cgi_pid > 0) {
-            kill(cgi_pid, SIGTERM);  // Try graceful termination
-            usleep(100000);
-            
-            // Force kill if still alive
-            if (kill(cgi_pid, 0) == 0) {
-                kill(cgi_pid, SIGKILL);
+            if (kill(cgi_pid, SIGTERM) == 0) {
+                usleep(100000); // Wait 100ms
+                
+                if (kill(cgi_pid, 0) == 0) {
+                    kill(cgi_pid, SIGKILL);
+                }
             }
             waitpid(cgi_pid, NULL, WNOHANG);
         }
         return true;
     }
-    //return true; // Trigger timeout
     return false;
 }
 
 bool handle_cgi_timeout(Client& client) {
-    if (!client.is_cgi_running() || !client.is_cgi()) {
-      //  std::cout << "XXXXX No cgi running or client is not cgi" << std::endl;
+    if (!client.is_cgi_running() || !client.is_cgi())
         return false;
-    }
 
     if (check_cgi_timeout(client, CGI_TIMEOUT)) {
-        client.set_error_code(504);
-        client.set_cgi_running(0);
+        // IMPORTANT: Check error pipe BEFORE setting timeout error
+        // Child may have written error (chdir/execve fail) then hung with while(1)
+        int error_fd = client.get_cgi().get_error_fd();
+        
+		if (error_fd >= 0) {
+            int error_code = 0;
+            int n = read(error_fd, &error_code, sizeof(int));
+            if (n == sizeof(int) && error_code != 0)
+                client.set_error_code(error_code);
+            else
+                client.set_error_code(504);
+            close(error_fd);
+            client.get_cgi().set_error_fd(-1); // Mark as closed
+        } else
+            client.set_error_code(504);
+        
+		client.set_cgi_running(0);
         client.set_cgi_pid(-1);
         client.set_cgi_start_time();
         return true;  // Timeout occurred
@@ -263,6 +298,22 @@ bool handle_cgi_write_to_pipe(int pipe_fd, Client &client,  std::vector<struct p
         if (pfd_idx != -1)
 			pfds[pfd_idx].events |= POLLOUT;
         return false;
+    } else if (n < 0) {
+        if (errno == EAGAIN || errno == EWOULDBLOCK) {
+            return false; // Non-blocking write, try again later
+        }
+        // Pipe broken or other error - CGI died before reading all input
+        client.set_error_code(502); // Bad Gateway
+        for (size_t i = 0; i < pfds.size(); i++) {
+            if (pfds[i].fd == pipe_fd) {
+				pfds.erase(pfds.begin() + i);
+				break;
+			}
+        }
+        close(pipe_fd);
+        client.set_cgi_stdin_fd(-1);
+        client.set_cgi_writing(0);
+        return true;
     }
     return false;
 }

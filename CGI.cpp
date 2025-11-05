@@ -10,7 +10,14 @@
 
 CGI::~CGI() {
     if (_running && _pid > 0) {
-        kill(_pid, SIGTERM);
+        // Try graceful termination
+        if (kill(_pid, SIGTERM) == 0) {
+            usleep(50000); // Wait 50ms
+            // Force kill if still alive
+            if (kill(_pid, 0) == 0) {
+                kill(_pid, SIGKILL);
+            }
+        }
         waitpid(_pid, NULL, WNOHANG);
     }
     

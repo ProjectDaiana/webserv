@@ -17,6 +17,7 @@ private:
     time_t _start_time;
 	int _stdout_fd;
 	int _stdin_fd;
+	int _error_fd;
     std::vector<std::string> _env_storage;
     std::vector<char*> _env_ptrs;
 	int _written;
@@ -30,7 +31,7 @@ private:
 	t_location* _location;
 	
 	public:
-	CGI() : _pid(-1), _running(false), _output(""), _start_time(0), _stdout_fd(-1), _stdin_fd(-1), _written(0) {}
+	CGI() : _pid(-1), _running(false), _output(""), _start_time(0), _stdout_fd(-1), _stdin_fd(-1), _error_fd(-1), _written(0) {}
     ~CGI();
     
     void reset() {
@@ -40,6 +41,7 @@ private:
         _start_time = 0;
         _stdout_fd = -1;
 		_stdin_fd = -1;
+		_error_fd = -1;
         _env_storage.clear();
         _env_ptrs.clear();
     }
@@ -81,6 +83,7 @@ private:
 	//Setters
 	void set_stdout(int fd) { _stdout_fd = fd; }
 	void set_stdin(int fd) { _stdin_fd = fd; }
+	void set_error_fd(int fd) { _error_fd = fd; }
     void set_output(const std::string& output) { _output = output; }
     void set_pid(pid_t pid) { _pid = pid; }
     void set_start_time() { _start_time = std::time(NULL); }
@@ -89,6 +92,7 @@ private:
     void set_written(int n) { _written = n; }
 	bool is_running() const { return _running; }
 	bool is_writing() const { return _writing; }
+	int get_error_fd() const { return _error_fd; }
 //	void set_uploaded_file_ext(const std::string& ext) { _uploaded_file_ext = ext; }
 	void set_location(t_location* loc) { _location = loc; }
 
