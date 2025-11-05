@@ -48,18 +48,18 @@ void	autosettings(t_data *d)
 	{
 		j = 0;
 		if (!d->s[i]->lb)
-			ft_error(d->perm_memory, "Error: server has no listen binding\n", 1);
+			ft_error(d->perm_memory, NO_LISTEN_BINDING, 1);
 		if (!ft_strcmp(d->s[i]->lb->host, "localhost"))
 			d->s[i]->lb->host = "127.0.0.1";
 		if (!d->s[i]->max_bdy_size)
 			 d->s[i]->max_bdy_size = 10 * 1024 * 1024;
 		if (!d->s[i]->location_count)
-			//ft_error("Error: server has no locations\n", 1);
+			ft_error(d->perm_memory, NO_LOCATIONS, 1);
 			;
 		while (j < d->s[i]->location_count)
 		{
 			if (!d->s[i]->locations[j]->path || !d->s[i]->locations[j]->root)
-				//ft_error("Error: location without valid path", 1);
+				ft_error(d->perm_memory, INVALID_LOCATION, 1);
 				;
 			if (!d->s[i]->locations[j]->method_count)
 				//ft_error("Error: location must allow at least one method", 1);

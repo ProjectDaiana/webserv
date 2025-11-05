@@ -36,6 +36,9 @@
 #define CONFIG_STAT_FAILED ERROR_PREFIX CLR_CYAN "Cannot stat config file! (◞‸◟；)\n" CLR_RESET
 #define CONFIG_READ_FAILED ERROR_PREFIX CLR_CYAN "Failed to read config file! (；ω；)\n" CLR_RESET
 #define NO_SERVERS ERROR_PREFIX CLR_CYAN "No servers have been configured! (╯°□°）╯︵ ┻━┻\n" CLR_RESET
+#define NO_LOCATIONS    ERROR_PREFIX CLR_CYAN#define ERR_NO_LOCATIONS    ERROR_PREFIX CLR_ORANGE "Server has no locations configured!\n" CLR_RESET
+#define NO_LISTEN_BINDING    ERROR_PREFIX CLR_RED "Server has no listen binding!\n" CLR_RESET
+#define INVALID_LOCATION    ERROR_PREFIX CLR_MAGENTA "Location without a valid path!\n" CLR_RESET
 
 
 #endif // ERRORS_HPP
