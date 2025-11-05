@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>503 - Service Unavailable</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: radial-gradient(circle at center, #0a0010 0%, #000 100%);
+      color: #f0e6ff;
+      font-family: "Creepster", cursive, monospace;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    h1 {
+      font-size: 7em;
+      color: #ff4e6d;
+      text-shadow: 0 0 20px #ff4e6d, 0 0 60px #a3003b;
+      margin: 0;
+      animation: flicker 2s infinite;
+    }
+
+    p {
+      font-size: 1.3em;
+      max-width: 600px;
+      color: #d8c8ff;
+      margin: 15px auto 0;
+    }
+
+    .circle {
+      position: relative;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: radial-gradient(circle at center, rgba(255, 78, 109, 0.5) 0%, rgba(0,0,0,0.9) 70%);
+      box-shadow: 0 0 50px 15px #ff4e6d inset, 0 0 80px 30px #a3003b;
+      margin-top: 50px;
+      animation: pulse 3s infinite ease-in-out;
+    }
+
+    .energy {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 180px;
+      height: 180px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, transparent 70%);
+      animation: spin 4s linear infinite;
+    }
+
+    .spark {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: #ff77aa;
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform-origin: -100px 0;
+      animation: orbit 3s linear infinite;
+    }
+
+    .spark:nth-child(2) { animation-delay: 0.5s; }
+    .spark:nth-child(3) { animation-delay: 1s; }
+    .spark:nth-child(4) { animation-delay: 1.5s; }
+
+    @keyframes flicker {
+      0%, 100% { opacity: 1; text-shadow: 0 0 40px #ff4e6d; }
+      50% { opacity: 0.6; text-shadow: 0 0 10px #a3003b; }
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 50px 15px #ff4e6d inset, 0 0 80px 30px #a3003b; }
+      50% { box-shadow: 0 0 80px 20px #ff77aa inset, 0 0 100px 40px #ff3366; }
+    }
+
+    @keyframes spin {
+      0% { transform: translate(-50%, -50%) rotate(0deg); }
+      100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    @keyframes orbit {
+      0% { transform: rotate(0deg) translateX(100px) rotate(0deg); }
+      100% { transform: rotate(360deg) translateX(100px) rotate(-360deg); }
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
+</head>
+<body>
+  <h1>503</h1>
+  <p>The summoning circle is overwhelmed by magical energy.</p>
+  <p>The server’s magic is temporarily exhausted — please try again soon.</p>
+
+  <div class="circle">
+    <div class="energy"></div>
+    <div class="spark"></div>
+    <div class="spark"></div>
+    <div class="spark"></div>
+    <div class="spark"></div>
+  </div>
+</body>
+</html>
+

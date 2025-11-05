@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>405 - Forbidden Curse</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, #0b0b0b, #1a1a1a);
+            color: #e0e0e0;
+            font-family: "Creepster", cursive, monospace;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 8em;
+            color: #6a0dad; /* dark purple */
+            margin: 0;
+            text-shadow: 0 0 20px #9400d3, 0 0 40px #8a2be2;
+        }
+
+        p {
+            font-size: 1.8em;
+            margin-top: 20px;
+            max-width: 700px;
+            line-height: 1.4;
+        }
+
+        .curse {
+            font-size: 5em;
+            margin: 40px 0;
+            animation: pulse 2s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1) rotate(-2deg); opacity: 0.8; }
+            100% { transform: scale(1.1) rotate(2deg); opacity: 1; }
+        }
+
+        .warning {
+            font-size: 2em;
+            color: #ff4500;
+            margin-top: 30px;
+            text-shadow: 0 0 10px #ff6347;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="curse">💀</div>
+    <h1>405</h1>
+    <p>You dared to cast a <strong>forbidden curse</strong>.<br>
+       Only approved spells are allowed in this enchanted domain.<br></p>
+    <div class="warning">The magical barriers have rejected your incantation.</div>
+</body>
+</html>
+

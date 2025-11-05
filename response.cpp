@@ -47,7 +47,7 @@ t_response	build_response(Client &client, const t_server &config)
 	else if(!client.is_cgi())
 	{ 
 		client.set_error_code(303); //TODO test if content type still works
-		res.location = reload_page(client);
+		res.location = reload_page(location, client);
 	}
 	// if (res.content_type.empty())
 	// 	res.content_type = "text/html";
@@ -60,6 +60,10 @@ t_response	build_response(Client &client, const t_server &config)
 		client.set_keep_alive(false);
 	res.content_length = res.body.size();
 	res.status_code = client.get_error_code();
+	res.reason_phrase = get_reason_phrase(res.status_code);
+	if (displays_error(client))
+		load_error_page(client, &res, config, location);
+	res.content_length = res.body.size();
 	return (res);
 }
 
@@ -86,7 +90,7 @@ void	handle_client_write(Client &client, const t_server &config)
 		//printf("finished response:\n");
 	//	printf("status code is: '%d'\n", response.status_code);
 		written = write(client.get_fd(), str_response.c_str(), str_response.size());
-        //write(1, str_response.c_str(), str_response.size());
+        write(1, str_response.c_str(), str_response.size());
 		if (written == (int)str_response.size())
 		{
 			if (client.is_cgi())

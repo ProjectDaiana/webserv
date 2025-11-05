@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>502 - Bad Gateway</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: radial-gradient(circle at center, #050011 0%, #000 100%);
+      color: #d8caff;
+      font-family: "Creepster", cursive, monospace;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    h1 {
+      font-size: 7em;
+      color: #9b5bff;
+      text-shadow: 0 0 20px #9b5bff, 0 0 60px #4b00ff;
+      margin: 0;
+      animation: pulse 2.5s infinite;
+    }
+
+    p {
+      font-size: 1.3em;
+      max-width: 600px;
+      color: #b8a7ff;
+      margin: 15px auto 0;
+    }
+
+    .portal {
+      position: relative;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: radial-gradient(circle at center, rgba(80, 0, 255, 0.4) 0%, rgba(0, 0, 0, 0.9) 70%);
+      box-shadow: 0 0 60px 10px #7a4eff inset, 0 0 60px 30px #25003a;
+      margin-top: 50px;
+      animation: flicker 3s infinite ease-in-out;
+    }
+
+    .crack {
+      position: absolute;
+      background: linear-gradient(to bottom, #c8a3ff 0%, transparent 100%);
+      width: 3px;
+      height: 100px;
+      opacity: 0.8;
+      filter: blur(0.8px);
+      transform-origin: bottom center;
+      animation: crackAnim 2s infinite alternate;
+    }
+
+    .crack:nth-child(1) { left: 60px; top: 80px; transform: rotate(-15deg); animation-delay: 0.3s; }
+    .crack:nth-child(2) { left: 120px; top: 50px; transform: rotate(10deg); animation-delay: 0.6s; }
+    .crack:nth-child(3) { left: 170px; top: 90px; transform: rotate(20deg); animation-delay: 1s; }
+
+    .sparks {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 200px;
+      height: 200px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      box-shadow: 
+        0 0 10px 2px rgba(255, 255, 255, 0.6),
+        0 0 30px 10px rgba(150, 0, 255, 0.3);
+      animation: sparkPulse 1.8s infinite;
+    }
+
+    @keyframes flicker {
+      0%, 100% { box-shadow: 0 0 40px 10px #7a4eff inset, 0 0 50px 25px #1a0025; }
+      50% { box-shadow: 0 0 80px 20px #a56fff inset, 0 0 70px 35px #35004f; }
+    }
+
+    @keyframes pulse {
+      0%, 100% { text-shadow: 0 0 40px #9b5bff; opacity: 1; }
+      50% { text-shadow: 0 0 10px #4b00ff; opacity: 0.6; }
+    }
+
+    @keyframes crackAnim {
+      0% { opacity: 0.6; height: 80px; }
+      100% { opacity: 1; height: 120px; }
+    }
+
+    @keyframes sparkPulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+      50% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
+</head>
+<body>
+  <h1>502</h1>
+  <p>The gateway between realms has collapsed.</p>
+  <p>The summoning circle failed to connect to the higher server plane...</p>
+
+  <div class="portal">
+    <div class="sparks"></div>
+    <div class="crack"></div>
+    <div class="crack"></div>
+    <div class="crack"></div>
+  </div>
+</body>
+</html>
+

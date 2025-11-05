@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>500 - Internal Server Error</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            background: radial-gradient(circle at bottom, #0a0a0a 0%, #000000 100%);
+            color: #f0e6f6;
+            font-family: "Creepster", cursive, monospace;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        h1 {
+            font-size: 7em;
+            color: #ff3b3b;
+            text-shadow: 0 0 20px #ff3b3b, 0 0 40px #800000;
+            margin: 0;
+            animation: flickerTitle 2s infinite;
+        }
+
+        p {
+            font-size: 1.5em;
+            color: #cccccc;
+            margin-top: 20px;
+            max-width: 600px;
+        }
+
+        .house {
+            position: relative;
+            width: 350px;
+            height: 300px;
+            margin-top: 50px;
+            background: #111;
+            border: 5px solid #333;
+            box-shadow: 0 0 40px #220022;
+            animation: flickerHouse 3s infinite alternate;
+        }
+
+        .roof {
+            position: absolute;
+            top: -80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 200px solid transparent;
+            border-right: 200px solid transparent;
+            border-bottom: 80px solid #111;
+            filter: drop-shadow(0 0 20px #440044);
+        }
+
+        .window {
+            position: absolute;
+            width: 40px;
+            height: 50px;
+            background: #111;
+            border: 3px solid #333;
+            animation: lightFlicker 4s infinite alternate;
+        }
+
+        .window.left {
+            top: 100px;
+            left: 60px;
+        }
+
+        .window.right {
+            top: 100px;
+            right: 60px;
+        }
+
+        .window.center {
+            top: 180px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        @keyframes flickerHouse {
+            0%, 100% { box-shadow: 0 0 20px #220022; }
+            50% { box-shadow: 0 0 60px #880000; }
+        }
+
+        @keyframes flickerTitle {
+            0%, 100% { opacity: 1; text-shadow: 0 0 40px #ff3b3b; }
+            50% { opacity: 0.6; text-shadow: 0 0 10px #550000; }
+        }
+
+        @keyframes lightFlicker {
+            0%, 70%, 100% { background: #222; }
+            30%, 80% { background: #ffcc00; }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
+</head>
+<body>
+    <h1>500</h1>
+    <p>The haunted server house has collapsed under its own dark magic...</p>
+    <p>Strange lights flicker within. The ghosts of bad code wander the halls.</p>
+    <div class="house">
+        <div class="roof"></div>
+        <div class="window left"></div>
+        <div class="window right"></div>
+        <div class="window center"></div>
+    </div>
+</body>
+</html>
+

@@ -77,7 +77,7 @@ enum TokenType
 struct 							s_token
 {
 	TokenType type;
-	const char * value;
+	const char *value;
 	int line;
 	int col;
 };
@@ -88,7 +88,7 @@ struct s_lexer
     size_t pos;
     int line;
     int col;
-    t_token *tokens; //TODO change to container
+    t_token *tokens;
     int token_count;
     int capacity;
 };
@@ -187,6 +187,7 @@ bool parser_match(t_parser *p, int type);
 bool parser_advance(t_parser *p);
 const t_token* parser_current(t_parser *p);
 std::string read_config(t_arena *mem, const char *path);
+bool simple_directive(const char *str);
 
 //helper
 int							ft_atoi(const char *nptr);
@@ -239,8 +240,10 @@ void    handle_client_write(Client &client, const t_server &config);
 t_response      build_response(Client &client, const t_server &config);
 std::string     handle_method(Client &client, const t_server &config, t_location *location);
 std::string connection_type(Client &client);
-std::string reload_page(Client &client);
+std::string reload_page(t_location *location, Client &client);
 t_location *handle_location(Client &client, const t_server &config);
 std::string check_redirect(t_location *location, Client &client);
+bool displays_error(Client &client);
+void load_error_page(Client &client, t_response *res, const t_server &config, t_location *location);
 
 #endif
