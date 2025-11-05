@@ -27,8 +27,8 @@ static void print_locations(const t_server *s)
     printf("  Locations (%d):\n", s->location_count);
     for (int i = 0; i < s->location_count; ++i)
     {
-        const t_location *l = s->locations[i];
-        printf("    %s\n", l->path ? l->path : "(unnamed)");
+        const t_location *l = s->locations[i]; 
+        printf("    Path: %s\n", l->path ? l->path : "(unnamed)");
 
         printf("      Root: %s\n", l->root ? l->root : "(none)");
         printf("      Default file: %s\n", l->default_file ? l->default_file : "(none)");
@@ -44,6 +44,9 @@ static void print_locations(const t_server *s)
         else
             printf("      Allowed methods: (none)\n");
 
+        if (l->redirect)
+            printf("      Redirect: %s\n", l->redirect);
+
         // Always print upload info if present, even if upload_enabled is off
         if (l->upload_store || l->upload_enabled)
         {
@@ -58,6 +61,8 @@ static void print_locations(const t_server *s)
                 printf(" %s", l->cgi_extensions[k]);
             printf("\n");
             printf("      CGI path: %s\n", l->cgi_path ? l->cgi_path : "(none)");
+            if (l->cgi_upload_store)
+                printf("      CGI upload store: %s\n", l->cgi_upload_store);
         }
     }
 }
@@ -81,12 +86,6 @@ void print_data(const t_data *d)
 }
 
 
-struct ListenSnapshot {
-    const void *lb_ptr;
-    const void *host_ptr;
-    int port;
-    bool valid;
-};
 
 int	main(int ac, char **av)
 {

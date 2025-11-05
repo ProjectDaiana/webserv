@@ -36,7 +36,18 @@
 #define CONFIG_STAT_FAILED ERROR_PREFIX CLR_CYAN "Cannot stat config file! (◞‸◟；)\n" CLR_RESET
 #define CONFIG_READ_FAILED ERROR_PREFIX CLR_CYAN "Failed to read config file! (；ω；)\n" CLR_RESET
 #define NO_SERVERS ERROR_PREFIX CLR_CYAN "No servers have been configured! (╯°□°）╯︵ ┻━┻\n" CLR_RESET
-
+#define NO_LOCATIONS    ERROR_PREFIX CLR_CYAN "Server has no locations configured!\n" CLR_RESET
+#define NO_LISTEN_BINDING    ERROR_PREFIX CLR_RED "Server has no listen binding!\n" CLR_RESET
+#define INVALID_LOCATION    ERROR_PREFIX CLR_MAGENTA "Location without a valid path!\n" CLR_RESET
+#define NO_METHODS    ERROR_PREFIX CLR_YELLOW "Location doesnt allow any methods!\n" CLR_RESET
+#define NO_INDEX_OR_AUTOINDEX    ERROR_PREFIX CLR_CYAN "Location must allow autoindexing or provide a default file!\n" CLR_RESET
+#define EXPECTED_VALUE    ERROR_PREFIX CLR_RED "Parser Error: expected value for directive!\n" CLR_RESET
+#define EXPECTED_SEMICOLON    ERROR_PREFIX CLR_RED "Parser Error: expected ';' after directive!\n" CLR_RESET
+#define UNKNOWN_LOCATION_DIRECTIVE    ERROR_PREFIX CLR_MAGENTA "Parser Error: unknown location directive!\n" CLR_RESET
+#define UNKNOWN_SERVER_DIRECTIVE    ERROR_PREFIX CLR_MAGENTA "Parser Error: unknown server directive!\n" CLR_RESET
+#define EXPECTED_LOCATION_BRACE    ERROR_PREFIX CLR_RED "Parser Error: expected '{' after location path!\n" CLR_RESET
+#define EXPECTED_SERVER_BRACE    ERROR_PREFIX CLR_RED "Parser Error: expected '{' after 'server'!\n" CLR_RESET
+#define UNEXPECTED_TOKEN    ERROR_PREFIX CLR_YELLOW "Parser Error: unexpected token!\n" CLR_RESET
 
 #endif // ERRORS_HPP
 
