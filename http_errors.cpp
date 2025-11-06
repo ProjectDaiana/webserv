@@ -78,13 +78,7 @@ void load_error_page(Client &client, t_response *res, const t_server &config, t_
 		return ;
 	}
 	// If no location (request not parsed), use first location's root as fallback
-	std::string root_path;
-	if (location)
-		root_path = location->root;
-	else if (config.location_count > 0)
-		root_path = config.locations[0]->root;
-	else
-		root_path = "www/html";
+	std::string root_path = location ? location->root : (config.location_count > 0 ? config.locations[0].root : "www/html");
 	std::string full_path = root_path + path;
 	printf("this is the path to error page: '%s'\n", full_path.c_str());
     std::ifstream file(full_path.c_str());
