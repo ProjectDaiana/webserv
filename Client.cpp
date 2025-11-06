@@ -1,10 +1,13 @@
 #include "Client.hpp"
 
 Client::Client(int fd, Server &server) :
-							_fd(fd), _headers_complete(0),\
-							_read_complete(0), _write_complete(0),
+							_fd(fd),
+							_headers_complete(0),
+							_read_complete(0),
+							_write_complete(0),
 							_is_parsed(false),
-							_keep_alive(0), _content_len(0),
+							_keep_alive(0),
+							_content_len(0),
 							_headers_end_pos(0),
 							_error_code(200),
 							_server(&server)
@@ -67,8 +70,11 @@ bool Client::parse_request() {
 
 	if (!_is_parsed && _read_complete) {
 		_is_parsed = _request.parse(_raw_request);
+		if (!_is_parsed) {
+			int error_code = _request.get_parse_error().code;
+			set_error_code(error_code);
+		}
 	}
-	set_error_code(_request.get_parse_error().code);
 	return _is_parsed;
 }
 
@@ -183,9 +189,11 @@ int Client::get_error_code() const
 
 void Client::set_error_code(int code) 
 {
-	printf("ERROR CODE '%d' HAS BEEN SET!\n", code);
     if (_error_code == 200)
+	{
         _error_code = code;
+		printf("ERROR CODE '%d' HAS BEEN SET!\n", code);
+	}
 }
 
 const t_request& Client::get_request() const 

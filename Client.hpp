@@ -68,6 +68,7 @@ class Client {
 		void set_keep_alive(bool value) { _keep_alive = value; }
 		void set_request(const t_request& new_request);
 		void set_write_complete(bool value) { _write_complete = value; }
+		void set_read_complete(bool value) { _read_complete = value; }
 
 		//CGI
 		std::string cgi_output; //TODO move tp private or to CGI class?
