@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include "Request.hpp"
+#include "errors.hpp"
 
 std::string	handle_method(Client &client, const t_server &config, t_location *location)
 {
@@ -21,6 +22,7 @@ t_response	build_response(Client &client, const t_server &config)
 {
 	t_response res;
 	t_location *location;
+	printf(CLR_YELLOW"Error code is: %d\n" CLR_RESET, client.get_error_code());
 
 	location = handle_location(client, config);
 	if(!client.is_cgi())
