@@ -49,8 +49,9 @@ void Request::reset_struct() {
 
 // Parser
 bool Request::parse(const std::string& raw_request) { //maybe uptade this to take a string and not a reference to raw_request
-//	std::cout << "DEBUG: parse() called with " << raw_request.length() << " characters" << std::endl;
 	if (raw_request.empty()) {
+		s_parse_error.code = 400;
+		s_parse_error.msg = "Empty request";
         return false;
     }
 
@@ -82,6 +83,7 @@ bool Request::parse_start_line(const std::string &headers) {
     std::string line;
 
     if (!std::getline(stream, line)) {
+        s_parse_error.code = 400;
         s_parse_error.msg = "Missing request line";
         return false;
     }
@@ -120,19 +122,23 @@ bool Request::parse_start_line(const std::string &headers) {
 		return false;
 	}
 
-	// if (!is_method_allowed(_parsed_request.method)) {
-    //     s_parse_error.code = 405;
-    //     s_parse_error.msg = "Method not allowed: " + _parsed_request.method;
-    //     return false;
-    // }
+	if (!is_method_allowed(_parsed_request.method)) {
+        s_parse_error.code = 405;
+        s_parse_error.msg = "Method not allowed: " + _parsed_request.method;
+        return false;
+    }
 
-	if (!is_uri_valid(_parsed_request.uri) || !parse_uri(_parsed_request.uri)) {
-		if (_parsed_request.uri.empty()) {
+	if (!is_uri_valid(_parsed_request.uri)) {
+        return false;
+	}
+	
+	if (!parse_uri(_parsed_request.uri)) {
+		if (s_parse_error.code == 200) { // Only set if no error was set
 			s_parse_error.code = 400;
-			s_parse_error.msg = "Empty URI";
+			s_parse_error.msg = "Failed to parse URI";
 		}
         return false;
-	} //OJO if uri is invalid headers and body might still be parsed
+	}
 
     return true;
 }
@@ -147,33 +153,41 @@ bool Request::is_method_uppercase(const std::string &method) const {
     return true;
 }
 
-// bool Request::is_method_allowed(const std::string &method) const {
-// 	std::set<std::string> valid_methods;
-// 	    if (valid_methods.empty()) {
-//         valid_methods.insert("GET");
-//         valid_methods.insert("POST");
-//         valid_methods.insert("DELETE");
-//         // TODO: Load valid methods from config file later
-//     }
-// 	return valid_methods.find(method) != valid_methods.end();
-// }
+bool Request::is_method_allowed(const std::string &method) const {
+	std::set<std::string> valid_methods;
+	    if (valid_methods.empty()) {
+        valid_methods.insert("GET");
+        valid_methods.insert("POST");
+        valid_methods.insert("DELETE");
+        // TODO: Load valid methods from config file later
+    }
+	return valid_methods.find(method) != valid_methods.end();
+}
 
 bool Request::is_uri_valid(const std::string &uri) {
+	if (uri.empty()) {
+		s_parse_error.code = 400;
+		s_parse_error.msg = "Empty URI";
+		return false;
+	}
+	
 	if (uri[0] != '/') {
 		s_parse_error.code = 400;
 		s_parse_error.msg = "URI doesn't start with '/'";
 		return false;
 	}
 
-	if (uri.length() > 8000) {
+	if (uri.length() > MAX_URI_LEN) {
         s_parse_error.code = 414;
-        s_parse_error.msg = "URI too long (> 8000 characters)";
+        s_parse_error.msg = "URI too long (> MAX_URI_LEN)";
         return false;
     }
 
 	std::string::size_type first = uri.find('?');
     if (first != std::string::npos &&
         uri.find('?', first + 1) != std::string::npos) {
+        s_parse_error.code = 400;
+        s_parse_error.msg = "Multiple '?' characters in URI";
         return false;
     }
 	return true;
@@ -284,6 +298,9 @@ std::string unchunk_body(const std::string &chunked)
 // Parse Body
 bool Request::parse_body(const std::string &body_section)
 {
+    // Check if method requires a body (POST)
+    bool method_requires_body = (_parsed_request.method == "POST");
+    
     std::map<std::string, std::string>::iterator te_it = _parsed_request.headers.find("Transfer-Encoding");
     if (te_it != _parsed_request.headers.end()) {
         if (te_it->second.find("chunked") != std::string::npos) {
@@ -300,15 +317,21 @@ bool Request::parse_body(const std::string &body_section)
         int length = atoi(cl_it->second.c_str());
         
         if ((int)body_section.size() < length) {
-            // C++98 doesn't have std::to_string, so use stringstream
             std::ostringstream oss;
             oss << "Body truncated (expected " << length << " bytes, got " << body_section.size() << ")";
+            s_parse_error.code = 400;
             s_parse_error.msg = oss.str();
             return false;
         }
         
         _parsed_request.body = body_section.substr(0, length);
     } else {
+        // 411 Length Required: POST requires Content-Length or Transfer-Encoding
+        if (method_requires_body && !body_section.empty()) {
+            s_parse_error.code = 411;
+            s_parse_error.msg = "Length Required - POST requests must include Content-Length or Transfer-Encoding header";
+            return false;
+        }
         // No Content-Length and no Transfer-Encoding = no body expected
         _parsed_request.body = "";
     }
