@@ -93,13 +93,10 @@ private:
 	bool is_running() const { return _running; }
 	bool is_writing() const { return _writing; }
 	int get_error_fd() const { return _error_fd; }
-//	void set_uploaded_file_ext(const std::string& ext) { _uploaded_file_ext = ext; }
 	void set_location(t_location* loc) { _location = loc; }
 
     // Extract and save uploaded file from multipart/form-data body
     // Returns true on success, false on failure
     bool extract_and_save_uploaded_file(const std::string& body, const std::string& boundary, const std::string& out_filename);
-    //void set_uploaded_file_path(const std::string& path) { _uploaded_file_path = path; }
-//    const std::string& get_uploaded_file_path() const { return _uploaded_file_path; }
 };
 #endif

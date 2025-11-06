@@ -57,6 +57,7 @@ bool CGI::parse_multipart(Client& client)
 
 	std::string boundary = extract_boundary_from_disposition(content_type);
     std::string upload_dir = get_cgi_upload_store();
+    printf(CLR_RED"Upload dir: %s\n" CLR_RESET, upload_dir.c_str());
     std::string body = client.get_body();
     std::string filename;
     size_t disp_pos = body.find("Content-Disposition: form-data;");
@@ -83,13 +84,10 @@ bool CGI::parse_multipart(Client& client)
 
 	std::string unique_filename = make_unique_filename(filename);
     std::string out_filename = upload_dir + "/" + unique_filename;
-    //set_uploaded_file_path(out_filename);
 
     if (extract_and_save_multipart_file(body, boundary, out_filename)) {
-        //set_uploaded_file_path(out_filename);
         return true;
      } else {
-    //     set_uploaded_file_ext("");
          return false;
     }
 }

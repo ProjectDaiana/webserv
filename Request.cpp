@@ -303,9 +303,9 @@ bool Request::parse_body(const std::string &body_section)
     std::map<std::string, std::string>::iterator te_it = _parsed_request.headers.find("Transfer-Encoding");
     if (te_it != _parsed_request.headers.end()) {
         if (te_it->second.find("chunked") != std::string::npos) {
-            std::cout << "DEBUG: Raw chunked body: [" << body_section << "]" << std::endl;
+        //    std::cout << "DEBUG: Raw chunked body: [" << body_section << "]" << std::endl;
 			_parsed_request.body = unchunk_body(body_section); 
-            std::cout << "DEBUG: Un-chunked body: [" << _parsed_request.body << "]" << std::endl;
+        //    std::cout << "DEBUG: Un-chunked body: [" << _parsed_request.body << "]" << std::endl;
             return true;
         }
     }
