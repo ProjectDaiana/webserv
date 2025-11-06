@@ -107,7 +107,7 @@ echo -e "${CLR_YELLOW}Test 8:${CLR_RESET} Payload too large - ${CLR_CYAN}413 Pay
 RESPONSE=$({
     printf "POST / HTTP/1.1\r\n"
     printf "Host: localhost:8080\r\n"
-    printf "Content-Type: application/octet-stream\r\n"
+    printf "Content-Type: text/html\r\n"
     printf "Content-Length: 6000\r\n"
     printf "\r\n"
     dd if=/dev/zero bs=6000 count=1 2>/dev/null
