@@ -24,17 +24,18 @@ t_listen_binding  *parse_listen_binding(const char *str, t_arena *mem)
 
 void parse_directive(t_parser *p, t_server *s, t_arena *mem, t_location *l) //if no l, l = null
 {
-//	printf("\033[31mDIRECTIVE PARSER CALLED\033[0m\n");
+//	printf("\033[31mDIRECTIVE PARSER CALLED w '%s'\033[0m\n", parser_current(p)->value);
 	const char *name = parser_current(p)->value;
 	parser_advance(p);
 	if (parser_current(p)->type != TOK_STRING)
-		//ft_error("Parser Error: expected value for directive!\n");
-		;
+		ft_error(mem, EXPECTED_VALUE, 1);
 	const char *value = parser_current(p)->value;
 	parser_advance(p);
-	if (simple_directive(name) && !parser_match(p, TOK_SEMICOLON)) //expect ';' for simple directive
-		//ft_error("Parser Error: expected ';' after directive!\n");
-		;
+	if (simple_directive(name) && !parser_match(p, TOK_SEMICOLON)) //expect ; if simple dir
+	{
+		printf("goes here when parsing '%s'\n", name);
+		ft_error(mem, EXPECTED_SEMICOLON, 1);
+	}
 	if (l)
 	{
 		if (!ft_strcmp(name, "root")) l->root = arena_str(mem, value);
@@ -67,12 +68,10 @@ void parse_directive(t_parser *p, t_server *s, t_arena *mem, t_location *l) //if
             }
         }
 		else
-			//ft_error("Parser Error: unknown location directive!\n");
-			;
+			ft_error(mem, UNKNOWN_LOCATION_DIRECTIVE, 1);
 	}
 	else if (s)
 	{
-		//TODO integrate error pages
 		if (!ft_strcmp(name, "server_name")) s->name = arena_str(mem, value);
 		else if (!ft_strcmp(name, "max_body_size")) s->max_bdy_size = ft_atoi(value);
 		else if (!ft_strcmp(name, "listen")) 
@@ -86,11 +85,10 @@ void parse_directive(t_parser *p, t_server *s, t_arena *mem, t_location *l) //if
 			parser_advance(p);
 			s->error_pages[s->error_page_count++] = arena_str(mem, value);
 			if (!parser_match(p, TOK_SEMICOLON))
-				//ft_error(expected semicolon);
-				;
+				ft_error(mem, EXPECTED_SEMICOLON, 1);
 		}
-	//	else
-			//ft_error("Parser Error: unknown server directive!\n");
+		else
+			ft_error(mem, UNKNOWN_SERVER_DIRECTIVE, 1);
 	}
 	
 }
@@ -106,8 +104,7 @@ t_location* parse_location(t_parser *p, t_arena *mem)
 		parser_advance(p);
 	}
 	if (!parser_match(p, TOK_LBRACE))
-		//ft_error("Parser Error: expected '{' after *location path*!\n");
-		;
+		ft_error(mem, EXPECTED_LOCATION_BRACE, 1);
 	while (parser_current(p)->type != TOK_RBRACE && parser_current(p)->type != TOK_EOF)
 		parse_directive(p, NULL, mem, l);
 	parser_match(p, TOK_RBRACE);
@@ -120,8 +117,7 @@ t_server* parse_server(t_parser *p, t_arena *mem)
 	t_server *s = create_server(p, mem);
 	parser_advance(p); //skip 'server' token
 	if (!parser_match(p, TOK_LBRACE))
-		//ft_error("Parser Error: expected '{' after 'server'!\n");
-		;
+		ft_error(mem, EXPECTED_SERVER_BRACE, 1);
 	while (parser_current(p)->type != TOK_RBRACE && parser_current(p)->type != TOK_EOF)
 	{
 		if (!ft_strcmp(parser_current(p)->value, "location"))
@@ -142,7 +138,7 @@ void	parser(t_data *d, t_parser *p, t_lexer *lx, t_arena *mem)
 			d->s[d->server_count++] = parse_server(p, mem);
 		else
 		{
-			//ft_error("Parser Error: unexpected token!\n");
+			ft_error(mem, UNEXPECTED_TOKEN, 1);
 			parser_advance(p);
 		}
 	}

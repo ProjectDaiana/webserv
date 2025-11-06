@@ -64,3 +64,4 @@ echo "✅ Image uploaded!"
 echo "View at: http://localhost:8080/cgi-bin/show_image.py"
 echo ""
 # xdg-open "http://localhost:8080/cgi-bin/show_image.py" 2>/dev/null &
+## To see error code  `cat chunked_request.bin | nc -w 1 localhost 8080 2>&1 | head -1`

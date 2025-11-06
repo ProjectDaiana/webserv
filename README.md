@@ -75,14 +75,52 @@ Arena implementation.
 - header
 - location
 
-## Test commands
-- ` siege -c 20 -r 5 http://localhost:8080 ` (-c = concurrent users, -r = repetitions per user)
-- ` siege -c 3 -r 1 -f urls.txt ` to run differents conections with differents urls
-- `curl http://localhost:8080`
-- `curl -v -H "Connection: close" http://localhost:8080` -H to write in Connection Header
-- `siege -c50 -t1M -b 'http://localhost:8080/cgi-bin/test.py'` 50 connections 1 minute 
-- `siege -c10 -t30S --content-type "application/x-www-form-urlencoded" 'http://localhost:8080/cgi-bin/post_foto.py POST name=cat&color=orange'`
-- `siege -c 50 -r 10 'http://localhost:8080/cgi-bin/test.py'` This will run until all 50 users have each made 10 requests (total 500 requests)
+## Test Commands
+
+### Siege (Load Testing)
+```bash
+# Basic load test: 20 concurrent users, 5 repetitions each
+siege -c 20 -r 5 http://localhost:8080
+
+# Test multiple URLs: 3 concurrent users, 1 repetition each
+siege -c 3 -r 1 -f urls.txt
+
+# Benchmark mode: 50 connections for 1 minute
+siege -c50 -t1M -b 'http://localhost:8080/cgi-bin/test.py'
+
+# POST request with form data: 10 connections for 30 seconds
+siege -c10 -t30S --content-type "application/x-www-form-urlencoded" \
+  'http://localhost:8080/cgi-bin/post_foto.py POST name=cat&color=orange'
+
+# Fixed total requests: 50 users × 10 requests = 500 total requests
+siege -c 50 -r 10 'http://localhost:8080/cgi-bin/test.py'
+```
+
+**Siege Options:**
+- `-c` = concurrent users
+- `-r` = repetitions per user
+- `-t` = time duration (e.g., `1M` = 1 minute, `30S` = 30 seconds)
+- `-b` = benchmark mode (no delays between requests)
+- `-f` = file containing URLs to test
+
+### cURL (HTTP Testing)
+```bash
+# Simple GET request
+curl http://localhost:8080
+
+# Verbose mode with custom header
+curl -v -H "Connection: close" http://localhost:8080
+
+# Get only HTTP status code (silent mode)
+curl -s -o /dev/null -w "%{http_code}" http://localhost:8080
+```
+
+**cURL Options:**
+- `-v` = verbose mode (shows request/response headers)
+- `-H` = add custom header
+- `-s` = silent mode (hides progress bar and errors)
+- `-o /dev/null` = discard response body
+- `-w "%{http_code}"` = write out only the HTTP status code
 
 # Telnet
 ```

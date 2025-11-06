@@ -27,7 +27,7 @@ bool parser_match(t_parser *p, int type)
 
 bool simple_directive(const char *str)
 {
-	if (ft_strcmp(str, "allowed_methods") && ft_strcmp(str, "cgi_extensions") && ft_strcmp(str, "server_name"))
+	if (ft_strcmp(str, "allowed_methods") && ft_strcmp(str, "cgi_extensions") && ft_strcmp(str, "error_page"))
 		return true;
 	else
 		return false;

@@ -4,8 +4,9 @@
 # define PERM_MEM_SIZE 50000000 // TODO always update
 # define push_struct(type, arena) (type *)arena_alloc(arena, sizeof(type));
 
-#define CGI_TIMEOUT 5
-#define CLIENT_INACTIVITY_TIMEOUT 120
+#define CGI_TIMEOUT 5 // seconds
+#define CLIENT_INACTIVITY_TIMEOUT 120 // seconds
+#define MAX_URI_LEN 8000 // 2 characters
 
 # include <stddef.h>
 # include <stdint.h>
@@ -203,7 +204,7 @@ int ft_strlen(const char *str);
 //polling
 void handle_server_fd(pollfd &pfd, Server &server, std::vector<pollfd> &pfds, std::map<int, Client> &clients);
 void    debug_request(Client &client);
-bool    handle_client_read(int fd, pollfd &pfd, Client &client);
+bool    handle_client_read(int fd, pollfd &pfd, Client &client, const t_server &server_config);
 void    add_server_sockets(Server **servers, int server_count, std::vector<struct pollfd> &pfds);
 int find_pfd(int fd, std::vector<pollfd> &pfds);
 Client& find_client(int fd, std::map<int, Client> &clients);
@@ -234,7 +235,7 @@ int init_counter_from_dir(const std::string &upload_dir);
 int extract_number(const char *name);
 bool    method_allowed(const std::string& method, const t_location *location, Client &client);
 t_location *find_location(std::string uri, const t_server &config);
-std::string get_content_type(Client &client);
+std::string get_content_type(Client &client, t_location *location);
 std::string get_reason_phrase(int code);
 void    handle_client_write(Client &client, const t_server &config);
 t_response      build_response(Client &client, const t_server &config);
