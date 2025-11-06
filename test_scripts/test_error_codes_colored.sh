@@ -101,7 +101,7 @@ else
 fi
 echo ""
 
-# Test 8: Payload too large (should return 413 if max_body_size is 5KB)
+# Test 8: Payload too large (should return 413 if max_body_size is 5KB) 1048576 == 1MB, 5120 == 5KB
 echo -e "${CLR_YELLOW}Test 8:${CLR_RESET} Payload too large - ${CLR_CYAN}413 Payload Too Large${CLR_RESET}"
 # Send 6000 bytes (just over 5KB=5120 bytes limit)
 RESPONSE=$({
@@ -116,6 +116,23 @@ if [ "$RESPONSE" = "413" ]; then
     echo -e "${CLR_GREEN}✓ PASS: Got $RESPONSE${CLR_RESET}"
 else
     echo -e "${CLR_RED}✗ FAIL: Expected 413, got $RESPONSE${CLR_RESET}"
+fi
+echo ""
+
+# Test 9: Request timeout (should return 408)
+echo -e "${CLR_YELLOW}Test 9:${CLR_RESET} Request timeout - ${CLR_CYAN}408 Request Timeout${CLR_RESET}"
+echo -e "${CLR_WHITE}(Timeout set to 10s - sending incomplete request and waiting)${CLR_RESET}"
+# Send incomplete headers (no final \r\n) and wait longer than CLIENT_INACTIVITY_TIMEOUT
+RESPONSE=$({
+    printf "GET / HTTP/1.1\r\n"
+    printf "Host: localhost:8080\r\n"
+    # Don't send final \r\n to complete headers - server should timeout
+    sleep 12  # Wait longer than 10 second timeout
+} | nc localhost 8080 2>&1 | grep "HTTP/1.1" | awk '{print $2}')
+if [ "$RESPONSE" = "408" ]; then
+    echo -e "${CLR_GREEN}✓ PASS: Got $RESPONSE${CLR_RESET}"
+else
+    echo -e "${CLR_RED}✗ FAIL: Expected 408, got $RESPONSE${CLR_RESET}"
 fi
 echo ""
 
