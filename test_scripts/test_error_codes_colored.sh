@@ -119,6 +119,23 @@ else
 fi
 echo ""
 
+# Test 9: Request timeout (should return 408)
+echo -e "${CLR_YELLOW}Test 9:${CLR_RESET} Request timeout - ${CLR_CYAN}408 Request Timeout${CLR_RESET}"
+echo -e "${CLR_WHITE}(Timeout set to 10s - sending incomplete request and waiting)${CLR_RESET}"
+# Send incomplete headers (no final \r\n) and wait longer than CLIENT_INACTIVITY_TIMEOUT
+RESPONSE=$({
+    printf "GET / HTTP/1.1\r\n"
+    printf "Host: localhost:8080\r\n"
+    # Don't send final \r\n to complete headers - server should timeout
+    sleep 12  # Wait longer than 10 second timeout
+} | nc localhost 8080 2>&1 | grep "HTTP/1.1" | awk '{print $2}')
+if [ "$RESPONSE" = "408" ]; then
+    echo -e "${CLR_GREEN}✓ PASS: Got $RESPONSE${CLR_RESET}"
+else
+    echo -e "${CLR_RED}✗ FAIL: Expected 408, got $RESPONSE${CLR_RESET}"
+fi
+echo ""
+
 echo -e "${CLR_MAGENTA}=========================================${CLR_RESET}"
 echo -e "${CLR_GREEN}✨ Tests Complete ✨${CLR_RESET}"
 echo -e "${CLR_MAGENTA}=========================================${CLR_RESET}"
