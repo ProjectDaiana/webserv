@@ -463,7 +463,7 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 			connection_alive = 0;
 			return connection_alive;
         }
-		if (client.is_cgi() && !handle_cgi_timeout(client))
+		if (client.is_cgi() && !client.is_cgi_running() && !handle_cgi_timeout(client))
 		{
 			if (validate_and_resolve_path(server_config, client) != 200) {
 				set_client_pollout(pfds, client);
