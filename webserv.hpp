@@ -224,7 +224,7 @@ void    run_server(Server** servers, int server_count);
 
 
 //response
-std::string     handle_delete(Client &client, t_location *l, std::string path);
+std::string     handle_delete(Client &client, const t_server &config, t_location *l);
 int     ft_delete(std::string path);
 std::string handle_get(Client &client, const t_server &config, t_location *l);
 std::string     file_to_str(Client &client, const std::string &path);
