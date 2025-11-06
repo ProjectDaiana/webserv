@@ -108,7 +108,8 @@ int run_cgi(Client& client, std::vector<struct pollfd>& pfds)
 	    client.set_cgi_writing(1);
 		client.set_cgi_stdin_fd(pipefd_in[1]);
         pfds.push_back(Server::create_pollfd(pipefd_in[1], POLLOUT, 0));
-    } else {
+    }
+	 else {
 		//printf("NO PIPE STDIN No body to send, close stdin immediately\n");
         close(pipefd_in[1]);
         client.set_cgi_stdin_fd(-1);

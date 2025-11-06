@@ -101,6 +101,7 @@ std::string	gen_filename(Client &client, t_location *l, std::string extension)
 {
 	if (extension.empty())
 		extension = find_extension(client);
+	printf("extension is : '%s'\n", extension.c_str());
 	if (!l->upload_count) //in case upload count is set to 0, check if theres any uploads from running server previously
 		l->upload_count = init_counter_from_dir(l->upload_store, extension);
 	std::stringstream sstr;
