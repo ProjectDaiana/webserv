@@ -24,12 +24,36 @@ std::string	connection_type(Client &client)
 		return "close";
 }
 
+#include <sys/stat.h>
+#include <string>
+
+bool is_directory(const std::string &path, t_location *location)
+{
+    struct stat info;
+	std::string full_path;	
+
+	full_path = std::string(location->root) + path;
+	printf("directory is being tested w path: '%s'\n", path.c_str());
+    if (stat(full_path.c_str(), &info) != 0)
+	{
+		printf("PATH NOT ACCESIBLE!\n");
+        return false; // could not access path
+	}
+    return (info.st_mode & S_IFDIR) != 0;
+}
+
 //check whats the suffix after the dot and map content type/ "MIME" type to that
-std::string get_content_type(Client &client)
+std::string get_content_type(Client &client, t_location *location) //TODO pass location to be able to test if its dir
 {
     std::string path = client.get_path();
-	if (path == "/")
+	if (is_directory(path, location))
+	{
+		printf(">>IS A DIRECTORY\n");
 		return "text/html";
+		exit(0);
+	}
+	else
+		printf(">>NOT A DIRECTORY\n");
     if (client.is_cgi())
 	    return "text/html";
     printf("GETTING CONTENT TYPE NOW W PATH: '%s'\n", path.c_str());	    

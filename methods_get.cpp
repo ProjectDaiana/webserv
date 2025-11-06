@@ -189,7 +189,7 @@ std::string handle_get(Client &client, const t_server &config, t_location *l)
 	if (client.get_path() == "/name_pumpkin.html")
 		return name_pumpkin(client, l);
 	std::string path = std::string(l->root) + client.get_path();
-	printf("index is being searched at this location : '%s'\n", path.c_str());
+	printf("get method path is being searched at this location : '%s'\n", path.c_str());
 	if (stat(path.c_str(), &st) == -1) //if stat returns -1, the file doesnt exist, path not found
 	{
 		client.set_error_code(404);
@@ -205,6 +205,7 @@ std::string handle_get(Client &client, const t_server &config, t_location *l)
 		else if (l->default_file) //if its not on and theres a default file, serve it
 		{
 			std::string index_path = std::string(l->root) + "/" + std::string(l->default_file);
+			printf("index is being searched at this location : '%s'\n", index_path.c_str());
 			if (stat(index_path.c_str(), &st) == 0 && S_ISREG(st.st_mode))
 				return file_to_str(client, index_path);
 		}
