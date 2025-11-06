@@ -7,6 +7,15 @@
 #include "webserv.hpp"
 #include "errors.hpp"
 
+static void remove_fd_from_poll(int fd, std::vector<struct pollfd>& pfds) {
+	for (size_t i = 0; i < pfds.size(); i++) {
+		if (pfds[i].fd == fd) {
+			pfds.erase(pfds.begin() + i);
+			break;
+		}
+	}
+}
+
 int run_cgi(Client& client, std::vector<struct pollfd>& pfds)
 {
 	int pipefd_out[2];  // CGI stdout -> Server
@@ -42,13 +51,14 @@ int run_cgi(Client& client, std::vector<struct pollfd>& pfds)
         close(pipefd_err[0]); // Child doesn't read from error pipe
         
         int error_fd = pipefd_err[1]; // Keep this to write error codes
-        std::string abs_script = client.get_cgi().get_script_filename();
-		size_t slash = abs_script.find_last_of('/');
-		std::string script_dir = ".";
+        std::string abs_script = client.get_cgi().get_script_path();
+		size_t slash_pos = abs_script.find_last_of('/');
+
 		std::string script_base = abs_script;
-		if (slash != std::string::npos) {
-			script_dir = abs_script.substr(0, slash);         // "www/html/cgi-bin"
-			script_base = abs_script.substr(slash + 1);       // "test.py"
+		
+		if (slash_pos != std::string::npos) {
+			std::string script_dir = abs_script.substr(0, slash_pos);         // "www/html/cgi-bin"
+			script_base = abs_script.substr(slash_pos + 1);       // "test.py"
 			if (chdir(script_dir.c_str()) != 0) {
 				perror("chdir");
 				int error_code = 500; // Internal Server Error
@@ -132,16 +142,9 @@ bool cgi_eof(int pipe_fd, Client &client, std::vector<struct pollfd>& pfds)
 	if(client.get_method() == "POST")
     	client.get_cgi().parse_multipart(client);
 	close(pipe_fd);
-//	std::cout << "closed fd "<< pipe_fd << std::endl;
 
 	// IMPORTANT: Remove fd from pfds vector
-	for (size_t i = 0; i < pfds.size(); i++) {
-		if (pfds[i].fd == pipe_fd) {
-	//		printf("Removing pipe fd %d from pfds\n", pipe_fd);
-			pfds.erase(pfds.begin() + i);
-			break;
-		}
-	}
+	remove_fd_from_poll(pipe_fd, pfds);
 
 	if (cgi_pid > 0) {
 		int status;
@@ -262,9 +265,7 @@ bool handle_cgi_write_to_pipe(int pipe_fd, Client &client,  std::vector<struct p
 
     if (remaining == 0) {
     //    printf("=== CGI pipe in closed (done writing), cleaning up fd %d =====================\n", pipe_fd);
-        for (size_t i = 0; i < pfds.size(); i++) {
-            if (pfds[i].fd == pipe_fd) { pfds.erase(pfds.begin() + i); break; }
-        }
+        remove_fd_from_poll(pipe_fd, pfds);
         close(pipe_fd);
         client.set_cgi_writing(0);
         client.set_cgi_written(0);
@@ -284,9 +285,7 @@ bool handle_cgi_write_to_pipe(int pipe_fd, Client &client,  std::vector<struct p
         if (written == body_len) {
             // all bytes written -> cleanup
 	//		printf("\033[32m=== All POST body written (%zd/%zd), pipe %d =====================\033[0m\n", written, body_len, pipe_fd);
-            for (size_t i = 0; i < pfds.size(); i++) {
-                if (pfds[i].fd == pipe_fd) { pfds.erase(pfds.begin() + i); break; }
-            }
+            remove_fd_from_poll(pipe_fd, pfds);
             close(pipe_fd);
             client.set_cgi_stdin_fd(-1);
             client.set_cgi_written(0);
@@ -304,12 +303,7 @@ bool handle_cgi_write_to_pipe(int pipe_fd, Client &client,  std::vector<struct p
         }
         // Pipe broken or other error - CGI died before reading all input
         client.set_error_code(502); // Bad Gateway
-        for (size_t i = 0; i < pfds.size(); i++) {
-            if (pfds[i].fd == pipe_fd) {
-				pfds.erase(pfds.begin() + i);
-				break;
-			}
-        }
+        remove_fd_from_poll(pipe_fd, pfds);
         close(pipe_fd);
         client.set_cgi_stdin_fd(-1);
         client.set_cgi_writing(0);

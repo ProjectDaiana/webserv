@@ -22,10 +22,10 @@ private:
     std::vector<char*> _env_ptrs;
 	int _written;
 
-	std::string _script_filename; // full FS path
-    std::string _script_name;     // URI
-    std::string _document_root;   // root used to build script
-    std::string _interpreter;
+	std::string _script_path;     // Absolute filesystem path to CGI script
+    std::string _script_name;     // URI path as requested by client
+    std::string _document_root;   // Root directory from which script is served
+    std::string _interpreter;     // Path to interpreter (e.g., /usr/bin/python3)
     // std::string _uploaded_file_path;
     // std::string _uploaded_file_ext;
 	t_location* _location;
@@ -46,11 +46,11 @@ private:
         _env_ptrs.clear();
     }
     
-    void prepare_paths(const std::string& script_filename,
+    void prepare_paths(const std::string& script_path,
 		const std::string& script_name,
 		const std::string& document_root,
 		const std::string& interpreter) {
-        _script_filename = script_filename;
+        _script_path = script_path;
         _script_name = script_name;
         _document_root = document_root;
         _interpreter = interpreter;
@@ -65,10 +65,10 @@ private:
 
 	// getters for run_cgi 
 	char** get_envp();
-	const std::string& get_script_filename() const { return _script_filename; }
-    const std::string& get_script_name()     const { return _script_name; }
-    const std::string& get_document_root()   const { return _document_root; }
-    const std::string& get_interpreter()     const { return _interpreter; }
+	const std::string& get_script_path() const { return _script_path; }
+    const std::string& get_script_name() const { return _script_name; }
+    const std::string& get_document_root() const { return _document_root; }
+    const std::string& get_interpreter() const { return _interpreter; }
 	int get_stdout() const { return _stdout_fd; }
 	int get_stdin() const { return _stdin_fd; }
 	

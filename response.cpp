@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include "Request.hpp"
+#include "errors.hpp"
 
 std::string	handle_method(Client &client, const t_server &config, t_location *location)
 {

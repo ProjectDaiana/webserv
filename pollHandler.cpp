@@ -100,7 +100,7 @@ void	debug_request(Client &client)
 	client.print_request_struct();
 }
 
-bool	handle_client_read(int fd, pollfd &pfd, Client &client)
+bool	handle_client_read(int fd, pollfd &pfd, Client &client, const t_server &server_config)
 {
 	char	buffer[256];
 	int		bytes_read;
@@ -109,10 +109,8 @@ bool	handle_client_read(int fd, pollfd &pfd, Client &client)
 	bytes_read = read(fd, buffer, sizeof(buffer));
 	if (bytes_read <= 0)
 	{
-//		printf("Client %d disconnected\n", fd);
 		if (!client.get_raw_request().empty())
 		{
-//			std::cout << "Attempting to parse incomplete request..." << std::endl;
 			if (!client.parse_request())
 			{
 //				std::cout << "Parse error on disconnect: " << client.get_parse_error().code << "- " << client.get_parse_error().msg << "Parse error passed to client: " << client.get_error_code() << std::endl;
@@ -122,15 +120,26 @@ bool	handle_client_read(int fd, pollfd &pfd, Client &client)
 		return (false);
 	}
 	client.add_to_request(buffer, bytes_read);
+	
+	// 413 Payload Too Large: Check if body exceeds max_body_size
+	if (client.is_headers_complete() && server_config.max_bdy_size > 0) {
+		size_t body_size = client.get_raw_request().size() - client.get_headers_end_pos();
+		if (body_size > server_config.max_bdy_size) {
+			client.set_error_code(413);
+			client.set_read_complete(true);
+			pfd.events = POLLOUT;
+			return (true);
+		}
+	}
+	
 	if (client.is_read_complete())
 	{
-		client.get_method().c_str(), client.get_uri().c_str();
-		if (!client.parse_request())
-		{ // Calling parser, will also set_error
-	//		std::cout << "Parse error: " << client.get_parse_error().code << std::endl;
-	//		std::cout << "Parse error: " << client.get_parse_error().msg << std::endl;
-	//		std::cout << "Parse error passed to client: " << client.get_error_code() << std::endl;
-			return (false);
+		if (client.get_error_code() == 200) {
+			if (!client.parse_request()) // Calling parser, will also set_error
+			{
+				pfd.events = POLLOUT;
+				return (true);
+			}
 		}
 		//debug_request(client);
 		if (!client.is_cgi()) 
@@ -249,10 +258,14 @@ int ft_poll(std::vector<struct pollfd>& pfds, int timeout_ms, std::map<int, Clie
 		{
 			if (now - i->second.get_last_activity() > CLIENT_INACTIVITY_TIMEOUT)
 			{
-		//		printf("XXXXXXXXXXXXXXXXX Last activity > %d\n", CLIENT_INACTIVITY_TIMEOUT);
-				int fd = i->first;
+				i->second.set_error_code(408); //Request Timeout
+				i->second.set_read_complete(true);
+				// Set client to POLLOUT to send error response
+				int client_fd = i->first;
+				int pfd_idx = find_pfd(client_fd, pfds);
+				if (pfd_idx != -1)
+					pfds[pfd_idx].events = POLLOUT;
 				i++;
-				cleanup_client(fd, pfds, clients);
 			}
 			else
 				i++;
@@ -443,14 +456,14 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 			pfd.events = POLLOUT;
    	    	return connection_alive;
    		}
-		if (clients.find(pfd.fd) != clients.end() && !client.is_cgi_running() && !is_cgi_fd(pfd.fd, clients) && !handle_client_read(pfd.fd, pfd, client)) //if we dont wanna continue reading, cleanup client
+		if (clients.find(pfd.fd) != clients.end() && !client.is_cgi_running() && !is_cgi_fd(pfd.fd, clients) && !handle_client_read(pfd.fd, pfd, client, server_config)) //if we dont wanna continue reading, cleanup client
 		{
 		//	printf("\033[33mCGI cleanup_client called, cgi not running\033[0m\n");
 			cleanup_client(pfd.fd, pfds, clients);
 			connection_alive = 0;
 			return connection_alive;
         }
-		if (client.is_cgi() && !client.is_cgi_running() && !handle_cgi_timeout(client)) //TODO we can priobably remove  the check for timeout here since the client is set to POLLOUT on timeout before reaching here
+		if (client.is_cgi() && !handle_cgi_timeout(client))
 		{
 			if (validate_and_resolve_path(server_config, client) != 200) {
 				set_client_pollout(pfds, client);
@@ -465,18 +478,13 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 		}
 
 		if (client.is_cgi_running() && handle_cgi_read_from_pipe(client.get_cgi_stdout_fd() , client,  pfds))
-			{
 				set_client_pollout(pfds, client);
-			//	std::cout << "handle_write ok pid:"<<  client.get_cgi_pid() <<  std::endl; //needed?
-			//	std::cout << "handle_write client fd:"<<  client.get_fd() <<  std::endl; //"	
-			}
 	}
 	// WRITE
 	else if (pfd.revents & POLLOUT && client.is_read_complete())
 	{
 		//printf("\033[35mPOLLOUT: Before handle_client_write - method='%s', uri='%s'\033[0m\n", client.get_method().c_str(), client.get_uri().c_str());
 		if (handle_cgi_timeout(client)) {
-		//	printf("\033[31mCGI timeout detected in POLLOUT branch\033[0m\n");
 			pfd.events = POLLOUT;
 			return connection_alive;
 		}

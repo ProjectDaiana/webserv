@@ -101,7 +101,7 @@ else
 fi
 echo ""
 
-# Test 8: Payload too large (should return 413 if max_body_size is 5KB)
+# Test 8: Payload too large (should return 413 if max_body_size is 5KB) 1048576 == 1MB, 5120 == 5KB
 echo -e "${CLR_YELLOW}Test 8:${CLR_RESET} Payload too large - ${CLR_CYAN}413 Payload Too Large${CLR_RESET}"
 # Send 6000 bytes (just over 5KB=5120 bytes limit)
 RESPONSE=$({
