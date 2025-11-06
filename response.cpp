@@ -7,6 +7,8 @@
 
 std::string	handle_method(Client &client, const t_server &config, t_location *location)
 {
+	if (client.get_request().method.empty())
+		return std::string();
 	printf("method is:  '%s'\n", client.get_request().method.c_str());
 	if (client.get_request().method == "GET" && method_allowed("GET", location, client))
 		return handle_get(client, config, location);
@@ -27,6 +29,8 @@ t_response	build_response(Client &client, const t_server &config)
 	if(!client.is_cgi())
 		res.location = check_redirect(location, client);
 	res.version = client.get_request().http_version;
+	if (res.version.empty())
+		res.version = "HTTP/1.1";
 	if (client.is_cgi() && !client.cgi_output.empty())
 		res.body = client.cgi_output;
 	else if (!client.is_cgi())
@@ -62,7 +66,8 @@ void	handle_client_write(Client &client, const t_server &config)
 	sstr << response.version << " "
 		<< response.status_code << " "
 		<< response.reason_phrase << "\r\n";
-	sstr << "Host: " << client.get_header("Host") << "\r\n";
+	if (!(client.get_header("Host").empty()))
+		sstr << "Host: " << client.get_header("Host") << "\r\n";
 	if (!response.location.empty())
 		sstr << "Location: " << response.location << "\r\n";
 	sstr << "Content-Type: " << response.content_type << "\r\n"
@@ -75,7 +80,7 @@ void	handle_client_write(Client &client, const t_server &config)
 		//printf("finished response:\n");
 		printf(CLR_YELLOW"status code is: '%d'\n" CLR_RESET, response.status_code);
 		written = write(client.get_fd(), str_response.c_str(), str_response.size());
-        write(1, str_response.c_str(), str_response.size());
+       		 write(1, str_response.c_str(), str_response.size());
 		if (written == (int)str_response.size())
 		{
 			if (client.is_cgi())

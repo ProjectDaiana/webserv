@@ -6,6 +6,8 @@
 
 std::string reload_page(t_location *location, Client &client)
 {
+	if (!location)
+		return std::string();
 	std::string referer = client.get_header("Referer");
 	if (referer.empty())
 		return std::string(location->default_file);
@@ -45,7 +47,9 @@ bool is_directory(const std::string &path, t_location *location)
 //check whats the suffix after the dot and map content type/ "MIME" type to that
 std::string get_content_type(Client &client, t_location *location) //TODO pass location to be able to test if its dir
 {
-    std::string path = client.get_path();
+   	 std::string path = client.get_path();
+	 if (path.empty())
+		 return std::string();
 	if (is_directory(path, location))
 	{
 		printf(">>IS A DIRECTORY\n");
@@ -132,7 +136,7 @@ t_location *find_location(std::string uri, const t_server &config)
 
 std::string check_redirect(t_location *location, Client &client)
 {
-	if (!location->redirect)
+	if (!location || !location->redirect)
 		return std::string();
 	else
 	{
@@ -148,12 +152,12 @@ t_location *handle_location(Client &client, const t_server &config)
 	t_location *location;
 
         location = find_location(client.get_request().uri, config);
-	// if (location)
-    //             printf("location passed!\n");
+	 if (location)
+              printf("location passed!\n");
         if (!location)
         {
                 client.set_error_code(404);
-                printf("404 set at first instance");
+                printf("404 set at first instance\n");
                 return NULL;
         }
 	return location;

@@ -111,7 +111,7 @@ RESPONSE=$({
     printf "Content-Length: 6000\r\n"
     printf "\r\n"
     dd if=/dev/zero bs=6000 count=1 2>/dev/null
-} | nc -w 1 localhost 8080 2>&1 | grep "HTTP/1.1" | awk '{print $2}')
+} | nc -w 2 localhost 8080 2>&1 | grep "HTTP/1.1" | awk '{print $2}')
 if [ "$RESPONSE" = "413" ]; then
     echo -e "${CLR_GREEN}✓ PASS: Got $RESPONSE${CLR_RESET}"
 else

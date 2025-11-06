@@ -68,7 +68,7 @@ void load_error_page(Client &client, t_response *res, const t_server &config, t_
 		}
 		i++;
 	}
-	if (path.empty()) //if no error code available
+	if (path.empty() || !location) //if no error code available
 	{
 		std::stringstream body;
 		body << "<html><body><h1>" << code << " "
