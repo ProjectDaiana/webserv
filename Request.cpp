@@ -159,7 +159,6 @@ bool Request::is_method_allowed(const std::string &method) const {
         valid_methods.insert("GET");
         valid_methods.insert("POST");
         valid_methods.insert("DELETE");
-        // TODO: Load valid methods from config file later
     }
 	return valid_methods.find(method) != valid_methods.end();
 }
