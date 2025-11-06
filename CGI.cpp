@@ -55,9 +55,13 @@ bool CGI::parse_multipart(Client& client)
     if (content_type.find("multipart/form-data") == std::string::npos)
 		return false;
 
+	if (!_location || !_location->upload_enabled) {
+		client.set_error_code(403);
+		return false;
+	}
+
 	std::string boundary = extract_boundary_from_disposition(content_type);
     std::string upload_dir = get_cgi_upload_store();
-    printf(CLR_RED"Upload dir: %s\n" CLR_RESET, upload_dir.c_str());
     std::string body = client.get_body();
     std::string filename;
     size_t disp_pos = body.find("Content-Disposition: form-data;");
