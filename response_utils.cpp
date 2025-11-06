@@ -75,6 +75,8 @@ std::string get_content_type(Client &client, t_location *location) //TODO pass l
         return "image/gif";
     else if (suffix == "txt")
         return "text/plain";
+	else if (suffix == "mp3")
+		return "audio/mpeg";
     else if (suffix == "pdf")
         return "application/pdf";
 	else if (suffix == "ico")

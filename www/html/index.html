@@ -2,15 +2,22 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome to PumpkinServer 🐱</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
     <style>
-        html, body {
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
             height: 100%;
             overflow: hidden;
-            font-family: 'Comic Sans MS', cursive, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
+        
         .bg-video {
             position: fixed;
             top: 0;
@@ -20,31 +27,134 @@
             object-fit: cover;
             z-index: -1;
         }
+        
         .content {
-            position: relative;
-            z-index: 1;
-            text-align: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            text-align: left;
             color: white;
-            padding-top: 20%;
-            text-shadow: 2px 2px 5px #000;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            padding: 20px 40px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo {
+            width: 80px;
+            height: 80px;
+        }
+        
+        .header-text {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .music-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .music-btn {
+            background: rgba(255, 165, 0, 0.7);
+            border: none;
+            color: black;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+        
+        .music-btn:hover {
+            background: rgba(255, 169, 77, 0.9);
+            transform: scale(1.05);
+        }
+        
         h1 {
-            font-size: 3em;
+            font-size: 2em;
+            font-weight: 600;
+            margin-bottom: 5px;
+            letter-spacing: -0.5px;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
         }
+        
+        .subtitle {
+            font-size: 0.9em;
+            opacity: 0.8;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+        }
+        
+        .sidebar {
+            position: fixed;
+            left: 50px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            z-index: 10;
+            margin-top: 40px;
+        }
+        
         .pumpkin-button {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 20px;
-            background: orange;
+            display: block;
+            padding: 12px 20px;
+            background: rgba(255, 165, 0, 0.7);
             color: black;
             text-decoration: none;
-            border-radius: 8px;
-            font-weight: bold;
-            text-shadow: none;
-            transition: background 0.2s ease;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 140, 0, 0.3);
+            text-align: center;
+            min-width: 220px;
+            backdrop-filter: blur(5px);
         }
+        
         .pumpkin-button:hover {
-            background: #ffa94d;
+            background: rgba(255, 169, 77, 0.9);
+            transform: translateX(8px);
+            box-shadow: 0 6px 25px rgba(255, 140, 0, 0.5);
+        }
+        
+        @media (max-width: 1024px) {
+            .sidebar {
+                left: 20px;
+                font-size: 0.85em;
+            }
+            
+            .content {
+                padding: 15px 20px;
+            }
+            
+            h1 {
+                font-size: 1.5em;
+            }
+            
+            .subtitle {
+                font-size: 0.8em;
+            }
+            
+            .pumpkin-button {
+                min-width: 180px;
+                font-size: 0.85em;
+                padding: 10px 16px;
+            }
         }
     </style>
 </head>
@@ -53,26 +163,54 @@
         <source src="background.mp4" type="video/mp4">
         Your browser does not support the video tag.
     </video>
+    
     <div class="content">
-        <h1>Welcome to PumpkinServer 🐾</h1>
-        <p>by Daiana and Lima</p>
-
-        <p>
-            <a href="/name_pumpkin.html" class="pumpkin-button">🎃 Name Your Pumpkin 🎃</a>
-        </p>
-        <p>
-            <a href="/halloween_game.html" class="pumpkin-button">🎮 Play Halloween Pumpkins 🎮</a>
-        </p>
-        <p>
-            <a href="https://www.google.com/logos/2024/halloween24/rc1/halloween24.html"
-               class="pumpkin-button" target="_blank">🪄 Magic Cat Academy 🪄</a>
-        </p>
-        <p>
-            <a href="/cgi-bin/test.py" class="pumpkin-button">🍬 No trick, here’s a treat 🍬</a>
-        </p>
-        <p>
-            <a href="/cgi-bin/infinite.py" class="pumpkin-button">⚰️ Portal to the Afterlife ⚰️</a>
-        </p>
+        <div class="header-left">
+            <img src="favicon.ico" alt="Logo" class="logo">
+            <div class="header-text">
+                <h1>Welcome to PumpkinServer 🐾</h1>
+                <p class="subtitle">by Daiana and Lima</p>
+            </div>
+        </div>
+        <div class="music-controls">
+            <button class="music-btn" id="playBtn" onclick="togglePlay()">▶️ Play</button>
+            <button class="music-btn" id="muteBtn" onclick="toggleMute()">🔊 Mute</button>
+        </div>
     </div>
+    
+    <div class="sidebar">
+        <a href="/name_pumpkin.html" class="pumpkin-button">🎃 Name Your Pumpkin 🎃</a>
+        <a href="/halloween_game.html" class="pumpkin-button">🎮 Play Halloween Pumpkins 🎮</a>
+        <a href="https://www.google.com/logos/2024/halloween24/rc1/halloween24.html" 
+           class="pumpkin-button" target="_blank">🪄 Magic Cat Academy 🪄</a>
+        <a href="/cgi-bin/test.py" class="pumpkin-button">🍬 No trick, here's a treat 🍬</a>
+        <a href="/cgi-bin/infinite.py" class="pumpkin-button">⚰️ Portal to the Afterlife ⚰️</a>
+    </div>
+    
+    <audio id="bgMusic" loop>
+        <source src="background-music.mp3" type="audio/mpeg">
+        <source src="background-music.ogg" type="audio/ogg">
+    </audio>
+    
+    <script>
+        const music = document.getElementById('bgMusic');
+        const playBtn = document.getElementById('playBtn');
+        const muteBtn = document.getElementById('muteBtn');
+        
+        function togglePlay() {
+            if (music.paused) {
+                music.play();
+                playBtn.innerHTML = '⏸️ Pause';
+            } else {
+                music.pause();
+                playBtn.innerHTML = '▶️ Play';
+            }
+        }
+        
+        function toggleMute() {
+            music.muted = !music.muted;
+            muteBtn.innerHTML = music.muted ? '🔇 Unmute' : '🔊 Mute';
+        }
+    </script>
 </body>
 </html>
