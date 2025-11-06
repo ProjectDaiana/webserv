@@ -55,6 +55,11 @@ bool CGI::parse_multipart(Client& client)
     if (content_type.find("multipart/form-data") == std::string::npos)
 		return false;
 
+	if (!_location || !_location->upload_enabled) {
+		client.set_error_code(403);
+		return false;
+	}
+
 	std::string boundary = extract_boundary_from_disposition(content_type);
     std::string upload_dir = get_cgi_upload_store();
     std::string body = client.get_body();
@@ -83,13 +88,10 @@ bool CGI::parse_multipart(Client& client)
 
 	std::string unique_filename = make_unique_filename(filename);
     std::string out_filename = upload_dir + "/" + unique_filename;
-    //set_uploaded_file_path(out_filename);
 
     if (extract_and_save_multipart_file(body, boundary, out_filename)) {
-        //set_uploaded_file_path(out_filename);
         return true;
      } else {
-    //     set_uploaded_file_ext("");
          return false;
     }
 }
