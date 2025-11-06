@@ -165,9 +165,9 @@ bool Request::is_uri_valid(const std::string &uri) {
 		return false;
 	}
 
-	if (uri.length() > 8000) {
+	if (uri.length() > MAX_URI_LEN) {
         s_parse_error.code = 414;
-        s_parse_error.msg = "URI too long (> 8000 characters)";
+        s_parse_error.msg = "URI too long (> MAX_URI_LEN characters)";
         return false;
     }
 
