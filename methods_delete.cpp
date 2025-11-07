@@ -15,11 +15,18 @@ int	ft_delete(std::string path)
 }
 
 
-std::string	handle_delete(Client &client, const t_server &config, t_location *l)
+std::string	handle_delete(Client &client, t_location *l, std::string path)
 {
 	printf("DELETE WAS CALLED\n");
-	(void)config; //TODO remove it from ft if not needed
-	std::string path = std::string(l->root) + client.get_request().uri;
+	
+	printf("path is now: '%s'\n", path.c_str());
+	printf("location is now: '%p'\n", l);
+	if (path.empty() && l)
+	{
+		path = std::string(l->root) + client.get_request().uri;
+		printf("goes here\n");
+	}
+	printf("path is now: '%s'\n", path.c_str());
 	if (path.find("..") != std::string::npos) //check that file is in root for security
    	{
        		client.set_error_code(403); // forbidden
