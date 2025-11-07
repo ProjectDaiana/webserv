@@ -128,6 +128,21 @@ bool cgi_eof(int pipe_fd, Client &client, std::vector<struct pollfd>& pfds)
 		client.get_cgi().set_error_fd(-1);
 	}
 
+	if(client.get_method() == "DELETE") {
+		std::string file = client.get_path();
+		printf(CLR_MAGENTA "file_path is = %s\n" CLR_RESET, file.c_str());
+
+		// Trim whitespace and newlines
+		// size_t start = file.find_first_not_of(" \t\r\n");
+		// size_t end = file.find_last_not_of(" \t\r\n");
+		// if (start != std::string::npos && end != std::string::npos)
+			//file = file.substr(start, end - start + 1);
+		
+		std::string file_path = client.get_cgi().get_cgi_upload_store() + "/" + file;
+		printf(CLR_MAGENTA "file_path is = %s\n" CLR_RESET, file_path.c_str());
+		handle_delete(client, NULL, file_path);
+	}
+
 	if(client.get_method() == "POST")
     	client.get_cgi().parse_multipart(client);
 	close(pipe_fd);
