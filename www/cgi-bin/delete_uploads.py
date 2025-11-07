@@ -11,15 +11,15 @@ script_dir = os.path.dirname(__file__)
 uploads_path = os.path.join(script_dir, UPLOAD_DIR)
 
 # Handle POST - return only filename for server to delete
-if request_method == "POST":
-    form = cgi.FieldStorage()
-    if "delete" in form:
-        filename = form.getvalue("delete")
-        # Return just the filename so server can delete it
-        sys.stdout.write(filename)
-    else:
-        sys.stdout.write("Error: No file specified")
-    sys.exit(0)
+# if request_method == "POST":
+#     form = cgi.FieldStorage()
+#     if "delete" in form:
+#         filename = form.getvalue("delete")
+#         # Return just the filename so server can delete it
+#         sys.stdout.write(filename)
+#     else:
+#         sys.stdout.write("Error: No file specified")
+#     sys.exit(0)
 
 # Handle DELETE - return only filename for server to delete
 if request_method == "DELETE":
