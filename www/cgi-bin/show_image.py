@@ -11,7 +11,7 @@ import time
 
 # Get script directory and build absolute paths
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-UPLOAD_DIR = os.path.join(SCRIPT_DIR, '..', 'cgi-bin', 'uploads')
+UPLOAD_DIR = os.path.join(SCRIPT_DIR, 'uploads')
 SAVED_IMAGE = os.path.join(UPLOAD_DIR, 'latest_upload.jpg')
 METADATA_FILE = os.path.join(UPLOAD_DIR, 'latest_metadata.txt')
 
@@ -62,7 +62,7 @@ else:
         content_type = metadata.get('Content-Type', 'image/jpeg')
 
 # Output HTTP headers
-# # print("Content-Type: text/html")
+# print("Content-Type: text/html")
 # print()
 
 # Generate HTML
