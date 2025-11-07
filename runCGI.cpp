@@ -95,7 +95,8 @@ int run_cgi(Client& client, std::vector<struct pollfd>& pfds)
 	client.set_cgi_written(0);
     client.set_cgi_pid(pid);
 
-	if (client.get_method() == "POST" && !client.get_body().empty()) {
+	// Write body to CGI stdin for POST and DELETE methods
+	if ((client.get_method() == "POST" || client.get_method() == "DELETE") && !client.get_body().empty()) {
 	    client.set_cgi_writing(1);
 		client.set_cgi_stdin_fd(pipefd_in[1]);
         pfds.push_back(Server::create_pollfd(pipefd_in[1], POLLOUT, 0));
@@ -129,18 +130,24 @@ bool cgi_eof(int pipe_fd, Client &client, std::vector<struct pollfd>& pfds)
 	}
 
 	if(client.get_method() == "DELETE") {
-		std::string file = client.get_path();
-		printf(CLR_MAGENTA "file_path is = %s\n" CLR_RESET, file.c_str());
-
+		// Get filename from CGI output
+		std::string file = client.cgi_output;
+		
 		// Trim whitespace and newlines
 		// size_t start = file.find_first_not_of(" \t\r\n");
 		// size_t end = file.find_last_not_of(" \t\r\n");
 		// if (start != std::string::npos && end != std::string::npos)
-			//file = file.substr(start, end - start + 1);
+		// 	file = file.substr(start, end - start + 1);
+		// printf(CLR_MAGENTA "Filename from CGI (trimmed): '%s'\n" CLR_RESET, file.c_str());
 		
-		std::string file_path = client.get_cgi().get_cgi_upload_store() + "/" + file;
-		printf(CLR_MAGENTA "file_path is = %s\n" CLR_RESET, file_path.c_str());
-		handle_delete(client, NULL, file_path);
+		if (!file.empty()) {
+			std::string file_path = client.get_cgi().get_cgi_upload_store() + "/" + file;
+			printf(CLR_MAGENTA "Full file_path: '%s'\n" CLR_RESET, file_path.c_str());
+			handle_delete(client, NULL, file_path);
+		} else {
+		//	printf(CLR_RED "ERROR: CGI output is empty, cannot delete file\n" CLR_RESET);
+			client.set_error_code(400); // Bad Request
+		}
 	}
 
 	if(client.get_method() == "POST")
