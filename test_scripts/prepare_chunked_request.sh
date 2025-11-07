@@ -1,6 +1,8 @@
 #!/bin/bash
 
 # Create a chunked HTTP request file from an image that you can send via telnet/nc
+# Usage: ./prepare_chunked_request.sh <image_file>
+# Example: ./prepare_chunked_request.sh kitty.jpg
 
 IMAGE="${1:-kitty.jpg}"
 
@@ -43,7 +45,7 @@ request = (
     b"Host: localhost\\r\\n"
     b"Transfer-Encoding: chunked\\r\\n"
     b"Content-Type: image/jpeg\\r\\n"
-    b"\\r\\n"
+
 ) + b"".join(chunks)
 
 # Save to file
@@ -57,7 +59,10 @@ echo ""
 echo "✅ Chunked request file created!"
 echo ""
 echo "Sending to server..."
+
 cat "$OUTPUT" | nc localhost 8080 > /dev/null
+# To timeout slow servers use this line instead:
+## cat "$OUTPUT" | nc -w 120 localhost 8080 > /dev/null
 
 echo ""
 echo "✅ Image uploaded!"
