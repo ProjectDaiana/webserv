@@ -62,7 +62,7 @@ void	autosettings(t_data *d)
 			if (!d->s[i]->locations[j]->method_count)
 				ft_error(d->perm_memory, NO_METHODS, 0);
 			if (!d->s[i]->locations[j]->autoindex && !d->s[i]->locations[j]->default_file)
-				ft_error(d->perm_memory, NO_INDEX_OR_AUTOINDEX, 0);
+				ft_error(d->perm_memory, NO_INDEX_OR_AUTOINDEX, 1);
 			j++;
 		}
 		i++;
