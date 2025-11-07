@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to PumpkinServer 🐱</title>
+    <title>Welcome to PumpkinServer 🎃</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <style>
         * {
@@ -132,6 +132,51 @@
             box-shadow: 0 6px 25px rgba(255, 140, 0, 0.5);
         }
         
+        .picture-frame {
+            position: fixed;
+            right: 50px;
+            bottom: 50px;
+            z-index: 10;
+            padding: 15px;
+            background: linear-gradient(145deg, #8B4513, #654321);
+            border: 8px solid #654321;
+            border-radius: 5px;
+            box-shadow: 
+                0 10px 30px rgba(0, 0, 0, 0.7),
+                inset 0 0 20px rgba(0, 0, 0, 0.3),
+                0 0 0 2px #3d2817;
+            transform: rotate(-2deg);
+            transition: all 0.3s ease;
+        }
+        
+        .picture-frame:hover {
+            transform: rotate(0deg) scale(1.05);
+            box-shadow: 
+                0 15px 40px rgba(0, 0, 0, 0.8),
+                inset 0 0 20px rgba(0, 0, 0, 0.3),
+                0 0 0 2px #3d2817;
+        }
+        
+        .picture-frame::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            background: linear-gradient(145deg, #5d3a1a, #3d2817);
+            border-radius: 5px;
+            z-index: -1;
+        }
+        
+        .picture-frame img {
+            display: block;
+            width: 280px;
+            height: auto;
+            border: 3px solid #2d1810;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        
         @media (max-width: 1024px) {
             .sidebar {
                 left: 20px;
@@ -155,6 +200,23 @@
                 font-size: 0.85em;
                 padding: 10px 16px;
             }
+            
+            .picture-frame {
+                right: 20px;
+                bottom: 20px;
+                padding: 10px;
+                border: 5px solid #654321;
+            }
+            
+            .picture-frame img {
+                width: 200px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .picture-frame {
+                display: none;
+            }
         }
     </style>
 </head>
@@ -168,7 +230,7 @@
         <div class="header-left">
             <img src="favicon.ico" alt="Logo" class="logo">
             <div class="header-text">
-                <h1>Welcome to PumpkinServer 🐾</h1>
+                <h1>Welcome to PumpkinServer 🎃</h1>
                 <p class="subtitle">by Daiana and Lima</p>
             </div>
         </div>
@@ -190,8 +252,12 @@
         <a href="/delete.html" class="pumpkin-button">🧙‍♀️ Avada Kedavra (Delete) 🧪</a>
         <a href="/upload.html" class="pumpkin-button">👻 Haunt the Server (Upload) 👻</a>
         <a href="/cgi-bin/post_foto.py" class="pumpkin-button">📸 Ghostly Portraits 📸</a>
-		<a href="/cgi-bin/manage_uploads.py" class="pumpkin-button">💀 Send to the Graveyard 💀</a>
+		<a href="/cgi-bin/delete_uploads.py" class="pumpkin-button">💀 Send to the Graveyard 💀</a>
         <a href="/cgi-bin/show_image.py" class="pumpkin-button">🪞 Mirror of the Undead (View Images) 🪞</a>
+    </div>
+
+    <div class="picture-frame">
+        <img src="spooky_season.jpg" alt="Spooky Season">
     </div>
 
     <audio id="bgMusic" loop>

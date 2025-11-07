@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drop Off Treats - KittyServer 🐱</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #FFB6C1 0%, #FFC0CB 50%, #FFB6C1 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '🐱😺🐾😸🐈';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            font-size: 80px;
+            opacity: 0.05;
+            animation: float 20s infinite linear;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(50px, 50px) rotate(360deg); }
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border: 3px solid #FF69B4;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 0 40px rgba(255, 105, 180, 0.4), 0 0 80px rgba(255, 182, 193, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            color: #FF1493;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            color: #C71585;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 0.9em;
+        }
+
+        .endpoint-input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 192, 203, 0.2);
+            border: 2px solid #FF69B4;
+            border-radius: 10px;
+            color: #8B008B;
+            font-family: 'Courier New', monospace;
+            font-size: 1em;
+            margin-bottom: 20px;
+        }
+
+        .endpoint-input:focus {
+            outline: none;
+            border-color: #FF1493;
+            background: rgba(255, 182, 193, 0.3);
+        }
+
+        .upload-zone {
+            border: 3px dashed #FF69B4;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: rgba(255, 192, 203, 0.1);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .upload-zone:hover {
+            border-color: #FF1493;
+            background: rgba(255, 182, 193, 0.2);
+            transform: scale(1.02);
+        }
+
+        .upload-zone.dragover {
+            border-color: #FF1493;
+            background: rgba(255, 105, 180, 0.3);
+            transform: scale(1.05);
+        }
+
+        .upload-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            animation: bob 2s ease-in-out infinite;
+        }
+
+        @keyframes bob {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .upload-text {
+            color: #FF1493;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .upload-subtext {
+            color: #C71585;
+            font-size: 0.9em;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .upload-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #FF69B4 0%, #FF1493 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Courier New', monospace;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 20px;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(255, 105, 180, 0.6);
+        }
+
+        .upload-btn:disabled {
+            background: #CCC;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .file-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 192, 203, 0.2);
+            border: 2px solid #FF69B4;
+            border-radius: 10px;
+            color: #8B008B;
+            display: none;
+        }
+
+        .file-info.show {
+            display: block;
+        }
+
+        .response-area {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #FF1493;
+            border-radius: 10px;
+            color: #8B008B;
+            font-size: 0.9em;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .response-area.show {
+            display: block;
+        }
+
+        .response-area pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .status-success {
+            color: #228B22;
+        }
+
+        .status-error {
+            color: #DC143C;
+        }
+
+        .back-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #FFB6C1, #FFC0CB);
+            color: #8B008B;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: 2px solid #FF69B4;
+        }
+
+        .back-button:hover {
+            background: linear-gradient(135deg, #FFC0CB, #FFB6C1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐱 Drop Off Treats 📦</h1>
+        <p class="subtitle">Upload files for your kitties</p>
+
+        <input 
+            type="text" 
+            class="endpoint-input" 
+            id="endpoint" 
+            placeholder="Enter upload endpoint (e.g., http://localhost:8080/)"
+            value="http://localhost:8081/"
+        >
+
+        <div class="upload-zone" id="uploadZone">
+            <div class="upload-icon">🐟🐾🐟</div>
+            <div class="upload-text">Drop your treats here</div>
+            <div class="upload-subtext">or click to browse (single file only)</div>
+            <input type="file" id="fileInput">
+        </div>
+
+        <div class="file-info" id="fileInfo"></div>
+
+        <button class="upload-btn" id="uploadBtn" disabled>Deliver Treats</button>
+
+        <div class="response-area" id="responseArea"></div>
+
+        <a href="/index.html" class="back-button">🏠 Back to Kitty Home</a>
+    </div>
+
+    <script>
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const responseArea = document.getElementById('responseArea');
+        const endpointInput = document.getElementById('endpoint');
+
+        let selectedFiles = null;
+
+        // Click to upload
+        uploadZone.addEventListener('click', () => fileInput.click());
+
+        // Drag and drop
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        // File selection
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            if (files.length === 0) return;
+
+            selectedFiles = files[0]; // Only take first file
+            let infoHTML = '<strong>Selected treat:</strong><br>';
+            
+            const file = selectedFiles;
+            const size = (file.size / 1024).toFixed(2);
+            infoHTML += `📄 ${file.name} (${size} KB)<br>`;
+            infoHTML += `   Type: ${file.type || 'application/octet-stream'}<br>`;
+
+            fileInfo.innerHTML = infoHTML;
+            fileInfo.classList.add('show');
+            uploadBtn.disabled = false;
+        }
+
+        // Upload functionality
+        uploadBtn.addEventListener('click', async () => {
+            console.log('Upload button clicked!');
+            console.log('Selected files:', selectedFiles);
+            
+            if (!selectedFiles) {
+                console.log('No file selected');
+                showResponse('Error: No file selected', true);
+                return;
+            }
+
+            const endpoint = endpointInput.value.trim();
+            if (!endpoint) {
+                showResponse('Error: Please enter an endpoint URL', true);
+                return;
+            }
+
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = 'Delivering Treats... 🐾';
+
+            try {
+                showResponse('Uploading...', false);
+
+                const file = selectedFiles;
+
+                // Capture request details before sending
+                let debugInfo = `Request Details:\n`;
+                debugInfo += `Endpoint: ${endpoint}\n`;
+                debugInfo += `Method: POST\n`;
+                debugInfo += `Content-Type: ${file.type || 'application/octet-stream'}\n`;
+                debugInfo += `Content-Length: ${file.size}\n\n`;
+                
+                debugInfo += `File: ${file.name}\n`;
+                debugInfo += `  Size: ${file.size} bytes\n`;
+                debugInfo += `  Type: ${file.type || 'application/octet-stream'}\n\n`;
+
+                debugInfo += `Raw Request Body:\n`;
+                debugInfo += `[Binary file data - ${file.size} bytes]\n\n`;
+
+                console.log('Sending POST request to:', endpoint);
+                console.log('File:', file.name, 'Size:', file.size, 'Type:', file.type);
+
+                // Send raw file data with proper Content-Type
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': file.type || 'application/octet-stream'
+                    },
+                    body: file
+                });
+
+                console.log('Response received:', response.status, response.statusText);
+
+                const text = await response.text();
+                const isError = !response.ok;
+
+                debugInfo += `\n${'='.repeat(50)}\n\n`;
+                debugInfo += `Server Response:\n`;
+                debugInfo += `Status: ${response.status} ${response.statusText}\n\n`;
+                debugInfo += `Headers:\n${formatHeaders(response.headers)}\n\n`;
+                debugInfo += `Body:\n${text}`;
+
+                showResponse(debugInfo, isError);
+            } catch (error) {
+                console.error('Upload error:', error);
+                showResponse(`Error: ${error.message}`, true);
+            } finally {
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = 'Deliver Treats';
+            }
+        });
+
+        function formatHeaders(headers) {
+            let result = '';
+            for (let [key, value] of headers.entries()) {
+                result += `${key}: ${value}\n`;
+            }
+            return result;
+        }
+
+        function showResponse(text, isError) {
+            responseArea.innerHTML = `<pre class="${isError ? 'status-error' : 'status-success'}">${text}</pre>`;
+            responseArea.classList.add('show');
+        }
+    </script>
+</body>
+</html>

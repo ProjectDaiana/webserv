@@ -17,8 +17,8 @@ Request::Request() {
 Request::~Request() {};
 
 bool Request::is_cgi() const {
-    if (_parsed_request.uri.find("/cgi-bin/") == std::string::npos)
-		return false;
+  //  if (_parsed_request.uri.find("/cgi-bin/") == std::string::npos)
+	//	return false;
 
 	size_t len = _parsed_request.uri.length();
     if (len >= 4 && _parsed_request.uri.substr(len - 3) == ".py") {
