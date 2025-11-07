@@ -45,7 +45,7 @@ request = (
     b"Host: localhost\\r\\n"
     b"Transfer-Encoding: chunked\\r\\n"
     b"Content-Type: image/jpeg\\r\\n"
-
+    b"\\r\\n"
 ) + b"".join(chunks)
 
 # Save to file
