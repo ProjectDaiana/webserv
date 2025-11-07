@@ -5,8 +5,8 @@
 # define push_struct(type, arena) (type *)arena_alloc(arena, sizeof(type));
 
 #define CGI_TIMEOUT 5 // seconds
-#define CLIENT_INACTIVITY_TIMEOUT 10 // seconds
-#define MAX_URI_LEN 8000 // 2 characters
+#define CLIENT_INACTIVITY_TIMEOUT 120 // seconds
+#define MAX_URI_LEN 8000 // characters
 
 # include <stddef.h>
 # include <stdint.h>
