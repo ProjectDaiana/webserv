@@ -1,7 +1,17 @@
+# Compiled object files
 *.o
+
+# Binary test files
 *.bin
+
+# Compiled webserv executable
 /webserv
+
+# Ignore all files inside uploads directories (at any level)
 **/uploads/*
-./uploads/*
-www/html/uploads/*
+
+# But keep the uploads directories themselves
+!**/uploads/.gitkeep
+
+# VS Code settings
 settings.json
