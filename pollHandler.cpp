@@ -111,11 +111,8 @@ bool	handle_client_read(int fd, pollfd &pfd, Client &client, const t_server &ser
 	{
 		if (!client.get_raw_request().empty())
 		{
-			if (!client.parse_request())
-			{
-//				std::cout << "Parse error on disconnect: " << client.get_parse_error().code << "- " << client.get_parse_error().msg << "Parse error passed to client: " << client.get_error_code() << std::endl;
-				// Could send error response here if connection still writable
-			}
+			if (!client.parse_request() || !client.is_headers_complete())
+				client.set_error_code(400); // Bad Request
 		}
 		return (false);
 	}
