@@ -10,21 +10,26 @@ request_method = os.environ.get("REQUEST_METHOD", "GET")
 script_dir = os.path.dirname(__file__)
 uploads_path = os.path.join(script_dir, UPLOAD_DIR)
 
-# Handle POST/DELETE - return filename for server to delete
+# Handle POST - return only filename for server to delete
 if request_method == "POST":
     form = cgi.FieldStorage()
     if "delete" in form:
-        print(form.getvalue("delete"))
+        filename = form.getvalue("delete")
+        # Return just the filename so server can delete it
+        sys.stdout.write(filename)
     else:
-        print("Error: No file specified")
+        sys.stdout.write("Error: No file specified")
     sys.exit(0)
 
-elif request_method == "DELETE":
+# Handle DELETE - return only filename for server to delete
+if request_method == "DELETE":
     content_length = int(os.environ.get("CONTENT_LENGTH", 0))
     if content_length > 0:
-        print(sys.stdin.read(content_length).strip())
+        filename = sys.stdin.read(content_length).strip()
+        # Return just the filename so server can delete it
+        sys.stdout.write(filename)
     else:
-        print("Error: No filename provided")
+        sys.stdout.write("Error: No filename provided")
     sys.exit(0)
 
 # Handle GET - display file list with delete buttons

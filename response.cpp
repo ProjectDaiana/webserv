@@ -80,7 +80,7 @@ void	handle_client_write(Client &client, const t_server &config)
 		//printf("finished response:\n");
 		printf(CLR_YELLOW"status code is: '%d'\n" CLR_RESET, response.status_code);
 		written = write(client.get_fd(), str_response.c_str(), str_response.size());
-       		 write(1, str_response.c_str(), str_response.size());
+       		// write(1, str_response.c_str(), str_response.size());
 		if (written == (int)str_response.size())
 		{
 			if (client.is_cgi())
