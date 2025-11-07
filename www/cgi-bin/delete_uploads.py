@@ -11,15 +11,15 @@ script_dir = os.path.dirname(__file__)
 uploads_path = os.path.join(script_dir, UPLOAD_DIR)
 
 # Handle POST - return only filename for server to delete
-# if request_method == "POST":
-#     form = cgi.FieldStorage()
-#     if "delete" in form:
-#         filename = form.getvalue("delete")
-#         # Return just the filename so server can delete it
-#         sys.stdout.write(filename)
-#     else:
-#         sys.stdout.write("Error: No file specified")
-#     sys.exit(0)
+if request_method == "POST":
+    form = cgi.FieldStorage()
+    if "delete" in form:
+        filename = form.getvalue("delete")
+        # Return just the filename so server can delete it
+        sys.stdout.write(filename)
+    else:
+        sys.stdout.write("Error: No file specified")
+    sys.exit(0)
 
 # Handle DELETE - return only filename for server to delete
 if request_method == "DELETE":
@@ -33,7 +33,6 @@ if request_method == "DELETE":
     sys.exit(0)
 
 # Handle GET - display file list with delete buttons
-print("Content-Type: text/html\n")
 print("<!DOCTYPE html>")
 print("<html>")
 print("<head>")
@@ -58,20 +57,28 @@ print("<script>")
 print("function deleteFile(filename) {")
 print("  if (!confirm('Are you sure you want to delete ' + filename + '?')) return;")
 print("  ")
-print("  fetch('/cgi-bin/manage_uploads.py', {")
+print("  console.log('Deleting file:', filename);")
+print("  ")
+print("  fetch('/cgi-bin/delete_uploads.py', {")
 print("    method: 'DELETE',")
 print("    headers: { 'Content-Type': 'text/plain' },")
 print("    body: filename")
 print("  })")
 print("  .then(response => {")
-print("    if (response.ok) {")
-print("      alert('File deleted successfully!');")
-print("      window.location.reload();")
-print("    } else {")
-print("      alert('Failed to delete file');")
-print("    }")
+print("    console.log('Response status:', response.status);")
+print("    console.log('Response ok:', response.ok);")
+print("    return response.text().then(text => {")
+print("      console.log('Response body:', text);")
+print("      if (response.ok) {")
+print("        alert('File deleted successfully!');")
+print("        window.location.reload();")
+print("      } else {")
+print("        alert('Failed to delete file. Status: ' + response.status);")
+print("      }")
+print("    });")
 print("  })")
 print("  .catch(error => {")
+print("    console.error('Error:', error);")
 print("    alert('Error: ' + error);")
 print("  });")
 print("}")
