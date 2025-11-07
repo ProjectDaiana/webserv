@@ -27,13 +27,14 @@ void parse_directive(t_parser *p, t_server *s, t_arena *mem, t_location *l) //if
 //	printf("\033[31mDIRECTIVE PARSER CALLED w '%s'\033[0m\n", parser_current(p)->value);
 	const char *name = parser_current(p)->value;
 	parser_advance(p);
+	if (parser_current(p)->type != TOK_STRING && !ft_strcmp(name, "server"))
+		ft_error(mem, BRACE_MISSING, 1);
 	if (parser_current(p)->type != TOK_STRING)
 		ft_error(mem, EXPECTED_VALUE, 1);
 	const char *value = parser_current(p)->value;
 	parser_advance(p);
 	if (simple_directive(name) && !parser_match(p, TOK_SEMICOLON)) //expect ; if simple dir
 	{
-		printf("goes here when parsing '%s'\n", name);
 		ft_error(mem, EXPECTED_SEMICOLON, 1);
 	}
 	if (l)
