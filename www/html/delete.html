@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Halloween File Deleter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #1a0b2e 0%, #2d1b4e 50%, #1a0b2e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '🎃👻🦇💀🕷️';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            font-size: 80px;
+            opacity: 0.03;
+            animation: float 20s infinite linear;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(50px, 50px) rotate(360deg); }
+        }
+
+        .container {
+            background: rgba(26, 11, 46, 0.9);
+            border: 3px solid #ff6b35;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 700px;
+            width: 100%;
+            box-shadow: 0 0 40px rgba(255, 107, 53, 0.3), 0 0 80px rgba(138, 43, 226, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            color: #ff6b35;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-shadow: 0 0 10px rgba(255, 107, 53, 0.5);
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            color: #9d4edd;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 0.9em;
+        }
+
+        .endpoint-input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(157, 78, 221, 0.1);
+            border: 2px solid #9d4edd;
+            border-radius: 10px;
+            color: #e0aaff;
+            font-family: 'Courier New', monospace;
+            font-size: 1em;
+            margin-bottom: 20px;
+        }
+
+        .endpoint-input:focus {
+            outline: none;
+            border-color: #ff6b35;
+            background: rgba(255, 107, 53, 0.1);
+        }
+
+        .refresh-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #9d4edd 0%, #7209b7 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Courier New', monospace;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(157, 78, 221, 0.5);
+        }
+
+        .files-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            border: 2px solid #9d4edd;
+            border-radius: 10px;
+            background: rgba(157, 78, 221, 0.05);
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid rgba(157, 78, 221, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .file-item:last-child {
+            border-bottom: none;
+        }
+
+        .file-item:hover {
+            background: rgba(255, 107, 53, 0.1);
+        }
+
+        .file-name {
+            color: #e0aaff;
+            font-size: 1em;
+            flex: 1;
+            word-break: break-all;
+        }
+
+        .delete-btn {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #f94144 0%, #dc2f02 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 0.9em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Courier New', monospace;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .delete-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 15px rgba(249, 65, 68, 0.5);
+        }
+
+        .delete-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .empty-state {
+            padding: 40px;
+            text-align: center;
+            color: #9d4edd;
+            font-size: 1.2em;
+        }
+
+        .loading-state {
+            padding: 40px;
+            text-align: center;
+            color: #e0aaff;
+            font-size: 1.2em;
+        }
+
+        .response-area {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(26, 11, 46, 0.8);
+            border: 2px solid #ff6b35;
+            border-radius: 10px;
+            color: #e0aaff;
+            font-size: 0.9em;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .response-area.show {
+            display: block;
+        }
+
+        .response-area pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .status-success {
+            color: #4ade80;
+        }
+
+        .status-error {
+            color: #f87171;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(157, 78, 221, 0.1);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #9d4edd;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ff6b35;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💀 Spooky File Deleter 🗑️</h1>
+        <p class="subtitle">Delete files from your webserv uploads</p>
+
+        <input 
+            type="text" 
+            class="endpoint-input" 
+            id="baseEndpoint" 
+            placeholder="Base endpoint (e.g., http://localhost:8080/uploads)"
+            value="http://localhost:8080/uploads"
+        >
+
+        <button class="refresh-btn" id="refreshBtn">🔄 Refresh File List</button>
+
+        <div class="files-list" id="filesList">
+            <div class="loading-state">👻 Click "Refresh File List" to load files...</div>
+        </div>
+
+        <div class="response-area" id="responseArea"></div>
+    </div>
+
+    <script>
+        const baseEndpointInput = document.getElementById('baseEndpoint');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const filesList = document.getElementById('filesList');
+        const responseArea = document.getElementById('responseArea');
+
+        let files = [];
+
+        // Refresh file list
+        refreshBtn.addEventListener('click', async () => {
+            await loadFileList();
+        });
+
+        async function loadFileList() {
+            const baseEndpoint = baseEndpointInput.value.trim();
+            if (!baseEndpoint) {
+                showResponse('Error: Please enter a base endpoint URL', true);
+                return;
+            }
+
+            refreshBtn.disabled = true;
+            refreshBtn.textContent = '🔄 Loading...';
+            filesList.innerHTML = '<div class="loading-state">👻 Loading files...</div>';
+
+            try {
+                console.log('Fetching file list from:', baseEndpoint);
+                
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+                
+                const response = await fetch(baseEndpoint, {
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                
+                console.log('Response received:', response.status, response.statusText);
+
+                if (!response.ok) {
+                    throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+                }
+                
+                const html = await response.text();
+                console.log('HTML received, length:', html.length);
+
+                // Parse HTML to extract file links
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const links = doc.querySelectorAll('a');
+                
+                files = [];
+                links.forEach(link => {
+                    const href = link.getAttribute('href');
+                    const text = link.textContent.trim();
+                    // Filter out parent directory links and empty links
+                    if (href && text && text !== '..' && text !== '.' && href !== '../') {
+                        files.push(text);
+                    }
+                });
+
+                console.log('Found files:', files);
+
+                if (files.length === 0) {
+                    filesList.innerHTML = '<div class="empty-state">🕸️ No files found in uploads folder</div>';
+                } else {
+                    renderFileList();
+                }
+
+                showResponse(`Successfully loaded ${files.length} file(s)`, false);
+            } catch (error) {
+                console.error('Error loading files:', error);
+                filesList.innerHTML = '<div class="empty-state">❌ Error loading files</div>';
+                
+                let errorMsg = `Error: ${error.message}`;
+                if (error.name === 'AbortError') {
+                    errorMsg = 'Error: Request timed out (5s). Is your server running?';
+                } else if (error.message.includes('Failed to fetch')) {
+                    errorMsg = 'Error: Cannot connect to server. Check:\n';
+                    errorMsg += '1. Is your webserv running on localhost:8080?\n';
+                    errorMsg += '2. CORS headers enabled?\n';
+                    errorMsg += '3. GET method allowed for /uploads?';
+                }
+                
+                showResponse(errorMsg, true);
+            } finally {
+                refreshBtn.disabled = false;
+                refreshBtn.textContent = '🔄 Refresh File List';
+            }
+        }
+
+        function renderFileList() {
+            filesList.innerHTML = '';
+            
+            files.forEach(filename => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'file-name';
+                nameSpan.textContent = filename;
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.textContent = '🗑️ Delete';
+                deleteBtn.onclick = () => deleteFile(filename);
+                
+                fileItem.appendChild(nameSpan);
+                fileItem.appendChild(deleteBtn);
+                filesList.appendChild(fileItem);
+            });
+        }
+
+        async function deleteFile(filename) {
+            const baseEndpoint = baseEndpointInput.value.trim();
+            const deleteUrl = `${baseEndpoint}/${filename}`;
+
+            if (!confirm(`Are you sure you want to delete "${filename}"?`)) {
+                return;
+            }
+
+            try {
+                console.log('Sending DELETE request to:', deleteUrl);
+                
+                const response = await fetch(deleteUrl, {
+                    method: 'DELETE'
+                });
+
+                const text = await response.text();
+                const isError = !response.ok;
+
+                console.log('Delete response:', response.status, response.statusText);
+
+                let debugInfo = `DELETE Request:\n`;
+                debugInfo += `URL: ${deleteUrl}\n`;
+                debugInfo += `Method: DELETE\n\n`;
+                debugInfo += `${'='.repeat(50)}\n\n`;
+                debugInfo += `Server Response:\n`;
+                debugInfo += `Status: ${response.status} ${response.statusText}\n\n`;
+                debugInfo += `Headers:\n${formatHeaders(response.headers)}\n\n`;
+                debugInfo += `Body:\n${text}`;
+
+                showResponse(debugInfo, isError);
+
+                if (!isError) {
+                    // Remove from list
+                    files = files.filter(f => f !== filename);
+                    if (files.length === 0) {
+                        filesList.innerHTML = '<div class="empty-state">🕸️ No files found in uploads folder</div>';
+                    } else {
+                        renderFileList();
+                    }
+                }
+            } catch (error) {
+                console.error('Delete error:', error);
+                showResponse(`Error: ${error.message}`, true);
+            }
+        }
+
+        function formatHeaders(headers) {
+            let result = '';
+            for (let [key, value] of headers.entries()) {
+                result += `${key}: ${value}\n`;
+            }
+            return result;
+        }
+
+        function showResponse(text, isError) {
+            responseArea.innerHTML = `<pre class="${isError ? 'status-error' : 'status-success'}">${text}</pre>`;
+            responseArea.classList.add('show');
+        }
+    </script>
+</body>
+</html>
