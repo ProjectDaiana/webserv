@@ -10,7 +10,6 @@ int validate_and_resolve_path(const t_server& config, Client& client) {
 
     t_location* location = find_location(request_path, config);
     if (!location) {
-        //printf("No matching location for path: %s\n", request_path.c_str());
         client.set_error_code(404); // Not found
         return 404;
     }
@@ -18,7 +17,6 @@ int validate_and_resolve_path(const t_server& config, Client& client) {
     
     size_t dot_pos = request_path.find_last_of(".");
     if (dot_pos == std::string::npos) {
-    //    printf("No file extension in path: %s\n", request_path.c_str());
         client.set_error_code(400); // Bad Request
         return 400;
     }
@@ -46,16 +44,13 @@ int validate_and_resolve_path(const t_server& config, Client& client) {
 	if (!document_root.empty() && document_root[document_root.size() - 1] == '/')
 		document_root.erase(document_root.size() - 1);
 	
-	// Check if file exists
     struct stat file_stat;
     if (stat(built_path.c_str(), &file_stat) != 0) {
-    //    printf("Script file not found: %s\n", built_path.c_str());
         client.set_error_code(404);
         return 404;
     }
 
     if (!location->cgi_path) {
-    //    printf("No interpreter defined for extension: %s\n", file_ext.c_str());
         client.set_error_code(500); //Internal Server Error
         return 500;
     }
@@ -218,21 +213,17 @@ void cleanup_client(int fd, std::vector<pollfd> &pfds, std::map<int, Client> &cl
         int pfd_index = find_pfd(stdin_fd, pfds);
         if (pfd_index != -1)
         {
-			//printf("\033[31mClosing stdin pipe fd %d here pollhandler line 197\033[0m\n", pfds[pfd_index].fd);
 			close(pfds[pfd_index].fd);
             pfds.erase(pfds.begin() + pfd_index);
         } else {
             // ensure fd closed if still valid
 			// pfd_index == -1, just close the fd directly if it's valid
-			//printf("\033[31mClosing stdin pipe fd %d here pollhandler line 202\033[0m\n", stdin_fd);
-
 			if (stdin_fd >= 0)
 				close(stdin_fd);
         }
     }
 
     // Close the client socket and erase the client entry by client fd
-	//printf("\033[31mClosing stdin pipe fd %d here pollhandler line 207\033[0m\n", client_fd);
     close(client_fd);
     clients.erase(client_fd);
 
