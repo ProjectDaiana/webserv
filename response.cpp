@@ -15,7 +15,7 @@ std::string	handle_method(Client &client, const t_server &config, t_location *lo
 	else if (client.get_request().method == "POST" && method_allowed("POST", location, client))
 		return handle_post(client, config, location);
 	else if (client.get_request().method == "DELETE" && method_allowed("DELETE", location, client))
-		return handle_delete(client, config, location);
+		return handle_delete(client, location, std::string());
 	client.set_error_code(405);
 	return std::string();
 }
