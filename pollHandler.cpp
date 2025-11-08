@@ -510,14 +510,25 @@ void    run_server(Server** servers, int server_count)
     size_t i = 0;
 
     add_server_sockets(servers, server_count, pfds);
+    int timeout_count = 0;
+    int max_timeouts = 10; // exit after 10 consecutive timeouts
+
     while (1)
     {
-        if (ft_poll(pfds, 1000, clients) == -1) //TODO check which value instead of 1000
+        int poll_result = ft_poll(pfds, 1000, clients); //set -1 to 1000
+        if (poll_result == -1)
 			break;
-	i = 0;
+		if (poll_result == 0) {
+			timeout_count++;
+			if (timeout_count >= max_timeouts)
+				break; // exit server loop
+		} else {
+			timeout_count = 0; // reset if there was activity
+		}
+        i = 0;
         while (i < pfds.size())
         {
-		//	printf("\n\n___NEW PFD NOW____\n");
+		//	printof("\n\n___NEW PFD NOW____\n");
 			Server *server = is_server(pfds[i].fd, servers, server_count); //if fd is server, return server
 			if (server) //if found, handle
 				handle_server_fd(pfds[i], *server, pfds, clients);
@@ -526,5 +537,6 @@ void    run_server(Server** servers, int server_count)
 		i++;
 		}
 	}
+	write(1,"Exiting server gracefully\n", 27);
 	close_servers(servers, server_count);
 }
