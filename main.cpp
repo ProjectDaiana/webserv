@@ -93,7 +93,6 @@ int	main(int ac, char **av)
 		ft_error(NULL, TOO_FEW_ARGS, 1);
 	t_data *data = init_data(av[1]);
 	init_config(data, data->perm_memory);
-	//print_data(data);
 	init_servers(data);
 	run_server(data->servers, data->server_count);	
 	free_arena(data->perm_memory);
