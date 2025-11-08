@@ -485,17 +485,36 @@ int handle_client_fd(pollfd &pfd, std::vector<pollfd> &pfds, std::map<int, Clien
 	return connection_alive;
 }
 
-void    run_server(Server** servers, int server_count)
+void    run_server(Server** servers, int server_count, int idle_seconds, int poll_timeout_ms)
 {
     std::vector<struct pollfd> pfds;
     std::map<int, Client> clients;
     size_t i = 0;
 
     add_server_sockets(servers, server_count, pfds);
+	// track a server-level activity time so test-mode exit doesn't conflict
+	// with per-client or CGI timeouts. We update this when any poll event
+	// occurs (poll_result > 0). If test_idle_seconds > 0 and no activity has
+	// occurred for that many seconds, exit the server loop.
+	time_t server_last_activity = std::time(NULL);
 
-    while (1)
-    {
-		if (ft_poll(pfds, 1000, clients) == -1) 
+	// Ensure poll timeout is reasonable (must be < smallest timeout we want to
+	// enforce, e.g. CGI timeout) so ft_poll will wake up and check CGI timeouts.
+	if (poll_timeout_ms <= 0)
+		poll_timeout_ms = 1000;
+
+	while (1)
+	{
+		int poll_result = ft_poll(pfds, poll_timeout_ms, clients);
+		if (poll_result == -1)
+			break;
+
+		time_t now = std::time(NULL);
+		if (poll_result > 0)
+			server_last_activity = now; // activity -> reset server idle timer
+
+		// If test-mode requested, exit if server has been idle for configured seconds
+		if (idle_seconds > 0 && (now - server_last_activity) >= idle_seconds)
 			break;
         i = 0;
         while (i < pfds.size())

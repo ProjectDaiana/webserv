@@ -14,7 +14,7 @@ int	main(int ac, char **av)
 	t_data *data = init_data(av[1]);
 	init_config(data, data->perm_memory);
 	init_servers(data);
-	run_server(data->servers, data->server_count);	
+	run_server(data->servers, data->server_count, 60, 1000);	
 	free_arena(data->perm_memory);
 	return (0);
 }
