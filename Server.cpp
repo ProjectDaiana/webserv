@@ -29,9 +29,7 @@ Server::~Server() {
 
 int Server::closeServer(){
 	if (_fd >= 0)
-	{ 
 		close(_fd);
-	}
 	return 0;
 }
 

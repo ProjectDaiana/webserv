@@ -70,14 +70,12 @@ bool CGI::parse_multipart(Client& client)
 
         if (disp_block.find("filename=\"") != std::string::npos) {
             filename = extract_filename_from_disposition(disp_block);
-            // fprintf(stderr, "[DEBUG] filename=%s\n", filename.c_str());
             break;
         }
         disp_pos = body.find("Content-Disposition: form-data;", header_end);
     }
 
     if (filename.empty()) {
-        //fprintf(stderr, "[ERROR] No filename found in multipart headers!\n");
         return false;
     }
 

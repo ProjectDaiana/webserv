@@ -320,6 +320,12 @@ siege -c 50 -r 10 'http://localhost:8080/cgi-bin/test.py'
 # Simple GET request
 curl http://localhost:8080
 
+# Simple UPLOAD request
+curl -v -X POST http://localhost:8080/www/html/uploads/ -d "hello"
+
+# Simple DELETE request
+curl -X DELETE http://localhost:8080/uploads/upload_1.txt
+
 # Verbose mode with custom header
 curl -v -H "Connection: close" http://localhost:8080
 

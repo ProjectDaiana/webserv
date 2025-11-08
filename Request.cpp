@@ -19,9 +19,9 @@ Request::~Request() {};
 bool Request::is_cgi() const {
   //  if (_parsed_request.uri.find("/cgi-bin/") == std::string::npos)
 	//	return false;
-
 	size_t len = _parsed_request.uri.length();
-    if (len >= 4 && _parsed_request.uri.substr(len - 3) == ".py") {
+    if (len >= 4 && (_parsed_request.uri.substr(len - 3) == ".py"))
+	{
         char prev_char = _parsed_request.uri[len - 4];
         // Check for valid filename char
         return (prev_char >= 'a' && prev_char <= 'z') || 
@@ -29,6 +29,15 @@ bool Request::is_cgi() const {
                (prev_char >= '0' && prev_char <= '9') || 
                prev_char == '_';
     }
+	else if (len >= 5 && (_parsed_request.uri.substr(len - 4) == ".php"))
+	{
+		 char prev_char = _parsed_request.uri[len - 5];
+        // Check for valid filename char
+        return (prev_char >= 'a' && prev_char <= 'z') ||
+               (prev_char >= 'A' && prev_char <= 'Z') ||
+               (prev_char >= '0' && prev_char <= '9') ||
+               prev_char == '_';
+	}
     return false;
 }
 

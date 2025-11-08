@@ -9,7 +9,6 @@ std::string	handle_method(Client &client, const t_server &config, t_location *lo
 {
 	if (client.get_request().method.empty())
 		return std::string();
-	printf("method is:  '%s'\n", client.get_request().method.c_str());
 	if (client.get_request().method == "GET" && method_allowed("GET", location, client))
 		return handle_get(client, config, location);
 	else if (client.get_request().method == "POST" && method_allowed("POST", location, client))
@@ -76,16 +75,12 @@ void	handle_client_write(Client &client, const t_server &config)
 		<< "\r\n" 
 		<< response.body;
 	std::string str_response(sstr.str());
-		printf("\n_______________________________\n");
-		//printf("finished response:\n");
-		printf(CLR_YELLOW"status code is: '%d'\n" CLR_RESET, response.status_code);
 		written = write(client.get_fd(), str_response.c_str(), str_response.size());
-       		// write(1, str_response.c_str(), str_response.size());
+       		//write(1, str_response.c_str(), str_response.size());
 		if (written == (int)str_response.size())
 		{
 			if (client.is_cgi())
 				client.cgi_output.clear();
-			printf("WRITE COMPLETE\n____________________________\n");
 			client.set_write_complete(1);
 		}
 }

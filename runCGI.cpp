@@ -122,7 +122,6 @@ bool cgi_eof(int pipe_fd, Client &client, std::vector<struct pollfd>& pfds)
 		ssize_t n = read(error_fd, &error_code, sizeof(int));
 		if (n == sizeof(int) && error_code != 0) {
 			client.set_error_code(error_code);
-			printf(CLR_RED "ERROR code in cgi_eof %d\n" CLR_RESET, error_code);
 			client.cgi_output.clear(); // 
 		}
 		close(error_fd);
@@ -138,7 +137,6 @@ bool cgi_eof(int pipe_fd, Client &client, std::vector<struct pollfd>& pfds)
 			file = file.substr(start, end - start + 1);		
 		
 		std::string file_path = client.get_cgi().get_cgi_upload_store() + "/" + file;
-	//	printf(CLR_MAGENTA "Full file_path: '%s'\n" CLR_RESET, file_path.c_str());
 		handle_delete(client, NULL, file_path);
 	}
 

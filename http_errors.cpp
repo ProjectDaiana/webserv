@@ -53,7 +53,6 @@ bool displays_error(Client &client)
 
 void load_error_page(Client &client, t_response *res, const t_server &config, t_location *location)
 {
-	printf("load error page has been called!\n");
 	int code = client.get_error_code();
 	int i = 0;
 	std::string path;
@@ -63,7 +62,6 @@ void load_error_page(Client &client, t_response *res, const t_server &config, t_
 		if (config.error_codes[i] == code)
 		{
 			path = config.error_pages[i];
-			printf("error page has been found!\n");
 			break;
 		}
 		i++;
@@ -86,11 +84,9 @@ void load_error_page(Client &client, t_response *res, const t_server &config, t_
 	else
 		root_path = "www/html";
 	std::string full_path = root_path + path;
-	printf("this is the path to error page: '%s'\n", full_path.c_str());
     std::ifstream file(full_path.c_str());
     if (!file.is_open())
     {
-		printf("error page not found!");
         std::stringstream body;
         body << "<html><body><h1>" << code << " "
              << get_reason_phrase(code) << "</h1></body></html>";
