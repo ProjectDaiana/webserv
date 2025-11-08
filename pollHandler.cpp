@@ -44,7 +44,6 @@ int validate_and_resolve_path(const t_server& config, Client& client) {
 	if (!document_root.empty() && document_root[document_root.size() - 1] == '/')
 		document_root.erase(document_root.size() - 1);
 	
-	// Check if file exists
     struct stat file_stat;
     if (stat(built_path.c_str(), &file_stat) != 0) {
         client.set_error_code(404);
