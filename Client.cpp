@@ -1,19 +1,40 @@
 #include "Client.hpp"
 
 Client::Client(int fd, Server &server) :
-							_fd(fd),
-							_headers_complete(0),
-							_read_complete(0),
-							_write_complete(0),
-							_is_parsed(false),
-							_keep_alive(0),
-							_content_len(0),
-							_headers_end_pos(0),
-							_error_code(200),
-							_server(&server)
-							{}
+	_fd(fd),
+	_raw_request(),
+	_headers_complete(false),
+	_read_complete(false),
+	_write_complete(false),
+	_is_parsed(false),
+	_keep_alive(false),
+	_content_len(0),
+	_headers_end_pos(0),
+	_last_activity(std::time(NULL)),
+	_error_code(200),
+	_server(&server),
+	_request(),
+	_cgi(),
+	cgi_output()
+{}
 
-Client::Client() : _fd(-1), _is_parsed(false), _server(NULL) {};
+Client::Client() :
+	_fd(-1),
+	_raw_request(),
+	_headers_complete(false),
+	_read_complete(false),
+	_write_complete(false),
+	_is_parsed(false),
+	_keep_alive(false),
+	_content_len(0),
+	_headers_end_pos(0),
+	_last_activity(std::time(NULL)),
+	_error_code(200),
+	_server(NULL),
+	_request(),
+	_cgi(),
+	cgi_output()
+{}
 
 Client::~Client() {};
 
@@ -42,14 +63,9 @@ void Client::add_to_request(char *data, int len) {
 	if (_headers_complete && !_read_complete) {
 		size_t te = _raw_request.find("Transfer-Encoding:");
 		if (te != std::string::npos && _raw_request.find("chunked", te) != std::string::npos) {
-			//std::cout << "DEBUG: Detected Transfer-Encoding: chunked" << std::endl;
 			if (_raw_request.find("0\r\n\r\n", _headers_end_pos) != std::string::npos) {
-				//std::cout << "DEBUG: Found end of chunked body (0\\r\\n\\r\\n)" << std::endl;
 				_read_complete = true;
 			}
-			// else {
-			// 	//std::cout << "DEBUG: Waiting for more chunked data..." << std::endl;
-			// }
 		}
 		else {
 			// Content-Length based
@@ -62,12 +78,6 @@ void Client::add_to_request(char *data, int len) {
 };
 
 bool Client::parse_request() {
-	// std::cout << "DEBUG: Client::parse_request called" << std::endl;
-    // std::cout << "DEBUG: _is_parsed = " << _is_parsed << std::endl;
-    // std::cout << "DEBUG: _headers_complete = " << _headers_complete << std::endl;
-    // std::cout << "DEBUG: _read_complete = " << _read_complete << std::endl;
-    // std::cout << "DEBUG: Raw request length = " << _raw_request.length() << std::endl;
-
 	if (!_is_parsed && _read_complete) {
 		_is_parsed = _request.parse(_raw_request);
 		if (!_is_parsed) {
@@ -169,8 +179,8 @@ void Client::print_raw_request() const
 {
 	std::cout << "\n=== Raw HTTP Request from client " << _fd << " ===\n";
 	std::cout << _raw_request;
-	// std::cout << "Length: " << _raw_request.length() << " chars\n";
-	// std::cout << "Length: " << _raw_request.length() << " chars\n";
+	std::cout << "Length: " << _raw_request.length() << " chars\n";
+	std::cout << "Length: " << _raw_request.length() << " chars\n";
 	std::cout << "=== End Raw Request ===\n\n";
 
 }
