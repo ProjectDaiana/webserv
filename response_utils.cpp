@@ -35,12 +35,8 @@ bool is_directory(const std::string &path, t_location *location)
 	std::string full_path;	
 
 	full_path = std::string(location->root) + path;
-	printf("directory is being tested w path: '%s'\n", path.c_str());
     if (stat(full_path.c_str(), &info) != 0)
-	{
-		printf("PATH NOT ACCESIBLE!\n");
         return false; // could not access path
-	}
     return (info.st_mode & S_IFDIR) != 0;
 }
 
@@ -52,15 +48,11 @@ std::string get_content_type(Client &client, t_location *location) //TODO pass l
 		 return std::string();
 	if (is_directory(path, location))
 	{
-		printf(">>IS A DIRECTORY\n");
 		return "text/html";
 		exit(0);
 	}
-	else
-		printf(">>NOT A DIRECTORY\n");
     if (client.is_cgi())
 	    return "text/html";
-    printf("GETTING CONTENT TYPE NOW W PATH: '%s'\n", path.c_str());	    
     int dot_pos = path.rfind('.');
     if (dot_pos == (int)std::string::npos)
         return "application/octet-stream"; // generic MIME type for unknown binary data
@@ -93,9 +85,6 @@ std::string get_content_type(Client &client, t_location *location) //TODO pass l
 
 t_location *find_location(std::string uri, const t_server &config)
 {
-	// printf("__find location__\n");
-	// printf("uri is: '%s'\n", uri.c_str());
-	// printf("this is location count '%d'\n", config.location_count);
 	t_location	*best_match;
 	int		best_len;
 	int 		i;
@@ -129,8 +118,6 @@ t_location *find_location(std::string uri, const t_server &config)
 		}
 		i++;
 	}
-	if (best_match)
-		printf("MATCH FOUND!\n");
 	return (best_match);
 }
 
@@ -147,17 +134,12 @@ std::string check_redirect(t_location *location, Client &client)
 
 t_location *handle_location(Client &client, const t_server &config)
 {
-	if (client.get_path().empty())
-		printf("ERROR: empty uri.\n"); //DEBUG
 	t_location *location;
 
         location = find_location(client.get_request().uri, config);
-	 if (location)
-              printf("location passed!\n");
         if (!location)
         {
                 client.set_error_code(404);
-                printf("404 set at first instance\n");
                 return NULL;
         }
 	return location;
@@ -176,7 +158,6 @@ bool	method_allowed(const std::string& method, const t_location *location, Clien
 			return true;
 		i++;
 	}
-	printf("%s is not allowed!\n", method.c_str());
 	return false;
 }
 

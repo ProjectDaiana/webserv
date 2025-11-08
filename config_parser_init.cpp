@@ -74,7 +74,6 @@ int count_cgi_extensions(t_parser *p)
         }
         i++;
     }
-//	printf(">count cgi extensions: %d\n", count);
     return count;
 }
 
@@ -105,7 +104,6 @@ int count_locations(t_parser *p)
     }
 
     p->pos = saved_pos;
-//	printf(">location count is: %d\n", count);
     return count;
 }
 

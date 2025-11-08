@@ -6,7 +6,7 @@
 /*   By: ltreser <ltreser@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/04 00:55:51 by ltreser           #+#    #+#             */
-/*   Updated: 2025/11/07 22:24:17 by ltreser          ###   ########.fr       */
+/*   Updated: 2025/11/08 01:41:26 by ltreser          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,6 @@
 void ft_exit(void)
 {
 	std::exit(1);
-	//kill(getpid(), SIGTERM);
 }
 
 

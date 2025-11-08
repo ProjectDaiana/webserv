@@ -113,7 +113,6 @@ std::string	gen_filename(Client &client, t_location *l, std::string extension)
 
 std::string handle_post(Client &client, const t_server &config, t_location *l)
 {
-	printf("POST WAS CALLED\n");
 	int fd;
 	ssize_t write_count;
 
@@ -135,7 +134,6 @@ std::string handle_post(Client &client, const t_server &config, t_location *l)
 	fd = open(path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644); //open file write only, if it doesnt exist, create it, if it exists, erase its contents, number stands for permissions, we can read & write, client can read
 	if (fd == -1)
 	{
-		printf("this is upload store: '%s'\n", l->upload_store);
 		client.set_error_code(500);
 		return std::string();
 	}
@@ -143,8 +141,6 @@ std::string handle_post(Client &client, const t_server &config, t_location *l)
 	write_count = write(fd, body.c_str(), body.size());
 	if (write_count < 0 || write_count != (ssize_t)body.size())
 		client.set_error_code(500);
-	else
-		printf("post didnt encounter any issues\n");
 	close(fd);
 	return std::string();
 }

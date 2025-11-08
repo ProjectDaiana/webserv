@@ -117,7 +117,6 @@ void lexer_pretty_print(const t_lexer *lx)
 
 void lexer(t_lexer *lx, const std::string &config_content, t_arena *mem)
 {
-    //printf("_____TOKENIZER:______\n");
 	lexer_init(lx, config_content, mem);
 	while (true)
 	{

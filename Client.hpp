@@ -75,7 +75,6 @@ class Client {
 		//time_t cgi_start_time;
 
 		bool is_cgi_running() {
-			// printf("CGI IS RUNNING?: '%d'\n", (int)cgi_running);
 			return _cgi.is_running();
 		}
 		bool is_cgi_writing() {  return _cgi.is_writing(); }
@@ -86,11 +85,9 @@ class Client {
 		void set_cgi_pid(pid_t pid) { _cgi.set_pid(pid); };		
 		void set_cgi_start_time() { _cgi.set_start_time(); }
 		void set_cgi_running(bool b) {
-			printf("CGI IS BEING SET TO: '%d'\n", (int)b);
 			_cgi.set_running(b);
 		}
 		void set_cgi_writing(bool b) {
-			printf("CGI Writting: '%d'\n", (int)b);
 			_cgi.set_writing(b);
 		}
 		void set_cgi_written(int n) { _cgi.set_written(n); }

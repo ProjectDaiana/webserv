@@ -79,7 +79,6 @@ bool Client::parse_request() {
 }
 
 void Client::reset() {
-	printf("Client '%d' is being reset\n", _fd);
 	_raw_request.clear();
 	_request.reset_struct();
 	_headers_complete = false;
