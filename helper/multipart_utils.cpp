@@ -5,10 +5,9 @@ std::string extract_filename_from_disposition(const std::string& header)
     std::string key = "filename=\"";
     size_t start = header.find(key);
     if (start == std::string::npos)
-	{
-		printf("RETURN HERE \n");
+
         return "";
-	}
+
     start += key.length();
     size_t end = header.find('"', start);
     if (end == std::string::npos) {
