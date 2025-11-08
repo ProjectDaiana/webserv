@@ -103,7 +103,7 @@ echo ""
 
 
 # Test 8: Request timeout (should return 408)
-echo -e "${CLR_YELLOW}Test 9:${CLR_RESET} Request timeout - ${CLR_CYAN}408 Request Timeout${CLR_RESET}"
+echo -e "${CLR_YELLOW}Test 8:${CLR_RESET} Request timeout - ${CLR_CYAN}408 Request Timeout${CLR_RESET}"
 echo -e "${CLR_WHITE}(Timeout set to 10s - sending incomplete request and waiting)${CLR_RESET}"
 # Send incomplete headers (no final \r\n) and wait longer than CLIENT_INACTIVITY_TIMEOUT
 RESPONSE=$({
